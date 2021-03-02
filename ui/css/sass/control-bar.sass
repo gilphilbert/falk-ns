@@ -1,0 +1,173 @@
+// this contains the fixed-bottom play bar
+#control-bar
+  position: fixed
+  height: 100px
+  width: 100%
+  bottom: 0
+  background: #383838
+  z-index: 3
+  line-height: 1
+  color: $white
+  .title
+    color: $white
+  .subtitle
+    color: $grey-dark
+  box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.15)
+  -webkit-box-shadow: 0px -2px 3px 0px rgba(0,0,0,0.15)
+  -moz-box-shadow: 0px -2px 3px 0px rgba(0,0,0,0.15)
+  transition: bottom 250ms ease-in-out
+  @include media("≤tablet")
+    height: 78px
+    padding-right: 8px
+    //left: 0
+  // make all columns full height
+  .row
+    height: 100%
+    align-items: center
+  //round play button
+  .play-button
+    height: 48px
+    min-width: 48px
+    max-width: 48px
+    background: $blue
+    border-radius: 1000px
+    display: inline-flex
+    align-items: center
+    @include media("≤tablet")
+      margin: 0 7px
+    .feather
+      stroke: $white
+    svg
+      margin: 0 auto
+  //icons
+  // currently playing song detail
+  .now-playing
+    @include media(">=desktop")
+    figure img
+      height: 70px
+      width: 70px
+      border-radius: 4px
+    .col-xs:first-child
+      flex-grow: 0
+      padding: 0 15px
+    .col-xs:not(:first-child)
+      padding-left: 0
+    @include media("≤tablet")
+      figure img
+        height: 48px
+        width: 48px
+    .title
+      max-height: 37px
+      overflow: hidden
+      text-overflow: ellipsis
+  //prev,play,next
+  .playing-controls
+    display: flex
+    align-items: center
+    >.feather
+      cursor: pointer
+      stroke: $white
+      padding: 12px
+      box-sizing: content-box
+      height: 24px
+      width: 24px
+      @include media(">=desktop")
+        &:first-child, &:last-child
+          height: 20px
+          width: 20px
+      @include media("≤tablet")
+        height: 20px
+        width: 20px
+        padding: 0
+        &:first-child
+          margin-right: 12px
+        &:last-child
+          margin-left: 12px
+    .is-active
+      stroke: $blue
+  .queue
+    margin: 0 10px
+  //random, repeat
+  .progress-topper
+    background-color: $blue
+    width: 0
+    height: 3px
+    position: absolute
+    top: 0
+    left: 0
+    transition: all 40ms ease
+    &::after
+      content: ''
+      position: absolute
+      right: 0
+      top: -4px
+      height: 6px
+      width: 6px
+      background-color: $grey-darkest
+      border: 3px solid $blue
+      border-radius: 1000px
+
+.mobile-controls
+  display: flex
+  align-items: center
+  justify-content: center
+  line-height: 0.8
+  svg.feather
+    margin: 0 25px
+      stroke: $white
+    &.is-small
+      height: 17px
+      width: 17px
+  .button
+    height: 48px
+    min-width: 48px
+    max-width: 48px
+    padding: 0
+    background: $primary
+    display: flex
+    align-items: center
+    .feather
+      margin: 0 auto
+      stroke: $white
+
+#mobile-progress
+  display: none
+  background: $darken
+  &::-moz-progress-value
+    background: $white
+  &::-moz-progress-bar
+    background: $darken
+  &::-webkit-progress-value
+    background: $white
+    border-radius: none
+  &::-webkit-progress-bar
+    background: $darken
+
+#mobile-progress-bar
+  margin-top: 15px
+  width: 100%
+  height: 3px
+  background-color: #3A3A3A
+  border-radius: 10px
+  div
+    position: relative
+    width: 0
+    height: 100%
+    background: $blue
+    border-radius: 3px
+    &::after
+      content: ''
+      position: absolute
+      right: 0
+      top: -5px
+      height: 6px
+      width: 6px
+      background: $grey-darkest
+      border: 3px solid $blue
+      border-radius: 9px
+
+body.no-controls
+  @include media("≤tablet")
+    #control-bar
+      bottom: -100px
+      transition: bottom 250ms ease-in-out
