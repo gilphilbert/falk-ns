@@ -1,13 +1,15 @@
 const Datastore = require('nedb')
-let musicDB = new Datastore({ filename: 'data/music.db', autoload: true })
+const musicDB = new Datastore({ filename: 'data/music.db', autoload: true })
+const appDB = new Datastore({ filename: 'data/app.db', autoload: true })
+
+//appDB.insert({ setting: 'directories', data: ['/home/phill/Music'] })
+
 musicDB.ensureIndex({ fieldName: 'location', unique: true }, function (err) {
     // If there was an error, err is not null
     if(err) {
         console.log('skipping duplicate entry')
     }
   })
-  
-//let musicDB = new Datastore()
 
 const get = {
     allSongs: () => {
@@ -111,12 +113,18 @@ const add = {
     }
 }
 
-const search = {
-
+const settings = {
+    getDirs: function() {
+        return new Promise(function (resolve, reject) {
+            appDB.find({ setting: 'directories' }, (err, data) => {
+                    resolve(data[0].data)
+            })
+        })
+    }
 }
 
 module.exports = {
     getMusic: get,
-    searchMusic: search,
-    addMusic: add
+    addMusic: add,
+    settings: settings
 }

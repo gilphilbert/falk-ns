@@ -1,5 +1,10 @@
 var express = require('express')
 var app = express()
+
+var bodyParser = require('body-parser')
+app.use(bodyParser.json())
+
+//for sreaming music
 var fs = require('fs')
 
 const database = require('./database')
@@ -11,7 +16,7 @@ app.get('/api/songs', function (req, res) {
         .then(data => {
             res.send(data)
         }).catch(e =>{
-            res.send({ 'status': failed })
+            res.send({})
         })
 })
 
@@ -23,7 +28,7 @@ app.get('/api/artists', function (req, res) {
             })
             res.send(data)
         }).catch(e =>{
-            res.send({ 'status': failed })
+            res.send({})
         })
 })
 
@@ -35,7 +40,7 @@ app.get('/api/artist/:artist', function (req, res) {
             })
             res.send(data)
         }).catch(e =>{
-            res.send({ 'status': failed })
+            res.send({})
         })
 })
 
@@ -51,7 +56,7 @@ app.get('/api/album/:artist/:album', function (req, res) {
             res.send(retVal)
         }).catch(e =>{
             console.log(e)
-            res.send({ 'status': 'failed' })
+            res.send({})
         })
 })
 
@@ -63,7 +68,7 @@ app.get('/api/albums', function (req, res) {
             })
             res.send(data)
         }).catch(e =>{
-            res.send({ 'status': failed })
+            res.send({})
         })
 })
 
@@ -72,7 +77,7 @@ app.get('/api/genres', function (req, res) {
         .then(data => {
             res.send(data)
         }).catch(e =>{
-            res.send({ 'status': failed })
+            res.send({})
         })
 })
 
@@ -84,16 +89,25 @@ app.get('/api/stream/:id', function (req, res) {
         //now go find the file
         database.getMusic.url(id)
             .then(data => {
-                res.setHeader("content-type", "audio/flac")
-                fs.createReadStream(data.location).pipe(res)
+                //res.setHeader("content-type", "audio/flac")
+                //fs.createReadStream(data.location).pipe(res)
+                res.sendFile(data.location)
             }).catch(e =>{
                 res.send()
             })
         }
 })
 
+app.post('/api/directories', function (req, res) {
+    const dir = req.body.location || ''
+    scanner.getDirs(dir)
+        .then((data) => {
+            res.send(data)
+        })
+})
+
 app.get('/api/scan', function (req, res) {
-    scanner.scan('/home/phill/Music')
+    scanner.scan()
         .then(() => {
             console.log('scan complete')
             res.send({ state: 'complete' })

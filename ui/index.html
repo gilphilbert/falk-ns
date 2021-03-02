@@ -22,7 +22,7 @@
   <body>
     <div id="content-container">
       <div data-bind="if: tiles().length > 0">
-        <tiles params="tiles: tiles"></tiles>
+        <tiles params="tiles: tiles, title: $root.pageTitle"></tiles>
       </div>
       <div data-bind="if: album">
         <album params="album: $root.album"></album>
@@ -31,7 +31,7 @@
 
     <aside class="menu">
       <figure class="image menu-brand">
-        <a href="/">
+        <a data-navigo href="/">
           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="isolation:isolate" viewBox="0 0 39.961 39.961" width="40px" height="40px"><circle vector-effect="non-scaling-stroke" cx="19.9805" cy="19.9805" r="15.5" fill="rgb(255,255,255)"/><path d=" M 0 19.981 C 0 8.953 8.953 0 19.981 0 C 31.008 0 39.961 8.953 39.961 19.981 C 39.961 31.008 31.008 39.961 19.981 39.961 C 8.953 39.961 0 31.008 0 19.981 Z  M 15.089 28.897 L 15.089 28.897 L 10.274 28.897 L 10.274 28.897 Q 10.045 28.897 9.879 28.732 L 9.879 28.732 L 9.879 28.732 Q 9.714 28.566 9.714 28.413 L 9.714 28.413 L 9.714 28.413 Q 9.714 28.26 9.739 28.184 L 9.739 28.184 L 15.293 11.905 L 15.293 11.905 Q 15.522 11.064 16.439 11.064 L 16.439 11.064 L 23.522 11.064 L 23.522 11.064 Q 24.439 11.064 24.668 11.905 L 24.668 11.905 L 30.222 28.184 L 30.222 28.184 Q 30.248 28.26 30.248 28.413 L 30.248 28.413 L 30.248 28.413 Q 30.248 28.566 30.082 28.732 L 30.082 28.732 L 30.082 28.732 Q 29.916 28.897 29.687 28.897 L 29.687 28.897 L 24.872 28.897 L 24.872 28.897 Q 24.057 28.897 23.726 28.031 L 23.726 28.031 Q 20.444 17.551 19.981 15.981 Q 19.516 17.591 16.236 28.031 L 16.236 28.031 Q 15.904 28.897 15.089 28.897 L 15.089 28.897 L 15.089 28.897 Z " fill-rule="evenodd" fill="rgb(77,132,195)"/></svg>
         </a>
       </figure>
@@ -55,24 +55,24 @@
               </figure>
             </div>
             <div class="col-xs">
-              <p id="control-bar-title" class="is-5"></p>
-              <p id="control-bar-artist" class="subtitle is-5"></p>
+              <p class="is-5" data-bind="text: playing.title"></p>
+              <p class="subtitle is-5" data-bind="text: playing.artist"></p>
             </div>
           </div>
         </div>
         <div class="col-xs no-grow col-md playing-controls misc-controls">
           <svg class="random feather hidden--to-desktop"><use href="/img/feather-sprite.svg#shuffle"></use></svg>
-          <svg class="feather prev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
+          <svg class="feather prev" data-bind="click: $root.playPrev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
           <span class="play-button" data-bind="click: $root.togglePlay">
             <svg class="feather"><use href="/img/feather-sprite.svg#play"></use></svg>
           </span>
-          <svg class="feather next"><use href="/img/feather-sprite.svg#skip-forward"></use></svg>
+          <svg class="feather next" data-bind="click: $root.playNext"><use href="/img/feather-sprite.svg#skip-forward"></use></svg>
           <svg class="repeat feather hidden--to-desktop"><use href="/img/feather-sprite.svg#repeat"></use></svg>
         </div>
         <div class="col-md has-text-right hidden--to-desktop">
           <div class="row end-md">
             <div class="col-md no-grow play-progress">
-              <span class="seek"></span>/<span class="duration"></span>
+              <span class="seek"></span>/<span data-bind="text: Math.floor(playing.duration() / 60) + ':' + ('0' + (playing.duration() % 60)).slice(-2, 3)"></span>
             </div>
             <div class="col-md no-grow">
               <svg id="queue-toggle" class="queue feather hidden--to-desktop"><use href="/img/feather-sprite.svg#queue-alt"></use></svg>
@@ -86,7 +86,13 @@
         <h1>Play Queue</h1>
       </div>
       <div id="queue-items">
-        <table></table>
+        <table data-bind="foreach: queue">
+          <tr class="" data-pos="0">
+            <td><figure class="image is-40x40"><img src="x" loading="lazy"></figure></td>
+            <td><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + (Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3))"></p></td>
+            <td><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
+          </tr>
+        </table>
       </div>
     </div>
     <div id="modal-container"></div>
@@ -112,6 +118,7 @@
 
     <template id="t-tiles">
       <div class="container-fluid">
+        <h1 class="is-capitalized" data-bind="text: title"></h1>
         <div class="row" data-bind="foreach: tiles">
           <div class="col-lg-2 col-xs-4 art has-text-centered item-tile">
             <tile params="title: title, art: art, url: url, subtitle: subtitle, surl: surl"></tile>
@@ -120,13 +127,13 @@
       </div>
     </template>
 
-    <template id="t-tile">
-        <a data-bind="attr: { href: url }" data-navigo>
+    <template id="t-tile" data-bind="">
+        <a data-bind="attr: { href: url }, template: { afterRender: $root.updateLinks }" data-navigo>
             <figure class="image is-1by1"><img data-bind="attr: { src: art }" loading="lazy"></figure>
             <p class="is-5 is-capitalized" data-bind="text: title"></p>
         </a>
         <span data-bind="if: surl">
-          <a data-bind="attr: { href: surl }" data-navigo><p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p></a> 
+          <a data-bind="attr: { href: surl }, template: { afterRender: $root.updateLinks }" data-navigo><p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p></a> 
         </span>
         <span data-bind="ifnot: surl">
           <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
@@ -143,9 +150,9 @@
                 </div>
                 <div class="col-md-8 col-md-offset-2 col-xs-8">
                   <h1 class="album-title" data-bind="text: title"></h1>
-                  <p class="subtitle is-1"><a data-navigo data-bind="attr: { href: '/artist/' + encodeURIComponent(artist()) }, text: artist"></a></p>
+                  <p class="subtitle is-1" data-bind="template: { afterRender: $root.updateLinks }"><a data-navigo data-bind="attr: { href: '/artist/' + encodeURIComponent(artist()) }, text: artist"></a></p>
                   <p class="is-4 detail" data-bind="text: year"></p>
-                  <p class="is-4"><a data-navigo="" data-bind="attr: { href: '/genre/' + encodeURIComponent(genre()) }, text: genre">>rock</a></p>
+                  <p class="is-4" data-bind="template: { afterRender: $root.updateLinks }"><a data-navigo="" data-bind="attr: { href: '/genre/' + encodeURIComponent(genre()) }, text: genre"></a></p>
                   <p class="is-6 tag is-rounded detail" data-bind="text: shortformat"></p>
                 </div>
               </div>
@@ -157,7 +164,7 @@
                   <table class="table songs">
                     <tbody data-bind="foreach: tracks">
                         <tr data-bind="attr: { 'data-id': _id }">
-                          <td class="pointer" data-bind="click: $root.playSong"><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3)"></p></td>
+                          <td class="pointer" data-bind="click: $root.playAlbumSong"><p class="is-5" data-bind="text: track() + '. ' + title()"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3)"></p></td>
                           <td class="hidden--to-tablet"><span class="tag" data-bind="text: shortformat"></span></td>
                           <td class="is-narrow">
                             <div class="dropdown is-right">
@@ -180,7 +187,7 @@
         </div>
     </template>
 
+    <audio preload="auto" autoplay id="audio-player" data-bind="event: { ended: $root.player.complete }"></audio>
     <script src="main.js"></script>
-    <audio preload id="audio-player"></audio>
   </body>
 </html>

@@ -1,5 +1,5 @@
 var Walk = require("@root/walk");
-const { promises } = require("fs");
+const fs = require("fs");
 var path = require("path")
 const mm = require('music-metadata')
 
@@ -53,10 +53,38 @@ async function walkFunc(err, pathname, dirent) {
     return Promise.resolve()
 }
 
-function scan(dir) {
+function getHome() {
+    return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+}
+
+async function getDirs(dir) {
+    dir = dir || getHome()
     const promise = new Promise(function (resolve, reject) {
-        Walk.walk(dir, walkFunc)
-        .then(() => {
+        fs.readdir(dir, { withFileTypes: true }, (err, files) => {
+            let out = []
+            if (dir != '/') {
+                out.push('..')
+            }
+            files.forEach((file) => {
+                if(file.isDirectory() && !file.name.startsWith('.')) {
+                    out.push(file.name)
+                }
+            })
+            resolve({ location: dir, directories: out })
+        })
+    })
+    return promise
+}
+
+function scan() {
+    const promise = new Promise(function (resolve, reject) {
+        const dirs = database.settings.getDirs()
+        .then(data => {
+            data.forEach(dir => {
+                Walk.walk(dir, walkFunc)
+                .then(() => {
+                })    
+            })
             resolve()
         })
     })
@@ -64,5 +92,6 @@ function scan(dir) {
 }
 
 module.exports = {
-    scan: scan
+    scan: scan,
+    getDirs: getDirs
 }
