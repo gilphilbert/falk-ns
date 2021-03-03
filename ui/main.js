@@ -64,10 +64,10 @@ function AppViewModel() {
     //information about the playing song (and it's state)
     self.playing = {
       state: ko.observable(false),
-      title: ko.observable(''),
+      title: ko.observable('Not playing'),
       artist: ko.observable(''),
       album: ko.observable(''),
-      art: ko.observable(''),
+      art: ko.observable('/art/placeholder.png'),
       duration: ko.observable(0),
       elapsed: ko.observable(0)
     }
@@ -178,6 +178,42 @@ function AppViewModel() {
     /* playback control ends */
 
 
+    self.menuState = ko.observable(false)
+    self.showMenu = function() {
+      self.menuState(true)
+    }
+
+    self.settings = {
+      directories: {
+        location: ko.observable('/home/bob'),
+        list: ko.observable([ { name: '..' }, { name: 'test' }, { name: 'joe' } ]),
+        load: function(e) {
+          let next
+          const curLocation = self.settings.directories.location()
+          if (e.name === '..') {
+            next = curLocation.substr(0, curLocation.lastIndexOf('/'))
+            if (next === '') {
+              next = '/'
+            }
+          } else {
+            if (curLocation === '/') {
+              next = '/' + e.name
+            } else {
+              next = curLocation + '/' + e.name
+            }
+          }
+          console.log(next)
+          body = JSON.stringify({ location: next })
+          window.fetch('/api/directories', { method: 'post', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: body })
+            .then(response => response.json())
+            .then(data => {
+              self.settings.directories.location(data.location)
+              self.settings.directories.list(data.directories)
+            })
+        }
+      }
+    }
+
     // this is called when a new link is added to the page (these are manual!)
     self.updateLinks = function() {
       self.router.updatePageLinks()
@@ -185,6 +221,11 @@ function AppViewModel() {
 
     self.router = new Navigo('/')
     self.router
+      .hooks({
+        after(match) {
+          self.menuState(false)
+        }
+      })
       .on('/', () => {
         self.tiles([])
         self.pageTitle('Home')
@@ -307,6 +348,12 @@ function AppViewModel() {
       .on('/settings', () => {
         self.pageTitle('Settings')
         self.tiles([])
+        window.fetch('/api/directories', { method: 'post' })
+          .then(response => response.json())
+          .then(data => {
+            self.settings.directories.location(data.location)
+            self.settings.directories.list(data.directories)
+          })
       })
       .resolve()
 }

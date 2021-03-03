@@ -1,6 +1,7 @@
 const Datastore = require('nedb')
 const musicDB = new Datastore({ filename: 'data/music.db', autoload: true })
 const appDB = new Datastore({ filename: 'data/app.db', autoload: true })
+const playlistDB = new Datastore({ filename: 'data/playlists.db', autoload: true })
 
 //appDB.insert({ setting: 'directories', data: ['/home/phill/Music'] })
 

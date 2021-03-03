@@ -57,8 +57,6 @@ async function walkFunc(err, pathname, dirent) {
         }
         const _f = song.album.toLowerCase() + song.albumartist.toLowerCase()
         const fn = 'art/' + crypto.createHash('sha1').update(_f).digest('hex') + '.' + ext
-        console.log(_f)
-        console.log(fn)
         if(!fs.existsSync(fn)) {
             fs.writeFile(fn, pic.data, (err) => {
                 if (err) return console.error(err)
@@ -84,11 +82,11 @@ async function getDirs(dir) {
         fs.readdir(dir, { withFileTypes: true }, (err, files) => {
             let out = []
             if (dir != '/') {
-                out.push('..')
+                out.push({ name: '..' })
             }
             files.forEach((file) => {
                 if(file.isDirectory() && !file.name.startsWith('.')) {
-                    out.push(file.name)
+                    out.push({ name: file.name })
                 }
             })
             resolve({ location: dir, directories: out })
