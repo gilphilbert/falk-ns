@@ -41,7 +41,7 @@
               <tr><th>Directories</th><th></th></tr>
             </thead>
             <tbody data-bind="foreach: { data: settings.locations.list, as: 'item' }">
-              <tr><td><p class="is-6" data-bind="text: item"></p></td><td class="is-narrow pointer"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td></tr>
+              <tr><td><p class="is-6" data-bind="text: item"></p></td><td class="is-narrow pointer" data-bind="click: $root.settings.locations.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td></tr>
             </tbody>
           </table>
           <button class="button is-rounded is-primary" onclick="document.getElementById('dir-modal').classList.add('is-active')">Add directory</button>
@@ -58,7 +58,7 @@
                   </table>
                   <p></p>
                   <button class="button is-rounded" onclick="this.closest('.modal').classList.remove('is-active')">Cancel</button>
-                <button class="button is-primary is-rounded">Add directory</button>
+                <button class="button is-primary is-rounded" onclick="this.closest('.modal').classList.remove('is-active')" data-bind="click: settings.locations.add">Add directory</button>
               </div>
             </div>
           </div>
