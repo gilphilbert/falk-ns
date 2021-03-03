@@ -115,10 +115,21 @@ const add = {
 }
 
 const settings = {
-    getDirs: function() {
+    getDirs: function () {
         return new Promise(function (resolve, reject) {
             appDB.find({ setting: 'directories' }, (err, data) => {
                     resolve(data[0].data)
+            })
+        })
+    },
+    locations: function () {
+        return new Promise(function (resolve, reject) {
+            appDB.find({ setting: 'directories' }, (err, data) => {
+                if (!err) {
+                    resolve(data[0].data)
+                } else {
+                    reject()
+                }
             })
         })
     }

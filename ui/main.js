@@ -184,17 +184,25 @@ function AppViewModel() {
     }
 
     self.settings = {
+      locations: {
+        list: ko.observable([])
+      },
       directories: {
-        location: ko.observable('/home/bob'),
-        list: ko.observable([ { name: '..' }, { name: 'test' }, { name: 'joe' } ]),
+        location: ko.observable(''),
+        list: ko.observable([]),
         load: function(e) {
           let next
           const curLocation = self.settings.directories.location()
-          if (e.name === '..') {
+          //case for when nothing is provided (initial load)
+          if (e === '') {
+            next = ''
+          //case for when someone clicks the "up" button (..)
+          } else if (e.name === '..') {
             next = curLocation.substr(0, curLocation.lastIndexOf('/'))
             if (next === '') {
               next = '/'
             }
+          //anything else (they clicked a directory)
           } else {
             if (curLocation === '/') {
               next = '/' + e.name
@@ -202,11 +210,13 @@ function AppViewModel() {
               next = curLocation + '/' + e.name
             }
           }
-          console.log(next)
+          // create body
           body = JSON.stringify({ location: next })
+          //make request
           window.fetch('/api/directories', { method: 'post', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: body })
             .then(response => response.json())
             .then(data => {
+              //update variables
               self.settings.directories.location(data.location)
               self.settings.directories.list(data.directories)
             })
@@ -348,11 +358,13 @@ function AppViewModel() {
       .on('/settings', () => {
         self.pageTitle('Settings')
         self.tiles([])
-        window.fetch('/api/directories', { method: 'post' })
+        //load the directory browser
+        self.settings.directories.load('')
+        //get the current directories
+        window.fetch('/api/locations')
           .then(response => response.json())
           .then(data => {
-            self.settings.directories.location(data.location)
-            self.settings.directories.list(data.directories)
+            self.settings.locations.list(data)
           })
       })
       .resolve()

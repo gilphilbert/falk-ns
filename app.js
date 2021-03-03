@@ -103,6 +103,15 @@ app.get('/api/stream/:id', function (req, res) {
         }
 })
 
+app.get('/api/locations', function (req, res) {
+    database.settings.locations()
+        .then(data => {
+            res.send(data)
+        }).catch(e =>{
+            res.send([])
+        })  
+})
+
 app.post('/api/directories', function (req, res) {
     const dir = req.body.location || ''
     scanner.getDirs(dir)
