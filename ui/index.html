@@ -45,13 +45,13 @@
       </ul>
     </aside>
     <div id="control-bar" class="is-active">
-      <div class="progress-topper"></div>
+      <div class="progress-topper" style="transition: all 1000ms linear" data-bind="style: { width: (playing.elapsed() / playing.duration() * 100) + '%' }"></div>
       <div class="row is-marginless">
         <div class="col-xs col-md">
           <div class="row now-playing">
             <div class="col-xs is-narrow">
               <figure class="image is-70x70">
-                <img>
+                <img data-bind="attr: { src: playing.art }">
               </figure>
             </div>
             <div class="col-xs">
@@ -64,7 +64,8 @@
           <svg class="random feather hidden--to-desktop"><use href="/img/feather-sprite.svg#shuffle"></use></svg>
           <svg class="feather prev" data-bind="click: $root.playPrev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
           <span class="play-button" data-bind="click: $root.togglePlay">
-            <svg class="feather"><use href="/img/feather-sprite.svg#play"></use></svg>
+            <svg class="feather" data-bind="css: { 'is-hidden': playing.state() == true }"><use href="/img/feather-sprite.svg#play"></use></svg>
+            <svg class="feather" data-bind="css: { 'is-hidden': playing.state() != true }"><use href="/img/feather-sprite.svg#pause"></use></svg>
           </span>
           <svg class="feather next" data-bind="click: $root.playNext"><use href="/img/feather-sprite.svg#skip-forward"></use></svg>
           <svg class="repeat feather hidden--to-desktop"><use href="/img/feather-sprite.svg#repeat"></use></svg>
@@ -72,7 +73,7 @@
         <div class="col-md has-text-right hidden--to-desktop">
           <div class="row end-md">
             <div class="col-md no-grow play-progress">
-              <span class="seek"></span>/<span data-bind="text: Math.floor(playing.duration() / 60) + ':' + ('0' + (playing.duration() % 60)).slice(-2, 3)"></span>
+              <span data-bind="text: Math.floor(playing.elapsed() / 60) + ':' + ('0' + (playing.elapsed() % 60)).slice(-2, 3)"></span>/<span data-bind="text: Math.floor(playing.duration() / 60) + ':' + ('0' + (playing.duration() % 60)).slice(-2, 3)"></span>
             </div>
             <div class="col-md no-grow">
               <svg id="queue-toggle" class="queue feather hidden--to-desktop"><use href="/img/feather-sprite.svg#queue-alt"></use></svg>
@@ -87,8 +88,8 @@
       </div>
       <div id="queue-items">
         <table data-bind="foreach: queue">
-          <tr class="" data-pos="0">
-            <td><figure class="image is-40x40"><img src="x" loading="lazy"></figure></td>
+          <tr>
+            <td><figure class="image is-40x40"><img data-bind="attr: { src: art }" loading="lazy"></figure></td>
             <td><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + (Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3))"></p></td>
             <td><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
           </tr>
@@ -133,7 +134,9 @@
             <p class="is-5 is-capitalized" data-bind="text: title"></p>
         </a>
         <span data-bind="if: surl">
-          <a data-bind="attr: { href: surl }, template: { afterRender: $root.updateLinks }" data-navigo><p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p></a> 
+          <a data-bind="attr: { href: surl }, template: { afterRender: $root.updateLinks }" data-navigo>
+            <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
+          </a>
         </span>
         <span data-bind="ifnot: surl">
           <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
@@ -187,7 +190,7 @@
         </div>
     </template>
 
-    <audio preload="auto" autoplay id="audio-player" data-bind="event: { ended: $root.player.complete }"></audio>
+    <audio preload="auto" autoplay id="audio-player" data-bind="event: { ended: $root.player.complete, timeupdate: $root.player.update, play: $root.player.play, pause: $root.player.pause }"></audio>
     <script src="main.js"></script>
   </body>
 </html>

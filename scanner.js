@@ -2,6 +2,7 @@ var Walk = require("@root/walk");
 const fs = require("fs");
 var path = require("path")
 const mm = require('music-metadata')
+var crypto = require('crypto')
 
 const database = require('./database')
 
@@ -46,6 +47,26 @@ async function walkFunc(err, pathname, dirent) {
         playcount: 1,
         dateadded: Date.now(),
         favorite: false,
+    }
+
+    if (meta.common.picture !== undefined) {
+        const pic = meta.common.picture[0]
+        let ext = "png"
+        if (pic.format === "image/jpeg") {
+            ext = "jpg"
+        }
+        const _f = song.album.toLowerCase() + song.albumartist.toLowerCase()
+        const fn = 'art/' + crypto.createHash('sha1').update(_f).digest('hex') + '.' + ext
+        console.log(_f)
+        console.log(fn)
+        if(!fs.existsSync(fn)) {
+            fs.writeFile(fn, pic.data, (err) => {
+                if (err) return console.error(err)
+                console.log('art saved to ', fn)
+            })
+        } else {
+            console.log('skipping art: exists')
+        }
     }
 
     database.addMusic.song(song)    

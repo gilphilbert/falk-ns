@@ -35,6 +35,8 @@ ko.components.register('album', {
 function AppViewModel() {
     var self = this
     
+    self.audio = document.getElementById('audio-player')
+
     self.pageTitle = ko.observable('FALK')
     self.pageTitle.subscribe(function(newTitle) {
       if (!self.playingState()) {
@@ -56,7 +58,9 @@ function AppViewModel() {
       title: ko.observable(''),
       artist: ko.observable(''),
       album: ko.observable(''),
-      duration: ko.observable(0)
+      art: ko.observable(''),
+      duration: ko.observable(0),
+      elapsed: ko.observable(0)
     }
     self.playingState = ko.observable(false)
 
@@ -88,7 +92,7 @@ function AppViewModel() {
 
     //play the song at queuePos
     self.play = () => {
-      const audio = document.getElementById('audio-player')
+      const audio = self.audio
       const song = self.queue()[self.queuePos()]
 
       const id = song._id()
@@ -99,6 +103,7 @@ function AppViewModel() {
       self.playing.title(song.title())
       self.playing.artist(song.albumartist())
       self.playing.duration(song.duration())
+      self.playing.art(song.art())
 
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -126,16 +131,14 @@ function AppViewModel() {
       }
     }
     self.playStop = () => {
-      const audio = document.getElementById('audio-player')
-      audio.src = ''
+      self.audio.src = ''
     }
 
     self.togglePlay = () => {
-      const audio = document.getElementById('audio-player')
-      if (audio.paused) {
-        audio.play()
+      if (self.audio.paused) {
+        self.audio.play()
       } else {
-        audio.pause()
+        self.audio.pause()
       }
     }
 
@@ -148,9 +151,19 @@ function AppViewModel() {
 
     self.player = {
       complete: () => {
+        self.playing.state(false)
         if(self.queuePos() < self.queue().length - 1) {
           self.queuePos(self.queuePos() + 1)
         }
+      },
+      update: () => {
+        self.playing.elapsed(Math.ceil(self.audio.currentTime))
+      },
+      play: () => {
+        self.playing.state(true)
+      },
+      pause: () => {
+        self.playing.state(false)
       }
     }
     /* playback control ends */

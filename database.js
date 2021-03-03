@@ -106,7 +106,7 @@ const add = {
     song: (meta) => {
         musicDB.insert(meta, (err, doc) => {
             if (err) {
-                console.log(err)
+                console.log('Can\'t add file: probably exists')
                 return
             }
         })
