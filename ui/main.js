@@ -35,24 +35,33 @@ ko.components.register('album', {
 function AppViewModel() {
     var self = this
     
+    //quick link to the audio player
     self.audio = document.getElementById('audio-player')
 
+    //set the page title
     self.pageTitle = ko.observable('FALK')
     self.pageTitle.subscribe(function(newTitle) {
-      if (!self.playingState()) {
+      if (!self.playing.state()) {
         document.title = newTitle
       }
     })
 
+    //tiles holds the list of tiles to show (null means no tiles)
     self.tiles = ko.observable([])
+    //this holds information about the current album (null means information is hidden)
     self.album = ko.observable(null)
 
-    self.queuePos = ko.observable(0)
+    //queue observables
     self.queue = ko.observable([])
+    self.queuePos = ko.observable(0)
     self.queuePos.subscribe(function(qp) {
       self.play()
+      self.queue().forEach((s, i) => {
+        s.playing(i === qp)
+      })
     })
 
+    //information about the playing song (and it's state)
     self.playing = {
       state: ko.observable(false),
       title: ko.observable(''),
@@ -62,7 +71,6 @@ function AppViewModel() {
       duration: ko.observable(0),
       elapsed: ko.observable(0)
     }
-    self.playingState = ko.observable(false)
 
     /* playback control */
     // clear queue and play a single song
@@ -83,8 +91,10 @@ function AppViewModel() {
       self.queue(self.album().tracks())
 
       self.queue().forEach((s, i) => {
+        //s.playing = ko.observable(false)
         if(s._id() == song._id()) {
           self.queuePos(i)
+          s.playing(true)
         }
       })
       self.play()
@@ -92,13 +102,12 @@ function AppViewModel() {
 
     //play the song at queuePos
     self.play = () => {
-      const audio = self.audio
       const song = self.queue()[self.queuePos()]
 
       const id = song._id()
       const ext = song.location().substr(song.location().lastIndexOf('.'))
       const url = `/api/stream/${id}${ext}`
-      audio.src = url
+      self.audio.src = url
 
       self.playing.title(song.title())
       self.playing.artist(song.albumartist())
@@ -169,6 +178,7 @@ function AppViewModel() {
     /* playback control ends */
 
 
+    // this is called when a new link is added to the page (these are manual!)
     self.updateLinks = function() {
       self.router.updatePageLinks()
     }
@@ -238,6 +248,7 @@ function AppViewModel() {
             data.tracks.map(e => {
               // e.title = e.track + '. ' + e.title
               e.shortformat = (e.format.samplerate / 1000) + 'kHz ' + ((e.format.bits) ? e.format.bits + 'bit' : '')
+              e.playing = false
             })
             if (data.tracks.length > 0) {
               data.year = data.tracks[0].year
@@ -298,7 +309,6 @@ function AppViewModel() {
         self.tiles([])
       })
       .resolve()
-
 }
 
 ko.applyBindings(new AppViewModel())

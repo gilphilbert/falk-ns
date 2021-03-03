@@ -88,7 +88,7 @@
       </div>
       <div id="queue-items">
         <table data-bind="foreach: queue">
-          <tr>
+          <tr data-bind="css: { 'is-playing': playing() == true }">
             <td><figure class="image is-40x40"><img data-bind="attr: { src: art }" loading="lazy"></figure></td>
             <td><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + (Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3))"></p></td>
             <td><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
