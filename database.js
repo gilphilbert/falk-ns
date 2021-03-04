@@ -21,35 +21,24 @@ userDB.ensureIndex({ fieldName: 'username', unique: true }, function (err) {
 })
 
 const get = {
-  stats: () => {
+  stats: (uuid) => {
     const promise = new Promise(function (resolve, reject) {
       const ret = { songs: 0, albums: 0, artists: 0 }
-      musicDB.find({}, (err, data) => {
-        if (err || data.length === 0) {
+      musicDB.find({ uuids: uuid }, (err, data) => {
+        if (err || data === undefined || data.lenth === 0) {
           reject(err)
         }
         ret.songs = data.length
-        ret.artists = [...new Set(data.map(song => song.albumartist))].length
-        ret.albums = [...new Set(data.map(song => song.album))].length
+        ret.artists = [...new Set(data.map(song => song.meta.albumartist))].length
+        ret.albums = [...new Set(data.map(song => song.meta.album))].length
         resolve(ret)
       })
     })
     return promise
   },
-  allSongs: () => {
+  url: (uuid, id) => {
     const promise = new Promise(function (resolve, reject) {
-      musicDB.find({}, (err, data) => {
-        if (err || data.length === 0) {
-          reject(err)
-        }
-        resolve(data)
-      })
-    })
-    return promise
-  },
-  url: (id) => {
-    const promise = new Promise(function (resolve, reject) {
-      musicDB.find({ _id: id }, { location: 1 }, (err, data) => {
+      musicDB.find({ uuids: uuid, _id: id }, { location: 1 }, (err, data) => {
         if (err || data.length === 0) {
           reject(err)
         }
@@ -58,24 +47,50 @@ const get = {
     })
     return promise
   },
-  artists: () => {
+  artists: (uuid) => {
     return new Promise(function (resolve, reject) {
-      musicDB.find({ }, { albumartist: 1 }, (err, data) => {
+      musicDB.find({ uuids: uuid }, { 'meta.albumartist': 1 }, (err, data) => {
         let artists = []
         if (!err && data.length > 0) {
-          artists = [...new Set(data.map(song => song.albumartist))]
+          artists = [...new Set(data.map(song => song.meta.albumartist))]
           resolve(artists)
         }
         reject(err)
       })
     })
   },
-  artistAlbums: (artist) => {
+  artistAlbums: (uuid, artist) => {
     const promise = new Promise(function (resolve, reject) {
-      musicDB.find({ albumartist: artist }, { albumartist: 1, album: 1, year: 1, _id: 0 }, (err, data) => {
+      musicDB.find({ uuids: uuid, 'meta.albumartist': artist }, { 'meta.albumartist': 1, 'meta.album': 1, 'meta.year': 1 }, (err, data) => {
         let albums = []
         if (!err && data.length > 0) {
-          albums = data.filter((tag, index, array) => array.findIndex(t => t.album === tag.album) === index)
+          albums = data.filter((tag, index, array) => array.findIndex(t => t.meta.album === tag.meta.album) === index)
+          const metas = albums.map(s => { return s.meta })
+          resolve(metas)
+        }
+        reject(err)
+      })
+    })
+    return promise
+  },
+  album: (uuid, artist, album) => {
+    const promise = new Promise(function (resolve, reject) {
+      musicDB.find({ uuids: uuid, 'meta.albumartist': artist, 'meta.album': album }, (err, data) => {
+        if (!err && data.length > 0) {
+          const metas = data.map(s => { s.meta._id = s._id; return s.meta }).sort((a, b) => { return a.track - b.track })
+          resolve(metas)
+        }
+        reject(err)
+      })
+    })
+    return promise
+  },
+  albums: (uuid) => {
+    const promise = new Promise(function (resolve, reject) {
+      musicDB.find({ uuids: uuid }, { 'meta.albumartist': 1, 'meta.album': 1 }, (err, data) => {
+        if (!err && data.length > 0) {
+          let albums = data.map(s => { return s.meta }).filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
+          albums = albums.sort((a, b) => { return a.title - b.title })
           resolve(albums)
         }
         reject(err)
@@ -83,47 +98,23 @@ const get = {
     })
     return promise
   },
-  album: (artist, album) => {
-    const promise = new Promise(function (resolve, reject) {
-      musicDB.find({ albumartist: artist, album: album }, (err, data) => {
-        if (!err && data.length > 0) {
-          data = data.sort((a, b) => { return a.track - b.track })
-          resolve(data)
-        }
-        reject(err)
-      })
-    })
-    return promise
-  },
-  albums: () => {
-    const promise = new Promise(function (resolve, reject) {
-      musicDB.find({ }, { albumartist: 1, album: 1, _id: 0 }, (err, data) => {
-        if (!err && data.length > 0) {
-          const albums = data.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
-          resolve(albums.sort((a, b) => { return a.title - b.title }))
-        }
-        reject(err)
-      })
-    })
-    return promise
-  },
-  genres: () => {
+  genres: (uuid) => {
     return new Promise(function (resolve, reject) {
-      musicDB.find({ }, { genre: 1 }, (err, data) => {
+      musicDB.find({ uuids: uuid }, { 'meta.genre': 1 }, (err, data) => {
         let genres = []
         if (!err && data.length > 0) {
-          genres = [...new Set(data.map(song => song.genre))]
+          genres = [...new Set(data.map(song => song.meta.genre))]
           resolve(genres.sort((a, b) => { return a - b }))
         }
         reject(err)
       })
     })
   },
-  genre: (genre) => {
+  genre: (uuid, genre) => {
     return new Promise(function (resolve, reject) {
-      musicDB.find({ genre: genre }, (err, data) => {
+      musicDB.find({ uuids: uuid, 'meta.genre': genre }, (err, data) => {
         if (!err && data.length > 0) {
-          const albums = data.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
+          const albums = data.map(s => { return s.meta }).filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
           resolve(albums.sort((a, b) => { return a.title - b.title }))
         }
         reject(err)
@@ -133,65 +124,96 @@ const get = {
 }
 
 const add = {
-  song: (meta, overwrite) => {
+  song: (meta, overwrite, uuid) => {
     return new Promise(function (resolve, reject) {
-      if (overwrite) {
-        musicDB.update({ location: meta.location }, meta, { upsert: true }, (err, doc) => {
-          if (err) {
-            console.log('Can\'t add file: something went wrong...')
+      musicDB.find({ location: meta.location }, (err, doc) => {
+        if (err) {
+          reject(err)
+        }
+
+        // get the uuids and append user if they're not in the list
+        let uuids = []
+        if (doc.length > 0) {
+          uuids = doc[0].uuids
+        }
+        if (uuids.includes(uuid) === false) {
+          uuids.push(uuid)
+        }
+
+        if (overwrite) {
+          // we'll update the metadata regardless
+          musicDB.update({ location: meta.location }, { location: meta.location, meta: meta, uuids: uuids }, { upsert: true }, (err, doc) => {
+            if (err) {
+              console.log('Can\'t add file: something went wrong...')
+            }
+            resolve()
+          })
+        } else {
+          if (doc.length === 0) {
+            // new file we've found
+            musicDB.insert({ location: meta.location, meta: meta, uuids: uuids }, (err, doc) => {
+              if (err) {
+                console.log('Can\'t add file: probably exists')
+              }
+              resolve()
+            })
+          } else {
+            // the file exists, but we're not changing the metadata
+            musicDB.update({ location: meta.location }, { $set: { uuids: uuids } }, (err, doc) => {
+              if (err) {
+                console.log('Can\'t add file: something went wrong')
+              }
+              resolve()
+            })
           }
-          resolve()
-        })
-      } else {
-        musicDB.insert(meta, (err, doc) => {
-          if (err) {
-            console.log('Can\'t add file: probably exists')
-          }
-          resolve()
-        })
-      }
+        }
+      })
     })
   }
 }
 
 const settings = {
-  getDirs: function () {
+  getDirs: function (uuid) {
     return new Promise(function (resolve, reject) {
-      appDB.find({ setting: 'directories' }, (err, data) => {
+      userDB.find({ _id: uuid }, (err, data) => {
         if (!err) {
-          resolve(data[0].data)
+          resolve(data[0].locations)
         }
       })
     })
   },
-  locations: function () {
+  locations: function (uuid) {
     return new Promise(function (resolve, reject) {
-      appDB.find({ setting: 'directories' }, (err, data) => {
+      userDB.find({ _id: uuid }, { locations: 1 }, (err, data) => {
         if (!err) {
-          resolve(data[0].data)
+          if (data.length > 0) {
+            resolve(data[0].locations)
+          } else {
+            resolve([])
+          }
         } else {
           reject(err)
         }
       })
     })
   },
-  addLocation: function (location) {
+  addLocation: function (uuid, location) {
     return new Promise(function (resolve, reject) {
-      appDB.update({ setting: 'directories' }, { $push: { data: location } }, (err, data) => {
+      userDB.update({ _id: uuid }, { $push: { locations: location } }, (err) => {
         if (err) {
           console.log(err)
         }
-        resolve(settings.locations())
+        resolve(settings.locations(uuid))
       })
     })
   },
-  removeLocation: function (location) {
+  removeLocation: function (uuid, location) {
     return new Promise(function (resolve, reject) {
-      appDB.update({ setting: 'directories' }, { $pull: { data: location } }, (err, data) => {
+      userDB.update({ _id: uuid }, { $pull: { locations: location } }, (err) => {
         if (err) {
           console.log(err)
         }
-        resolve(settings.locations())
+        resolve(settings.locations(uuid))
       })
     })
   }
@@ -220,7 +242,8 @@ const users = {
         const account = {
           user: username,
           pass: crypto.createHash('sha256').update(password).digest('hex'),
-          admin: true
+          admin: true,
+          locations: []
         }
         userDB.insert(account, () => {
           resolve({ status: true })
@@ -237,7 +260,7 @@ const users = {
         if (data.length > 0) {
           const hash = crypto.createHash('sha256').update(password).digest('hex')
           if (data[0].pass === hash) {
-            resolve({ uuid: data._id })
+            resolve({ uuid: data[0]._id })
           }
           reject(new Error('incorrect password'))
         }

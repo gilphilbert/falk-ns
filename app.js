@@ -65,7 +65,6 @@ app.use(function (req, res, next) {
         const publicKey = fs.readFileSync('jwtRS256.key.pub', 'utf8')
         jwt.verify(token, publicKey, (err, user) => {
           if (err) {
-            console.log(err)
             res.status(403).json({ error: 'unauthorized' })
           } else {
             res.locals.uuid = user.uuid
@@ -84,16 +83,7 @@ app.get('/api/logout', function (req, res) {
 })
 
 app.get('/api/stats', function (req, res) {
-  database.getMusic.stats()
-    .then(data => {
-      res.send(data)
-    }).catch(e => {
-      res.send({})
-    })
-})
-
-app.get('/api/songs', function (req, res) {
-  database.getMusic.allSongs()
+  database.getMusic.stats(res.locals.uuid)
     .then(data => {
       res.send(data)
     }).catch(e => {
@@ -102,7 +92,7 @@ app.get('/api/songs', function (req, res) {
 })
 
 app.get('/api/artists', function (req, res) {
-  database.getMusic.artists()
+  database.getMusic.artists(res.locals.uuid)
     .then(data => {
       data = data.map(i => {
         return { artist: i, art: '/art/' + encodeURIComponent(i) + '.jpg' }
@@ -114,7 +104,7 @@ app.get('/api/artists', function (req, res) {
 })
 
 app.get('/api/artist/:artist', function (req, res) {
-  database.getMusic.artistAlbums(req.params.artist)
+  database.getMusic.artistAlbums(res.locals.uuid, req.params.artist)
     .then(data => {
       data.forEach(e => { e.art = `/art/${encodeURIComponent(req.params.artist)}/${encodeURIComponent(e.album)}.jpg` })
       res.send(data)
@@ -124,7 +114,7 @@ app.get('/api/artist/:artist', function (req, res) {
 })
 
 app.get('/api/album/:artist/:album', function (req, res) {
-  database.getMusic.album(req.params.artist, req.params.album)
+  database.getMusic.album(res.locals.uuid, req.params.artist, req.params.album)
     .then(data => {
       data.forEach(e => { e.art = `/art/${encodeURIComponent(req.params.artist)}/${encodeURIComponent(req.params.album)}.jpg` })
       const retVal = {
@@ -141,7 +131,7 @@ app.get('/api/album/:artist/:album', function (req, res) {
 })
 
 app.get('/api/albums', function (req, res) {
-  database.getMusic.albums()
+  database.getMusic.albums(res.locals.uuid)
     .then(data => {
       data.forEach(e => { e.art = `/art/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}.jpg` })
       res.send(data)
@@ -151,7 +141,7 @@ app.get('/api/albums', function (req, res) {
 })
 
 app.get('/api/genres', function (req, res) {
-  database.getMusic.genres()
+  database.getMusic.genres(res.locals.uuid)
     .then(data => {
       res.send(data)
     }).catch(e => {
@@ -160,7 +150,7 @@ app.get('/api/genres', function (req, res) {
 })
 
 app.get('/api/genre/:genre', function (req, res) {
-  database.getMusic.genre(req.params.genre)
+  database.getMusic.genre(res.locals.uuid, req.params.genre)
     .then(data => {
       data.forEach(e => { e.art = `/art/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}.jpg` })
       res.send(data)
@@ -175,7 +165,7 @@ app.get('/api/stream/:id', function (req, res) {
     // remove the extension
     id = id.substr(0, id.lastIndexOf('.'))
     // now go find the file
-    database.getMusic.url(id)
+    database.getMusic.url(res.locals.uuid, id)
       .then(data => {
         // streaming the file doesn't allow seeking (annoying)
         //  -> res.setHeader("content-type", "audio/flac")
@@ -189,17 +179,17 @@ app.get('/api/stream/:id', function (req, res) {
 })
 
 app.get('/api/locations', function (req, res) {
-  database.settings.locations()
+  database.settings.locations(res.locals.uuid)
     .then(data => {
-      res.send(data)
+      res.json(data)
     }).catch(e => {
-      res.send([])
+      res.json([])
     })
 })
 app.post('/api/locations', function (req, res) {
   const dir = req.body.location || ''
   if (dir !== '') {
-    database.settings.addLocation(dir)
+    database.settings.addLocation(res.locals.uuid, dir)
       .then(data => {
         res.send(data)
       }).catch(e => {
@@ -210,7 +200,7 @@ app.post('/api/locations', function (req, res) {
 app.delete('/api/locations', function (req, res) {
   const dir = req.body.location || ''
   if (dir !== '') {
-    database.settings.removeLocation(dir)
+    database.settings.removeLocation(res.locals.uuid, dir)
       .then(data => {
         res.send(data)
       }).catch(e => {
@@ -245,7 +235,8 @@ app.get('/art/:artist', function (req, res) {
 })
 
 app.get('/api/update', function (req, res) {
-  scanner.scan(false)
+  const uuid = res.locals.uuid
+  scanner.scan(false, uuid)
     .then(() => {
       console.log('update complete')
     })
@@ -253,7 +244,8 @@ app.get('/api/update', function (req, res) {
   res.send({ state: 'scanning' })
 })
 app.get('/api/rescan', function (req, res) {
-  scanner.scan(true)
+  const uuid = res.locals.uuid
+  scanner.scan(true, uuid)
     .then(() => {
       console.log('rescan complete')
     })
