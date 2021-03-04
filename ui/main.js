@@ -85,16 +85,49 @@ const vmApp = function (params) {
   })
 
   // tiles holds the list of tiles to show (null means no tiles)
-  self.tiles = ko.observable([])
+  self.tiles = ko.observableArray([])
   // this holds information about the current album (null means information is hidden)
   self.album = ko.observable(null)
 
   // queue observables
-  self.queue = ko.observable([])
-  self.queuePos = ko.observable(0)
-  self.queuePos.subscribe(function (qp) {
-    self.play()
-    self.queue().forEach((s, i) => {
+  self.queue = {
+    list: ko.observableArray([]),
+    pos: ko.observable(0),
+    trigger: true,
+    changePos: (song) => {
+      // console.log(song.id)
+      self.queue.list().forEach((s, i) => {
+        if (s._id() === song._id()) {
+          self.queue.pos(i)
+        //  s.playing(true)
+        }// else {
+        //  s.playing(false)
+        // }
+      })
+    },
+    remove: (song) => {
+      self.queue.list().forEach((s, i) => {
+        // find the song in the queue
+        if (s._id() === song._id()) {
+          // remove the item from the queue
+          self.queue.list.splice(i, 1)
+          if (i < self.queue.pos()) {
+            // if the song is before the current playing position, turn off the trigger and decrement
+            self.queue.trigger = false
+            self.queue.pos(self.queue.pos() - 1)
+          }
+        }
+      })
+    }
+  }
+  self.queue.pos.subscribe(function (qp) {
+    if (self.queue.trigger) {
+      self.play()
+    } else {
+      // we didn't trigger, but we'll need to next time
+      self.queue.trigger = true
+    }
+    self.queue.list().forEach((s, i) => {
       s.playing(i === qp)
     })
   })
@@ -114,32 +147,32 @@ const vmApp = function (params) {
   // clear queue and play a single song
   // self.clearPlaySong = song => {
   //   song = song || null
-  //   self.queue([song])
+  //   self.queue.list([song])
   //   self.playSong(song)
   // }
 
   // clear queue and play a whole album
   // self.clearPlayAlbum = () => {
-  //   self.queue(self.album.tracks)
-  //   self.playSong(self.queue[0])
+  //   self.queue.list(self.album.tracks)
+  //   self.playSong(self.queue.list[0])
   // }
 
   // clear queue and play album, from specific song
   self.playAlbumSong = song => {
-    self.queue(self.album().tracks())
+    self.queue.list(self.album().tracks())
 
-    self.queue().forEach((s, i) => {
+    self.queue.list().forEach((s, i) => {
       if (s._id() === song._id()) {
-        self.queuePos(i)
+        self.queue.pos(i)
         s.playing(true)
       }
     })
     self.play()
   }
 
-  // play the song at queuePos
+  // play the song at queue.pos
   self.play = () => {
-    const song = self.queue()[self.queuePos()]
+    const song = self.queue.list()[self.queue.pos()]
 
     const id = song._id()
     const ext = song.location().substr(song.location().lastIndexOf('.'))
@@ -165,13 +198,13 @@ const vmApp = function (params) {
     document.title = song.title() + ' - ' + song.albumartist() + ' | FALK'
   }
   self.playPrev = () => {
-    if (self.queuePos() > 0) {
-      self.queuePos(self.queuePos() - 1)
+    if (self.queue.pos() > 0) {
+      self.queue.pos(self.queue.pos() - 1)
     }
   }
   self.playNext = () => {
-    if (self.queuePos() < self.queue().length - 1) {
-      self.queuePos(self.queuePos() + 1)
+    if (self.queue.pos() < self.queue.list().length - 1) {
+      self.queue.pos(self.queue.pos() + 1)
     } else {
       self.playStop()
     }
@@ -198,8 +231,8 @@ const vmApp = function (params) {
   self.player = {
     complete: () => {
       self.playing.state(false)
-      if (self.queuePos() < self.queue().length - 1) {
-        self.queuePos(self.queuePos() + 1)
+      if (self.queue.pos() < self.queue.list().length - 1) {
+        self.queue.pos(self.queue.pos() + 1)
       }
     },
     update: () => {
@@ -221,7 +254,7 @@ const vmApp = function (params) {
 
   self.settings = {
     locations: {
-      list: ko.observable([]),
+      list: ko.observableArray([]),
       add: (e) => {
         const body = JSON.stringify({ location: self.settings.directories.location() })
         window.fetch('/api/locations', { method: 'post', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
@@ -243,7 +276,7 @@ const vmApp = function (params) {
     },
     directories: {
       location: ko.observable(''),
-      list: ko.observable([]),
+      list: ko.observableArray([]),
       load: function (e) {
         let next
         const curLocation = self.settings.directories.location()

@@ -83,11 +83,11 @@
           <h1>Play Queue</h1>
         </div>
         <div id="queue-items">
-          <table data-bind="foreach: queue">
+          <table data-bind="foreach: queue.list">
             <tr data-bind="css: { 'is-playing': playing() == true }">
-              <td><figure class="image is-40x40"><img data-bind="attr: { src: art }" loading="lazy"></figure></td>
-              <td><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + (Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3))"></p></td>
-              <td><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
+              <td data-bind="click: $parent.queue.changePos"><figure class="image is-40x40"><img data-bind="attr: { src: art }" loading="lazy"></figure></td>
+              <td data-bind="click: $parent.queue.changePos"><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + (Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3))"></p></td>
+              <td data-bind="click: $parent.queue.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
             </tr>
           </table>
         </div>
@@ -241,7 +241,7 @@
         </div>
         <table class="table">
           <thead>
-            <tr><th>Directories</th><th></th></tr>
+            <tr><th>Library Locations</th><th></th></tr>
           </thead>
           <tbody data-bind="foreach: { data: settings.locations.list, as: 'item' }">
             <tr><td><p class="is-6" data-bind="text: item"></p></td><td class="is-narrow pointer" data-bind="click: $parent.settings.locations.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td></tr>
@@ -249,8 +249,8 @@
         </table>
         <div style="display: flex; align-items: center;">
           <button class="button no-v is-rounded is-primary" onclick="document.getElementById('dir-modal').classList.add('is-active')">Add directory</button>
-          <button class="button no-v is-primary is-rounded" data-bind="click: settings.database.update">Scan Directories</button>
-          <label class="switch"><input type="checkbox" data-bind="checked: settings.database.rescan"><span class="slider round"></span></label><span style="margin-left: 5px">Rescan existing files for changes  </span>
+          <button class="button no-v is-primary is-rounded" data-bind="click: settings.database.update">Update Library</button>
+          <label class="switch"><input type="checkbox" data-bind="checked: settings.database.rescan"><span class="slider round"></span></label><span style="margin-left: 5px">Rescan existing files</span>
         </div>
 
         <div id="dir-modal" class="modal is-small modal-fx-fadeInScale">

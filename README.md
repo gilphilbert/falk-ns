@@ -54,9 +54,6 @@ Lots!
         * Most played
         * Most recently added
         * Favorites
-* Settings page
-    * rescan
-    * update
 * Home page
 * Artist page (header image, etc)
 * Package as docker container
