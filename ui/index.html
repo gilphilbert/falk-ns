@@ -20,164 +20,164 @@
 
   </head>
   <body>
-    <div id="content-container">
-      <div data-bind="if: tiles().length > 0">
-        <tiles params="tiles: tiles, title: $root.pageTitle"></tiles>
-      </div>
-      <div data-bind="if: album">
-        <album params="album: $root.album"></album>
-      </div>
-      <div data-bind="if: pageTitle() == 'Settings'">
-        <div class="container-fluid">
-          <h1>Settings</h1>
-          <p class="is-1">Music Library</p>
-          <div class="box row has-text-centered">
-            <div class="col-xs-4"><h1>3976</h1><p class="subtitle is-3">Songs</p></div>
-            <div class="col-xs-4"><h1>227</h1><p class="subtitle is-3">Artists</p></div>
-            <div class="col-xs-4"><h1>333</h1><p class="subtitle is-3">Albums</p></div>
+    <div data-bind="component: { name: mainContainer, params: { mainContainer: mainContainer } }"></div>
+
+    <template id="t-app">
+      <div id="content-container" data-bind="template: pageContainer"></div>
+
+      <aside class="menu" data-bind="css: { 'is-active': menuState() == true }">
+        <figure class="image menu-brand">
+          <a data-navigo href="/">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="isolation:isolate" viewBox="0 0 39.961 39.961" width="40px" height="40px"><circle vector-effect="non-scaling-stroke" cx="19.9805" cy="19.9805" r="15.5" fill="rgb(255,255,255)"/><path d=" M 0 19.981 C 0 8.953 8.953 0 19.981 0 C 31.008 0 39.961 8.953 39.961 19.981 C 39.961 31.008 31.008 39.961 19.981 39.961 C 8.953 39.961 0 31.008 0 19.981 Z  M 15.089 28.897 L 15.089 28.897 L 10.274 28.897 L 10.274 28.897 Q 10.045 28.897 9.879 28.732 L 9.879 28.732 L 9.879 28.732 Q 9.714 28.566 9.714 28.413 L 9.714 28.413 L 9.714 28.413 Q 9.714 28.26 9.739 28.184 L 9.739 28.184 L 15.293 11.905 L 15.293 11.905 Q 15.522 11.064 16.439 11.064 L 16.439 11.064 L 23.522 11.064 L 23.522 11.064 Q 24.439 11.064 24.668 11.905 L 24.668 11.905 L 30.222 28.184 L 30.222 28.184 Q 30.248 28.26 30.248 28.413 L 30.248 28.413 L 30.248 28.413 Q 30.248 28.566 30.082 28.732 L 30.082 28.732 L 30.082 28.732 Q 29.916 28.897 29.687 28.897 L 29.687 28.897 L 24.872 28.897 L 24.872 28.897 Q 24.057 28.897 23.726 28.031 L 23.726 28.031 Q 20.444 17.551 19.981 15.981 Q 19.516 17.591 16.236 28.031 L 16.236 28.031 Q 15.904 28.897 15.089 28.897 L 15.089 28.897 L 15.089 28.897 Z " fill-rule="evenodd" fill="rgb(77,132,195)"/></svg>
+          </a>
+        </figure>
+        <ul class="menu-list has-text-centered">
+          <li><a href="/" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#play"></use></svg><div class="detail">Playing</div></a></li>
+          <li><a href="/playlists" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#list"></use></svg><div class="detail">Playlists</div></a></li>
+          <li><a href="/artists" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#mic"></use></svg><div class="detail">Artists</div></a></li>
+          <li><a href="/albums" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#disc"></use></svg><div class="detail">Albums</div></a></li>
+          <li><a href="/genres" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#music"></use></svg><div class="detail">Genres</div></a></li>
+          <li><a href="/settings" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#settings"></use></svg><div class="detail">Settings</div></a></li>
+        </ul>
+      </aside>
+      <div id="control-bar" class="is-active">
+        <div class="progress-topper" style="transition: all 1000ms linear" data-bind="style: { width: (playing.elapsed() / playing.duration() * 100) + '%' }"></div>
+        <div class="row is-marginless">
+          <div class="col-xs col-md">
+            <div class="row now-playing">
+              <div class="col-xs is-narrow">
+                <figure class="image is-70x70">
+                  <img data-bind="attr: { src: playing.art }">
+                </figure>
+              </div>
+              <div class="col-xs">
+                <p class="is-5" data-bind="text: playing.title"></p>
+                <p class="subtitle is-5" data-bind="text: playing.artist"></p>
+              </div>
+            </div>
           </div>
-          <table class="table">
-            <thead>
-              <tr><th>Directories</th><th></th></tr>
-            </thead>
-            <tbody data-bind="foreach: { data: settings.locations.list, as: 'item' }">
-              <tr><td><p class="is-6" data-bind="text: item"></p></td><td class="is-narrow pointer" data-bind="click: $root.settings.locations.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td></tr>
-            </tbody>
-          </table>
-          <button class="button is-rounded is-primary" onclick="document.getElementById('dir-modal').classList.add('is-active')">Add directory</button>
-          <div id="dir-modal" class="modal is-small modal-fx-3dSignDown">
-            <div class="modal-content">
-              <div class="box">
-                <h1>Add directory</h1>
-                  <div>
-                    <input class="input" type="text" readonly value="/home/phill" data-bind="value: settings.directories.location" />
-                    <p></p>
-                  </div>
-                  <table data-bind="foreach: settings.directories.list">
-                    <tr class="pointer" data-bind="click: $root.settings.directories.load"><td class="is-narrow"><svg class="feather"><use href="/img/feather-sprite.svg#folder"></use></svg>&nbsp</td><td data-bind="text: name"></td></tr>
-                  </table>
-                  <p></p>
-                  <button class="button is-rounded" onclick="this.closest('.modal').classList.remove('is-active')">Cancel</button>
-                <button class="button is-primary is-rounded" onclick="this.closest('.modal').classList.remove('is-active')" data-bind="click: settings.locations.add">Add directory</button>
+          <div class="col-xs no-grow col-md playing-controls misc-controls">
+            <svg class="random feather hidden--to-desktop"><use href="/img/feather-sprite.svg#shuffle"></use></svg>
+            <svg class="feather prev" data-bind="click: playPrev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
+            <span class="play-button pointer" data-bind="click: togglePlay">
+              <svg class="feather" data-bind="css: { 'is-hidden': playing.state() == true }"><use href="/img/feather-sprite.svg#play"></use></svg>
+              <svg class="feather" data-bind="css: { 'is-hidden': playing.state() != true }"><use href="/img/feather-sprite.svg#pause"></use></svg>
+            </span>
+            <svg class="feather next" data-bind="click: playNext"><use href="/img/feather-sprite.svg#skip-forward"></use></svg>
+            <svg class="repeat feather hidden--to-desktop"><use href="/img/feather-sprite.svg#repeat"></use></svg>
+          </div>
+          <div class="col-md has-text-right hidden--to-desktop">
+            <div class="row end-md">
+              <div class="col-md no-grow play-progress">
+                <span data-bind="text: Math.floor(playing.elapsed() / 60) + ':' + ('0' + (playing.elapsed() % 60)).slice(-2, 3)"></span>/<span data-bind="text: Math.floor(playing.duration() / 60) + ':' + ('0' + (playing.duration() % 60)).slice(-2, 3)"></span>
+              </div>
+              <div class="col-md no-grow">
+                <svg id="queue-toggle" class="queue feather hidden--to-desktop"><use href="/img/feather-sprite.svg#queue-alt"></use></svg>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <aside class="menu" data-bind="css: { 'is-active': menuState() == true }">
-      <figure class="image menu-brand">
-        <a data-navigo href="/">
-          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="isolation:isolate" viewBox="0 0 39.961 39.961" width="40px" height="40px"><circle vector-effect="non-scaling-stroke" cx="19.9805" cy="19.9805" r="15.5" fill="rgb(255,255,255)"/><path d=" M 0 19.981 C 0 8.953 8.953 0 19.981 0 C 31.008 0 39.961 8.953 39.961 19.981 C 39.961 31.008 31.008 39.961 19.981 39.961 C 8.953 39.961 0 31.008 0 19.981 Z  M 15.089 28.897 L 15.089 28.897 L 10.274 28.897 L 10.274 28.897 Q 10.045 28.897 9.879 28.732 L 9.879 28.732 L 9.879 28.732 Q 9.714 28.566 9.714 28.413 L 9.714 28.413 L 9.714 28.413 Q 9.714 28.26 9.739 28.184 L 9.739 28.184 L 15.293 11.905 L 15.293 11.905 Q 15.522 11.064 16.439 11.064 L 16.439 11.064 L 23.522 11.064 L 23.522 11.064 Q 24.439 11.064 24.668 11.905 L 24.668 11.905 L 30.222 28.184 L 30.222 28.184 Q 30.248 28.26 30.248 28.413 L 30.248 28.413 L 30.248 28.413 Q 30.248 28.566 30.082 28.732 L 30.082 28.732 L 30.082 28.732 Q 29.916 28.897 29.687 28.897 L 29.687 28.897 L 24.872 28.897 L 24.872 28.897 Q 24.057 28.897 23.726 28.031 L 23.726 28.031 Q 20.444 17.551 19.981 15.981 Q 19.516 17.591 16.236 28.031 L 16.236 28.031 Q 15.904 28.897 15.089 28.897 L 15.089 28.897 L 15.089 28.897 Z " fill-rule="evenodd" fill="rgb(77,132,195)"/></svg>
-        </a>
-      </figure>
-      <ul class="menu-list has-text-centered">
-        <li><a href="/" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#play"></use></svg><div class="detail">Playing</div></a></li>
-        <li><a href="/playlists" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#list"></use></svg><div class="detail">Playlists</div></a></li>
-        <li><a href="/artists" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#mic"></use></svg><div class="detail">Artists</div></a></li>
-        <li><a href="/albums" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#disc"></use></svg><div class="detail">Albums</div></a></li>
-        <li><a href="/genres" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#music"></use></svg><div class="detail">Genres</div></a></li>
-        <li><a href="/settings" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#settings"></use></svg><div class="detail">Settings</div></a></li>
-      </ul>
-    </aside>
-    <div id="control-bar" class="is-active">
-      <div class="progress-topper" style="transition: all 1000ms linear" data-bind="style: { width: (playing.elapsed() / playing.duration() * 100) + '%' }"></div>
-      <div class="row is-marginless">
-        <div class="col-xs col-md">
-          <div class="row now-playing">
-            <div class="col-xs is-narrow">
-              <figure class="image is-70x70">
-                <img data-bind="attr: { src: playing.art }">
-              </figure>
-            </div>
-            <div class="col-xs">
-              <p class="is-5" data-bind="text: playing.title"></p>
-              <p class="subtitle is-5" data-bind="text: playing.artist"></p>
-            </div>
+      <div id="queue-list">
+        <div id="queue-header">
+          <h1>Play Queue</h1>
+        </div>
+        <div id="queue-items">
+          <table data-bind="foreach: queue">
+            <tr data-bind="css: { 'is-playing': playing() == true }">
+              <td><figure class="image is-40x40"><img data-bind="attr: { src: art }" loading="lazy"></figure></td>
+              <td><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + (Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3))"></p></td>
+              <td><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div id="modal-container"></div>
+      <div id="burger" class="hidden--for-desktop" data-bind="click: showMenu">
+        <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
+      </div>
+      <div id="search-input-container" class="hidden--to-desktop">
+        <input id="search-input" type="text" placeholder="" value=""/>
+      </div>
+      <div id="disconnect-message">
+        <div class="has-text-centered">
+          <div class="animation-container">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
-        </div>
-        <div class="col-xs no-grow col-md playing-controls misc-controls">
-          <svg class="random feather hidden--to-desktop"><use href="/img/feather-sprite.svg#shuffle"></use></svg>
-          <svg class="feather prev" data-bind="click: $root.playPrev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
-          <span class="play-button pointer" data-bind="click: $root.togglePlay">
-            <svg class="feather" data-bind="css: { 'is-hidden': playing.state() == true }"><use href="/img/feather-sprite.svg#play"></use></svg>
-            <svg class="feather" data-bind="css: { 'is-hidden': playing.state() != true }"><use href="/img/feather-sprite.svg#pause"></use></svg>
-          </span>
-          <svg class="feather next" data-bind="click: $root.playNext"><use href="/img/feather-sprite.svg#skip-forward"></use></svg>
-          <svg class="repeat feather hidden--to-desktop"><use href="/img/feather-sprite.svg#repeat"></use></svg>
-        </div>
-        <div class="col-md has-text-right hidden--to-desktop">
-          <div class="row end-md">
-            <div class="col-md no-grow play-progress">
-              <span data-bind="text: Math.floor(playing.elapsed() / 60) + ':' + ('0' + (playing.elapsed() % 60)).slice(-2, 3)"></span>/<span data-bind="text: Math.floor(playing.duration() / 60) + ':' + ('0' + (playing.duration() % 60)).slice(-2, 3)"></span>
-            </div>
-            <div class="col-md no-grow">
-              <svg id="queue-toggle" class="queue feather hidden--to-desktop"><use href="/img/feather-sprite.svg#queue-alt"></use></svg>
-            </div>
-          </div>
+          <p class="is-1">Connection to player lost</p>
+          <p class="is-3">Reconnecting</p>
         </div>
       </div>
-    </div>
-    <div id="queue-list">
-      <div id="queue-header">
-        <h1>Play Queue</h1>
-      </div>
-      <div id="queue-items">
-        <table data-bind="foreach: queue">
-          <tr data-bind="css: { 'is-playing': playing() == true }">
-            <td><figure class="image is-40x40"><img data-bind="attr: { src: art }" loading="lazy"></figure></td>
-            <td><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + (Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3))"></p></td>
-            <td><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
-          </tr>
-        </table>
-      </div>
-    </div>
-    <div id="modal-container"></div>
-    <div id="burger" class="hidden--for-desktop" data-bind="click: showMenu">
-      <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
-    </div>
-    <div id="search-input-container" class="hidden--to-desktop">
-      <input id="search-input" type="text" placeholder="" value=""/>
-    </div>
-    <div id="disconnect-message">
-      <div class="has-text-centered">
-        <div class="animation-container">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <p class="is-1">Connection to player lost</p>
-        <p class="is-3">Reconnecting</p>
-      </div>
-    </div>
+      <audio preload="auto" autoplay id="audio-player" data-bind="event: { ended: player.complete, timeupdate: player.update, play: player.play, pause: player.pause }"></audio>
+    </template>
 
-    <template id="t-tiles">
-      <div class="container-fluid">
-        <h1 class="is-capitalized" data-bind="text: title"></h1>
-        <div class="row" data-bind="foreach: tiles">
-          <div class="col-lg-2 col-xs-4 art has-text-centered item-tile">
-            <tile params="title: title, art: art, url: url, subtitle: subtitle, surl: surl"></tile>
+    <template id="t-login">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <h1>Log in</h1>
+            <fieldset style="margin: 5px 0">
+              <input data-bind="value: username" class="input" type="text" placeholder="Username" />
+            </fieldset>
+            <fieldset style="margin: 5px 0">
+              <input data-bind="value: password" class="input" type="password" placeholder="Password" autofocus />
+            </fieldset>
+            <button class="button is-rounded is-primary" data-bind="click: login">Log In</button>
           </div>
         </div>
       </div>
     </template>
 
-    <template id="t-tile" data-bind="">
-        <a data-bind="attr: { href: url }, template: { afterRender: $root.updateLinks }" data-navigo>
-            <figure class="image is-1by1"><img data-bind="attr: { src: art }" loading="lazy"></figure>
-            <p class="is-5 is-capitalized" data-bind="text: title"></p>
-        </a>
-        <span data-bind="if: surl">
-          <a data-bind="attr: { href: surl }, template: { afterRender: $root.updateLinks }" data-navigo>
-            <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
-          </a>
-        </span>
-        <span data-bind="ifnot: surl">
-          <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
-        </span>
+    <template id="t-welcome">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <h1>Welcome!</h1>
+            <p>It looks like you're new around here. First of all, you need to set the password for the admin account, then you can add your music and start listening!</p>
+            <fieldset style="margin: 5px 0; max-width: 300px;">
+              <input style="background-color: #404040; border-color: #404040" data-bind="value: username" class="input" type="text" readonly />
+            </fieldset>
+            <fieldset style="margin: 5px 0; max-width: 300px;">
+              <input data-bind="value: password" class="input" type="password" placeholder="Password" autofocus />
+            </fieldset>
+            <fieldset style="margin: 5px 0; max-width: 300px;">
+              <input data-bind="value: vpassword" class="input" type="password" placeholder="Verify password" />
+            </fieldset>
+            <fieldset style="margin: 5px 0; max-width: 300px;">
+              <button class="button is-rounded is-primary" data-bind="click: setPassword">Set Password</button>
+            </fieldset>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template id="t-home">
+    </template>
+
+    <template id="t-tiles">
+      <div class="container-fluid">
+        <h1 class="is-capitalized" data-bind="text: pageTitle"></h1>
+        <div class="row" data-bind="foreach: tiles">
+          <div class="col-lg-2 col-xs-4 art has-text-centered item-tile">
+            <a data-bind="attr: { href: url }, template: { afterRender: $parent.updateLinks }" data-navigo> <!--  -->
+              <figure class="image is-1by1"><img data-bind="attr: { src: art }" loading="lazy"></figure>
+              <p class="is-5 is-capitalized" data-bind="text: title"></p>
+            </a>
+            <span data-bind="if: surl">
+              <a data-bind="attr: { href: surl }" data-navigo>
+                <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
+              </a>
+            </span>
+            <span data-bind="ifnot: surl">
+              <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
+            </span>
+          </div>
+        </div>
+      </div>
     </template>
 
     <template id="t-album">
@@ -190,21 +190,21 @@
                 </div>
                 <div class="col-md-8 col-md-offset-2 col-xs-8">
                   <h1 class="album-title" data-bind="text: title"></h1>
-                  <p class="subtitle is-1" data-bind="template: { afterRender: $root.updateLinks }"><a data-navigo data-bind="attr: { href: '/artist/' + encodeURIComponent(artist()) }, text: artist"></a></p>
+                  <p class="subtitle is-1"><a data-navigo data-bind="attr: { href: '/artist/' + encodeURIComponent(artist()) }, text: artist"></a></p>
                   <p class="is-4 detail" data-bind="text: year"></p>
-                  <p class="is-4" data-bind="template: { afterRender: $root.updateLinks }"><a data-navigo="" data-bind="attr: { href: '/genre/' + encodeURIComponent(genre()) }, text: genre"></a></p>
+                  <p class="is-4"><a data-navigo="" data-bind="attr: { href: '/genre/' + encodeURIComponent(genre()) }, text: genre"></a></p>
                   <p class="is-6 tag is-rounded detail" data-bind="text: shortformat"></p>
                 </div>
               </div>
             </div>
-            <div class="col-xs-12 col-md-7">
+            <div class="col-xs-12 col-md-7" data-bind="template: { afterRender: $parent.updateLinks }">
               <div class="col-xs-12 col-md-11">
                 <div class="row album-detail">
                   <h1 class="hidden--to-tablet">Album Tracks</h1>
                   <table class="table songs">
                     <tbody data-bind="foreach: tracks">
                         <tr data-bind="attr: { 'data-id': _id }">
-                          <td class="pointer" data-bind="click: $root.playAlbumSong"><p class="is-5" data-bind="text: track() + '. ' + title()"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3)"></p></td>
+                          <td class="pointer" data-bind="click: $parents[1].playAlbumSong"><p class="is-5" data-bind="text: track() + '. ' + title()"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3)"></p></td>
                           <td class="hidden--to-tablet"><span class="tag" data-bind="text: shortformat"></span></td>
                           <td class="is-narrow">
                             <div class="dropdown is-right">
@@ -227,7 +227,43 @@
         </div>
     </template>
 
-    <audio preload="auto" autoplay id="audio-player" data-bind="event: { ended: $root.player.complete, timeupdate: $root.player.update, play: $root.player.play, pause: $root.player.pause }"></audio>
-    <script src="main.js"></script>
+    <template id="t-settings">
+      <div class="container-fluid">
+        <h1>Settings</h1>
+        <p class="is-1">Music Library</p>
+        <div class="box row has-text-centered">
+          <div class="col-xs-4"><h1>3976</h1><p class="subtitle is-3">Songs</p></div>
+          <div class="col-xs-4"><h1>227</h1><p class="subtitle is-3">Artists</p></div>
+          <div class="col-xs-4"><h1>333</h1><p class="subtitle is-3">Albums</p></div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>Directories</th><th></th></tr>
+          </thead>
+          <tbody data-bind="foreach: { data: settings.locations.list, as: 'item' }">
+            <tr><td><p class="is-6" data-bind="text: item"></p></td><td class="is-narrow pointer" data-bind="click: $parent.settings.locations.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td></tr>
+          </tbody>
+        </table>
+        <button class="button is-rounded is-primary" onclick="document.getElementById('dir-modal').classList.add('is-active')">Add directory</button>
+        <div id="dir-modal" class="modal is-small modal-fx-3dSignDown">
+          <div class="modal-content">
+            <div class="box">
+              <h1>Add directory</h1>
+                <div>
+                  <input class="input" type="text" readonly value="" data-bind="value: settings.directories.location" />
+                  <p></p>
+                </div>
+                <table data-bind="foreach: settings.directories.list">
+                  <tr class="pointer" data-bind="click: $parent.settings.directories.load"><td class="is-narrow"><svg class="feather"><use href="/img/feather-sprite.svg#folder"></use></svg>&nbsp</td><td data-bind="text: name"></td></tr>
+                </table>
+                <p></p>
+                <button class="button is-rounded" onclick="this.closest('.modal').classList.remove('is-active')">Cancel</button>
+              <button class="button is-primary is-rounded" onclick="this.closest('.modal').classList.remove('is-active')" data-bind="click: settings.locations.add">Add directory</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
   </body>
+  <script src="main.js"></script>
 </html>

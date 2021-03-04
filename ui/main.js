@@ -1,44 +1,86 @@
 const ko = window.ko
 
+/*
 // tiles view model
 function vmTiles (params) {
   this.tiles = params.tiles
   this.title = params.title
+  this.updateLinks = params.updateLinks
 }
 ko.components.register('tiles', {
   viewModel: vmTiles,
   template: { element: 't-tiles' }
 })
 
-// each tile model
-function vmTile (params) {
-  this.title = params.title
-  this.art = params.art
-  this.url = params.url
-  this.subtitle = params.subtitle
-  this.surl = params.surl
-}
-ko.components.register('tile', {
-  viewModel: vmTile,
-  template: { element: 't-tile' }
-})
-
 // album view model
 const vmAlbum = function (params) {
   this.album = params.album()
   this.tracks = this.album.tracks()
+  this.updateLinks = params.updateLinks
 }
 ko.components.register('album', {
   viewModel: vmAlbum,
   template: { element: 't-album' }
 })
+*/
 
-// app page model
-function AppViewModel () {
+// login view model
+const vmLogin = function (params) {
+  this.username = window.ko.observable('')
+  this.password = window.ko.observable('')
+  this.login = () => {
+    const body = JSON.stringify({ username: this.username(), password: this.password() })
+    window.fetch('/api/login', { method: 'post', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
+      .then(response => response.json())
+      .then(data => {
+        if (data.state) {
+          params.mainContainer('app')
+        } else {
+          // show a message that login failed
+          console.log('try again...')
+        }
+      })
+  }
+}
+ko.components.register('login', {
+  viewModel: vmLogin,
+  template: { element: 't-login' }
+})
+
+// welcome view model
+const vmWelcome = function (params) {
+  this.username = 'admin'
+  this.password = ko.observable('')
+  this.vpassword = ko.observable('')
+  this.setPassword = function () {
+    if (this.username !== '' && this.password() !== '' && this.password() === this.vpassword()) {
+      const body = JSON.stringify({ username: this.username, password: this.password() })
+      window.fetch('/api/welcome', { method: 'post', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
+        .then(response => response.json())
+        .then((data) => {
+          if (data.state) {
+            params.mainContainer('login')
+          } else {
+            // no reason we should actually get here, only if someone's trying to hack us...
+            console.log('failed... nice try')
+          }
+        })
+    } else {
+      console.log('bad entry')
+    }
+  }
+}
+ko.components.register('welcome', {
+  viewModel: vmWelcome,
+  template: { element: 't-welcome' }
+})
+
+const vmApp = function (params) {
   const self = this
-
   // quick link to the audio player
   self.audio = document.getElementById('audio-player')
+
+  self.pageContainer = ko.observable('t-home')
 
   // set the page title
   self.pageTitle = ko.observable('FALK')
@@ -90,6 +132,7 @@ function AppViewModel () {
 
   // clear queue and play album, from specific song
   self.playAlbumSong = song => {
+    console.log(song)
     self.queue(self.album().tracks())
 
     self.queue().forEach((s, i) => {
@@ -257,6 +300,7 @@ function AppViewModel () {
     .on('/', () => {
       self.tiles([])
       self.pageTitle('Home')
+      self.pageContainer('t-home')
     }, {
       before: (done) => {
         document.body.classList.add('no-controls')
@@ -270,6 +314,7 @@ function AppViewModel () {
     .on('/playlists', () => {
       self.pageTitle('Playlists')
       self.tiles([])
+      self.pageContainer('t-tiles')
     })
     .on('/artists', () => {
       window.fetch('/api/artists')
@@ -284,6 +329,7 @@ function AppViewModel () {
             })
             self.tiles(data)
             self.pageTitle('Artists')
+            self.pageContainer('t-tiles')
           } else {
             // nothing in the library!
           }
@@ -303,6 +349,7 @@ function AppViewModel () {
             })
             self.tiles(data)
             self.pageTitle(artist)
+            self.pageContainer('t-tiles')
           } else {
             // nothing in the library!
           }
@@ -326,6 +373,7 @@ function AppViewModel () {
           }
           self.album(ko.mapping.fromJS(data))
           self.pageTitle(album + ' - ' + artist)
+          self.pageContainer('t-album')
           self.tiles([])
         })
     }, {
@@ -347,6 +395,7 @@ function AppViewModel () {
             })
             self.tiles(data)
             self.pageTitle('Albums')
+            self.pageContainer('t-tiles')
           } else {
             // nothing in the library!
           }
@@ -368,6 +417,7 @@ function AppViewModel () {
             })
             self.tiles(arr)
             self.pageTitle('Genres')
+            self.pageContainer('t-tiles')
           } else {
             // nothing in the library!
           }
@@ -376,6 +426,7 @@ function AppViewModel () {
     .on('/settings', () => {
       self.pageTitle('Settings')
       self.tiles([])
+      self.pageContainer('t-settings')
       // load the directory browser
       self.settings.directories.load('')
       // get the current directories
@@ -386,6 +437,29 @@ function AppViewModel () {
         })
     })
     .resolve()
+}
+ko.components.register('app', {
+  viewModel: vmApp,
+  template: { element: 't-app' }
+})
+
+// app page model
+function AppViewModel () {
+  const self = this
+
+  self.mainContainer = ko.observable('')
+
+  window.fetch('/api/check')
+    .then(response => {
+      if (response.status === 200) {
+        self.mainContainer('app')
+      } else if (response.status === 403) {
+        self.mainContainer('login')
+      } else {
+        self.mainContainer('welcome')
+      }
+    })
+    .catch(() => { /* do nothing */ })
 }
 
 ko.applyBindings(new AppViewModel())

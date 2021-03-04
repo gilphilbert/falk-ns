@@ -4,13 +4,84 @@ const app = express()
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
-// for sreaming music
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
+
+// for serving files
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 
+// for authentication
+const jwt = require('jsonwebtoken')
+
 const database = require('./database')
 const scanner = require('./scanner')
+
+app.post('/api/login', (req, res) => {
+  const user = req.body.username || null
+  const pass = req.body.password || null
+  if (user === null || pass === null) {
+    res.status(400).json({ state: 'failed', error: 'invalid' })
+  }
+  // do some stuff like username/password verification, get the uuid back from the database
+  database.users.getUUID(user, pass)
+    .then(data => {
+      const privateKey = fs.readFileSync('jwtRS256.key')
+      const token = jwt.sign({ uuid: data.uuid }, privateKey, { algorithm: 'RS256' })
+      res.cookie('jwt', token, { httpOnly: true })
+      res.send({ state: true, error: 'none' })
+    })
+    .catch(() => {
+      res.status(400).json({ state: false, error: 'invalid' })
+    })
+})
+
+app.post('/api/welcome', (req, res) => {
+  const user = req.body.username || null
+  const pass = req.body.password || null
+  if (user !== null && pass !== null) {
+    database.users.welcome(user, pass)
+      .then(data => {
+        if (data.status === true) {
+          res.json({ state: true })
+        } else {
+          res.json({ state: false })
+        }
+      })
+  }
+})
+
+// serve the static files (the UI) - needs to come before authentication
+const serveStatic = require('serve-static')
+app.use(serveStatic('ui', { index: ['index.html'] }))
+
+app.use(function (req, res, next) {
+  const token = req.cookies.jwt
+
+  database.users.check()
+    .then(data => {
+      if (data > 0) {
+        const publicKey = fs.readFileSync('jwtRS256.key.pub', 'utf8')
+        jwt.verify(token, publicKey, (err, user) => {
+          if (err) {
+            console.log(err)
+            res.status(403).json({ error: 'unauthorized' })
+          } else {
+            res.locals.uuid = user.uuid
+            next()
+          }
+        })
+      } else {
+        res.status(400).send({ welcome: true })
+      }
+    })
+})
+
+app.get('/api/logout', function (req, res) {
+  res.cookie('jwt', null, { 'max-age': 0, httpOnly: true })
+  res.json({ message: 'logged out' })
+})
 
 app.get('/api/songs', function (req, res) {
   database.getMusic.allSongs()
@@ -162,10 +233,6 @@ app.get('/api/scan', function (req, res) {
     })
 })
 
-const serveStatic = require('serve-static')
-app.use(serveStatic('ui', { index: ['index.html'] }))
-
-// serve the static files (the UI)
 app.get('*', (req, res) => {
   res.sendFile('ui/index.html', { root: __dirname })
 })
