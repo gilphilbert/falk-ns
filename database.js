@@ -1,7 +1,7 @@
 const Datastore = require('nedb')
 const musicDB = new Datastore({ filename: 'data/music.db', autoload: true })
 const appDB = new Datastore({ filename: 'data/app.db', autoload: true })
-const userDB = new Datastore() // ({ filename: 'data/users.db', autoload: true })
+const userDB = new Datastore({ filename: 'data/users.db', autoload: true })
 // const playlistDB = new Datastore({ filename: 'data/playlists.db', autoload: true })
 
 const crypto = require('crypto')

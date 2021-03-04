@@ -1,29 +1,5 @@
 const ko = window.ko
 
-/*
-// tiles view model
-function vmTiles (params) {
-  this.tiles = params.tiles
-  this.title = params.title
-  this.updateLinks = params.updateLinks
-}
-ko.components.register('tiles', {
-  viewModel: vmTiles,
-  template: { element: 't-tiles' }
-})
-
-// album view model
-const vmAlbum = function (params) {
-  this.album = params.album()
-  this.tracks = this.album.tracks()
-  this.updateLinks = params.updateLinks
-}
-ko.components.register('album', {
-  viewModel: vmAlbum,
-  template: { element: 't-album' }
-})
-*/
-
 // login view model
 const vmLogin = function (params) {
   this.username = window.ko.observable('')
@@ -40,7 +16,7 @@ const vmLogin = function (params) {
           console.log('try again...')
         }
       })
-  }
+  } 
 }
 ko.components.register('login', {
   viewModel: vmLogin,
@@ -132,7 +108,6 @@ const vmApp = function (params) {
 
   // clear queue and play album, from specific song
   self.playAlbumSong = song => {
-    console.log(song)
     self.queue(self.album().tracks())
 
     self.queue().forEach((s, i) => {
@@ -447,7 +422,7 @@ ko.components.register('app', {
 function AppViewModel () {
   const self = this
 
-  self.mainContainer = ko.observable('')
+  self.mainContainer = ko.observable('login')
 
   window.fetch('/api/check')
     .then(response => {
