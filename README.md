@@ -34,7 +34,6 @@ Lots!
     * User-based database entries (use a "users" array per entry with the userIDs in an array)
 * Artist art (will need to come from an online source, musicbrainz?)
 * Queue
-    * Remove song from queue
     * Clear queue
     * Add song to queue (enqeue)
     * Play song next (enqueue)
@@ -57,3 +56,14 @@ Lots!
 * Home page
 * Artist page (header image, etc)
 * Package as docker container
+* Restore queue after refresh (warning, this will also be browser/tab close/open)
+    * Need a localstorage value for "restore playing state"
+    * Save:
+        * get list, convert playing to a variable (instead of an observable), stringify and store
+        * store playing state and seek position (will need to be updated in progress function)
+    * Restore:
+        * get the json string and parse it
+        * convert the "playing" field to an observable -> get the queue position from the song with "playing" set to true
+        * repopulate queue
+        * set the player seek position
+        * if "restore playing state" then start playing if it's true

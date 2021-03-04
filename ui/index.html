@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="/css/falk.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
-    <script src="/js/knockout.mapping.js"></script>
     <script src="//unpkg.com/navigo"></script>
 
   </head>
@@ -86,7 +85,7 @@
           <table data-bind="foreach: queue.list">
             <tr data-bind="css: { 'is-playing': playing() == true }">
               <td data-bind="click: $parent.queue.changePos"><figure class="image is-40x40"><img data-bind="attr: { src: art }" loading="lazy"></figure></td>
-              <td data-bind="click: $parent.queue.changePos"><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + (Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3))"></p></td>
+              <td data-bind="click: $parent.queue.changePos"><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: albumartist + ' - ' + (Math.floor(duration / 60) + ':' + ('0' + (duration % 60)).slice(-2, 3))"></p></td>
               <td data-bind="click: $parent.queue.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
             </tr>
           </table>
@@ -193,9 +192,9 @@
                 </div>
                 <div class="col-md-8 col-md-offset-2 col-xs-8">
                   <h1 class="album-title" data-bind="text: title"></h1>
-                  <p class="subtitle is-1"><a data-navigo data-bind="attr: { href: '/artist/' + encodeURIComponent(artist()) }, text: artist"></a></p>
+                  <p class="subtitle is-1"><a data-navigo data-bind="attr: { href: '/artist/' + encodeURIComponent(artist) }, text: artist"></a></p>
                   <p class="is-4 detail" data-bind="text: year"></p>
-                  <p class="is-4"><a data-navigo="" data-bind="attr: { href: '/genre/' + encodeURIComponent(genre()) }, text: genre"></a></p>
+                  <p class="is-4"><a data-navigo="" data-bind="attr: { href: '/genre/' + encodeURIComponent(genre) }, text: genre"></a></p>
                   <p class="is-6 tag is-rounded detail" data-bind="text: shortformat"></p>
                 </div>
               </div>
@@ -207,7 +206,7 @@
                   <table class="table songs">
                     <tbody data-bind="foreach: tracks">
                         <tr data-bind="attr: { 'data-id': _id }">
-                          <td class="pointer" data-bind="click: $parents[1].playAlbumSong"><p class="is-5" data-bind="text: track() + '. ' + title()"></p><p class="subtitle is-5" data-bind="text: albumartist() + ' - ' + Math.floor(duration() / 60) + ':' + ('0' + (duration() % 60)).slice(-2, 3)"></p></td>
+                          <td class="pointer" data-bind="click: $parents[1].playAlbumSong"><p class="is-5" data-bind="text: track + '. ' + title"></p><p class="subtitle is-5" data-bind="text: albumartist + ' - ' + Math.floor(duration / 60) + ':' + ('0' + (duration % 60)).slice(-2, 3)"></p></td>
                           <td class="hidden--to-tablet"><span class="tag" data-bind="text: shortformat"></span></td>
                           <td class="is-narrow">
                             <div class="dropdown is-right">

@@ -97,7 +97,7 @@ const vmApp = function (params) {
     changePos: (song) => {
       // console.log(song.id)
       self.queue.list().forEach((s, i) => {
-        if (s._id() === song._id()) {
+        if (s._id === song._id) {
           self.queue.pos(i)
         //  s.playing(true)
         }// else {
@@ -108,7 +108,7 @@ const vmApp = function (params) {
     remove: (song) => {
       self.queue.list().forEach((s, i) => {
         // find the song in the queue
-        if (s._id() === song._id()) {
+        if (s._id === song._id) {
           // remove the item from the queue
           self.queue.list.splice(i, 1)
           if (i < self.queue.pos()) {
@@ -159,14 +159,15 @@ const vmApp = function (params) {
 
   // clear queue and play album, from specific song
   self.playAlbumSong = song => {
-    self.queue.list(self.album().tracks())
+    self.queue.list(self.album().tracks)
 
     self.queue.list().forEach((s, i) => {
-      if (s._id() === song._id()) {
+      if (s._id === song._id) {
         self.queue.pos(i)
         s.playing(true)
       }
     })
+
     self.play()
   }
 
@@ -174,28 +175,28 @@ const vmApp = function (params) {
   self.play = () => {
     const song = self.queue.list()[self.queue.pos()]
 
-    const id = song._id()
-    const ext = song.location().substr(song.location().lastIndexOf('.'))
+    const id = song._id
+    const ext = song.location.substr(song.location.lastIndexOf('.'))
     const url = `/api/stream/${id}${ext}`
     self.audio.src = url
 
-    self.playing.title(song.title())
-    self.playing.artist(song.albumartist())
-    self.playing.duration(song.duration())
-    self.playing.art(song.art())
+    self.playing.title(song.title)
+    self.playing.artist(song.albumartist)
+    self.playing.duration(song.duration)
+    self.playing.art(song.art)
 
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new window.MediaMetadata({
-        title: self.playing.title(),
-        artist: self.playing.artist(),
-        album: self.playing.album(),
+        title: self.playing.title,
+        artist: self.playing.artist,
+        album: self.playing.album,
         artwork: [
           { src: 'https://dummyimage.com/96x96', sizes: '96x96', type: 'image/png' }
         ]
       })
     }
 
-    document.title = song.title() + ' - ' + song.albumartist() + ' | FALK'
+    document.title = song.title + ' - ' + song.albumartist + ' | FALK'
   }
   self.playPrev = () => {
     if (self.queue.pos() > 0) {
@@ -401,14 +402,14 @@ const vmApp = function (params) {
           data.tracks.forEach(e => {
             // e.title = e.track + '. ' + e.title
             e.shortformat = (e.format.samplerate / 1000) + 'kHz ' + ((e.format.bits) ? e.format.bits + 'bit' : '')
-            e.playing = false
+            e.playing = ko.observable(false)
           })
           if (data.tracks.length > 0) {
             data.year = data.tracks[0].year
             data.genre = data.tracks[0].genre
             data.shortformat = ((data.tracks.every((i) => i.shortformat === data.tracks[0].shortformat)) ? data.tracks[0].shortformat : 'Mixed')
           }
-          self.album(ko.mapping.fromJS(data))
+          self.album(data)
           self.pageTitle(album + ' - ' + artist)
           self.pageContainer('t-album')
           self.tiles([])
