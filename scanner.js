@@ -6,6 +6,7 @@ const crypto = require('crypto')
 
 const database = require('./database')
 
+let rescan = false
 async function walkFunc (err, pathname, dirent) {
   if (err) {
     console.warn('fs stat error for %s: %s', pathname, err.message)
@@ -66,9 +67,10 @@ async function walkFunc (err, pathname, dirent) {
     }
   }
 
-  database.addMusic.song(song)
-
-  return Promise.resolve()
+  database.addMusic.song(song, rescan)
+    .then(() => {
+      return Promise.resolve()
+    })
 }
 
 function getHome () {
@@ -96,7 +98,8 @@ async function getDirs (dir) {
   return promise
 }
 
-function scan () {
+function scan (doRescan) {
+  rescan = doRescan || false
   const promise = new Promise(function (resolve, reject) {
     database.settings.getDirs()
       .then(data => {

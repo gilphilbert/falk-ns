@@ -21,6 +21,21 @@ userDB.ensureIndex({ fieldName: 'username', unique: true }, function (err) {
 })
 
 const get = {
+  stats: () => {
+    const promise = new Promise(function (resolve, reject) {
+      const ret = { songs: 0, albums: 0, artists: 0 }
+      musicDB.find({}, (err, data) => {
+        if (err || data.length === 0) {
+          reject(err)
+        }
+        ret.songs = data.length
+        ret.artists = [...new Set(data.map(song => song.albumartist))].length
+        ret.albums = [...new Set(data.map(song => song.album))].length
+        resolve(ret)
+      })
+    })
+    return promise
+  },
   allSongs: () => {
     const promise = new Promise(function (resolve, reject) {
       musicDB.find({}, (err, data) => {
@@ -83,10 +98,9 @@ const get = {
   albums: () => {
     const promise = new Promise(function (resolve, reject) {
       musicDB.find({ }, { albumartist: 1, album: 1, _id: 0 }, (err, data) => {
-        let albums = []
         if (!err && data.length > 0) {
-          albums = data.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
-          resolve(albums)
+          const albums = data.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
+          resolve(albums.sort((a, b) => { return a.title - b.title }))
         }
         reject(err)
       })
@@ -98,8 +112,19 @@ const get = {
       musicDB.find({ }, { genre: 1 }, (err, data) => {
         let genres = []
         if (!err && data.length > 0) {
-          genres = [...new Set(data.map(song => song.genre[0]))]
-          resolve(genres)
+          genres = [...new Set(data.map(song => song.genre))]
+          resolve(genres.sort((a, b) => { return a - b }))
+        }
+        reject(err)
+      })
+    })
+  },
+  genre: (genre) => {
+    return new Promise(function (resolve, reject) {
+      musicDB.find({ genre: genre }, (err, data) => {
+        if (!err && data.length > 0) {
+          const albums = data.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
+          resolve(albums.sort((a, b) => { return a.title - b.title }))
         }
         reject(err)
       })
@@ -108,10 +133,22 @@ const get = {
 }
 
 const add = {
-  song: (meta) => {
-    musicDB.insert(meta, (err, doc) => {
-      if (err) {
-        console.log('Can\'t add file: probably exists')
+  song: (meta, overwrite) => {
+    return new Promise(function (resolve, reject) {
+      if (overwrite) {
+        musicDB.update({ location: meta.location }, meta, { upsert: true }, (err, doc) => {
+          if (err) {
+            console.log('Can\'t add file: something went wrong...')
+          }
+          resolve()
+        })
+      } else {
+        musicDB.insert(meta, (err, doc) => {
+          if (err) {
+            console.log('Can\'t add file: probably exists')
+          }
+          resolve()
+        })
       }
     })
   }

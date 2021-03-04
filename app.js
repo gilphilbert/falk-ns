@@ -83,6 +83,15 @@ app.get('/api/logout', function (req, res) {
   res.json({ message: 'logged out' })
 })
 
+app.get('/api/stats', function (req, res) {
+  database.getMusic.stats()
+    .then(data => {
+      res.send(data)
+    }).catch(e => {
+      res.send({})
+    })
+})
+
 app.get('/api/songs', function (req, res) {
   database.getMusic.allSongs()
     .then(data => {
@@ -144,6 +153,16 @@ app.get('/api/albums', function (req, res) {
 app.get('/api/genres', function (req, res) {
   database.getMusic.genres()
     .then(data => {
+      res.send(data)
+    }).catch(e => {
+      res.send({})
+    })
+})
+
+app.get('/api/genre/:genre', function (req, res) {
+  database.getMusic.genre(req.params.genre)
+    .then(data => {
+      data.forEach(e => { e.art = `/art/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}.jpg` })
       res.send(data)
     }).catch(e => {
       res.send({})
@@ -225,12 +244,21 @@ app.get('/art/:artist', function (req, res) {
   res.sendFile(path.resolve(__dirname, 'placeholder.png'))
 })
 
-app.get('/api/scan', function (req, res) {
-  scanner.scan()
+app.get('/api/update', function (req, res) {
+  scanner.scan(false)
     .then(() => {
-      console.log('scan complete')
-      res.send({ state: 'complete' })
+      console.log('update complete')
     })
+  // this needs to be non-blocking...
+  res.send({ state: 'scanning' })
+})
+app.get('/api/rescan', function (req, res) {
+  scanner.scan(true)
+    .then(() => {
+      console.log('rescan complete')
+    })
+  // this needs to be non-blocking...
+  res.send({ state: 'scanning' })
 })
 
 app.get('*', (req, res) => {

@@ -162,22 +162,25 @@
       <div class="container-fluid">
         <h1 class="is-capitalized" data-bind="text: pageTitle"></h1>
         <div class="row" data-bind="foreach: tiles">
-          <div class="col-lg-2 col-xs-4 art has-text-centered item-tile">
-            <a data-bind="attr: { href: url }, template: { afterRender: $parent.updateLinks }" data-navigo> <!--  -->
-              <figure class="image is-1by1"><img data-bind="attr: { src: art }" loading="lazy"></figure>
-              <p class="is-5 is-capitalized" data-bind="text: title"></p>
-            </a>
-            <span data-bind="if: surl">
-              <a data-bind="attr: { href: surl }" data-navigo>
-                <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
-              </a>
-            </span>
-            <span data-bind="ifnot: surl">
-              <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
-            </span>
-          </div>
+          <div class="col-lg-2 col-xs-4 art has-text-centered item-tile" data-bind="template: { name: ((surl !== '') ? 't-tile-subtitle-link' : 't-tile-subtitle' ) }"></div>
         </div>
       </div>
+    </template>
+    <template id="t-tile-subtitle-link">
+      <a data-bind="attr: { href: url }, template: { afterRender: $parent.updateLinks }" data-navigo> <!--  -->
+        <figure class="image is-1by1"><img data-bind="attr: { src: art }" loading="lazy"></figure>
+        <p class="is-5 is-capitalized" data-bind="text: title"></p>
+      </a>
+      <a data-bind="attr: { href: surl }" data-navigo>
+        <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
+      </a>
+    </template>
+    <template id="t-tile-subtitle">
+      <a data-bind="attr: { href: url }, template: { afterRender: $parent.updateLinks }" data-navigo> <!--  -->
+        <figure class="image is-1by1"><img data-bind="attr: { src: art }" loading="lazy"></figure>
+        <p class="is-5 is-capitalized" data-bind="text: title"></p>
+      </a>
+      <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
     </template>
 
     <template id="t-album">
@@ -232,9 +235,9 @@
         <h1>Settings</h1>
         <p class="is-1">Music Library</p>
         <div class="box row has-text-centered">
-          <div class="col-xs-4"><h1>3976</h1><p class="subtitle is-3">Songs</p></div>
-          <div class="col-xs-4"><h1>227</h1><p class="subtitle is-3">Artists</p></div>
-          <div class="col-xs-4"><h1>333</h1><p class="subtitle is-3">Albums</p></div>
+          <div class="col-xs-4"><h1 data-bind="text: stats.songs"></h1><p class="subtitle is-3">Songs</p></div>
+          <div class="col-xs-4"><h1 data-bind="text: stats.artists"></h1><p class="subtitle is-3">Artists</p></div>
+          <div class="col-xs-4"><h1 data-bind="text: stats.albums"></h1><p class="subtitle is-3">Albums</p></div>
         </div>
         <table class="table">
           <thead>
@@ -244,8 +247,13 @@
             <tr><td><p class="is-6" data-bind="text: item"></p></td><td class="is-narrow pointer" data-bind="click: $parent.settings.locations.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td></tr>
           </tbody>
         </table>
-        <button class="button is-rounded is-primary" onclick="document.getElementById('dir-modal').classList.add('is-active')">Add directory</button>
-        <div id="dir-modal" class="modal is-small modal-fx-3dSignDown">
+        <div style="display: flex; align-items: center;">
+          <button class="button no-v is-rounded is-primary" onclick="document.getElementById('dir-modal').classList.add('is-active')">Add directory</button>
+          <button class="button no-v is-primary is-rounded" data-bind="click: settings.database.update">Scan Directories</button>
+          <label class="switch"><input type="checkbox" data-bind="checked: settings.database.rescan"><span class="slider round"></span></label><span style="margin-left: 5px">Rescan existing files for changes  </span>
+        </div>
+
+        <div id="dir-modal" class="modal is-small modal-fx-fadeInScale">
           <div class="modal-content">
             <div class="box">
               <h1>Add directory</h1>
@@ -253,9 +261,11 @@
                   <input class="input" type="text" readonly value="" data-bind="value: settings.directories.location" />
                   <p></p>
                 </div>
-                <table data-bind="foreach: settings.directories.list">
-                  <tr class="pointer" data-bind="click: $parent.settings.directories.load"><td class="is-narrow"><svg class="feather"><use href="/img/feather-sprite.svg#folder"></use></svg>&nbsp</td><td data-bind="text: name"></td></tr>
-                </table>
+                <div style="padding: 2px 0; max-height: 70vh; overflow-y: auto">
+                  <table data-bind="foreach: settings.directories.list">
+                    <tr class="pointer" data-bind="click: $parent.settings.directories.load"><td class="is-narrow"><svg class="feather"><use href="/img/feather-sprite.svg#folder"></use></svg>&nbsp</td><td data-bind="text: name"></td></tr>
+                  </table>
+                </div>
                 <p></p>
                 <button class="button is-rounded" onclick="this.closest('.modal').classList.remove('is-active')">Cancel</button>
               <button class="button is-primary is-rounded" onclick="this.closest('.modal').classList.remove('is-active')" data-bind="click: settings.locations.add">Add directory</button>

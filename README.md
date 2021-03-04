@@ -16,7 +16,7 @@ openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
 npm start
 ```
 ### Setup
-Head to http://localhost:3000 and click on "Settings" on the left. Where it says "directories" click on "Add directory" and find the directory you want to add, then click add.
+Create the admin password then login. Once you're in, head to http://localhost:3000 and click on "Settings" on the left. Where it says "directories" click on "Add directory" and find the directory you want to add, then click add.
 
 ### Scanning the database
 It's a bit manual at the moment, new button coming soon:
@@ -25,7 +25,8 @@ https://localhost:3000/api/scan
 ### TODO
 Lots!
 * User authentication
-    * Admin account at setup
+    * Admin account at setup (done) [REQUIRES WARNINGS]
+    * Login (done) [REQUIRES WARNINGS]
     * User database
         * Add user
         * Edit user
@@ -56,5 +57,6 @@ Lots!
 * Settings page
     * rescan
     * update
-    * correct stats
 * Home page
+* Artist page (header image, etc)
+* Package as docker container

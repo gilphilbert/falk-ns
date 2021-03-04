@@ -56,6 +56,24 @@ const vmApp = function (params) {
   // quick link to the audio player
   self.audio = document.getElementById('audio-player')
 
+  self.stats = {
+    songs: ko.observable(0),
+    albums: ko.observable(0),
+    artists: ko.observable(0),
+    update: function () {
+      window.fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+          self.stats.songs(data.songs)
+          self.stats.albums(data.albums)
+          self.stats.artists(data.artists)
+        }).catch(err => {
+          console.log(err)
+        })
+    }
+  }
+  self.stats.update()
+
   self.pageContainer = ko.observable('t-home')
 
   // set the page title
@@ -257,6 +275,17 @@ const vmApp = function (params) {
             self.settings.directories.list(data.directories)
           })
       }
+    },
+    database: {
+      rescan: ko.observable(false),
+      update: function () {
+        const url = '/api/' + ((self.settings.database.rescan()) ? 'rescan' : 'update')
+        console.log(url)
+        window.fetch(url)
+          .catch(err => {
+            console.log(err)
+          })
+      }
     }
   }
 
@@ -392,6 +421,26 @@ const vmApp = function (params) {
             })
             self.tiles(arr)
             self.pageTitle('Genres')
+            self.pageContainer('t-tiles')
+          } else {
+            // nothing in the library!
+          }
+        })
+    })
+    .on('/genre/:genre', (params) => {
+      const genre = params.data.genre
+      window.fetch('/api/genre/' + genre)
+        .then(response => response.json())
+        .then(data => {
+          if (data.length > 0) {
+            data.forEach(e => {
+              e.title = e.album,
+              e.url = `/album/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}`,
+              e.subtitle = e.albumartist,
+              e.surl = `/artist/${encodeURIComponent(e.albumartist)}`
+            })
+            self.tiles(data)
+            self.pageTitle(genre)
             self.pageContainer('t-tiles')
           } else {
             // nothing in the library!
