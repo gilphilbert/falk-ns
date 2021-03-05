@@ -26,13 +26,12 @@ async function walkFunc (err, pathname, dirent) {
 
   try {
     const meta = await mm.parseFile(path.dirname(pathname) + '/' + dirent.name)
-    console.log(meta)
 
     const song = {
       location: path.dirname(pathname) + '/' + dirent.name,
       title: meta.common.title,
       album: meta.common.album,
-      albumartist: meta.common.artist,
+      albumartist: (('albumartist' in meta.common) ? meta.common.albumartist : meta.common.artist),
       artists: meta.common.artists,
       duration: Math.round(meta.format.duration),
       genre: (('genre' in meta.common) ? meta.common.genre[0] : ''),
