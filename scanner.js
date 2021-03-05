@@ -34,7 +34,7 @@ async function walkFunc (err, pathname, dirent) {
     albumartist: meta.common.artist,
     artists: meta.common.artists,
     duration: Math.round(meta.format.duration),
-    genre: meta.common.genre[0] || '',
+    genre: (('genre' in meta.common) ? meta.common.genre[0] : ''),
     year: meta.common.year,
     track: meta.common.track.no,
     disc: meta.common.disk.no || 1,
