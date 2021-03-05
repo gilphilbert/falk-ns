@@ -25,53 +25,58 @@ async function walkFunc (err, pathname, dirent) {
     return Promise.resolve()
   }
 
-  const meta = await mm.parseFile(path.dirname(pathname) + '/' + dirent.name)
+  try {
+    const meta = await mm.parseFile(path.dirname(pathname) + '/' + dirent.name)
 
-  const song = {
-    location: path.dirname(pathname) + '/' + dirent.name,
-    title: meta.common.title,
-    album: meta.common.album,
-    albumartist: meta.common.artist,
-    artists: meta.common.artists,
-    duration: Math.round(meta.format.duration),
-    genre: (('genre' in meta.common) ? meta.common.genre[0] : ''),
-    year: meta.common.year,
-    track: meta.common.track.no,
-    disc: meta.common.disk.no || 1,
-    format: {
-      lossless: meta.format.lossless,
-      samplerate: meta.format.sampleRate,
-      channels: meta.format.numberOfChannels,
-      bits: meta.format.bitsPerSample,
-      codec: meta.format.codec
-    },
-    playcount: 1,
-    dateadded: Date.now(),
-    favorite: false
-  }
-
-  if (meta.common.picture !== undefined) {
-    const pic = meta.common.picture[0]
-    let ext = 'png'
-    if (pic.format === 'image/jpeg') {
-      ext = 'jpg'
+    const song = {
+      location: path.dirname(pathname) + '/' + dirent.name,
+      title: meta.common.title,
+      album: meta.common.album,
+      albumartist: meta.common.artist,
+      artists: meta.common.artists,
+      duration: Math.round(meta.format.duration),
+      genre: (('genre' in meta.common) ? meta.common.genre[0] : ''),
+      year: meta.common.year,
+      track: meta.common.track.no,
+      disc: meta.common.disk.no || 1,
+      format: {
+        lossless: meta.format.lossless,
+        samplerate: meta.format.sampleRate,
+        channels: meta.format.numberOfChannels,
+        bits: meta.format.bitsPerSample,
+        codec: meta.format.codec
+      },
+      playcount: 1,
+      dateadded: Date.now(),
+      favorite: false
     }
-    const _f = song.album.toLowerCase() + song.albumartist.toLowerCase()
-    const fn = 'art/' + crypto.createHash('sha1').update(_f).digest('hex') + '.' + ext
-    if (!fs.existsSync(fn)) {
-      fs.writeFile(fn, pic.data, (err) => {
-        if (err) return console.error(err)
-        console.log('art saved to ', fn)
+
+    if (meta.common.picture !== undefined) {
+      const pic = meta.common.picture[0]
+      let ext = 'png'
+      if (pic.format === 'image/jpeg') {
+        ext = 'jpg'
+      }
+      const _f = song.album.toLowerCase() + song.albumartist.toLowerCase()
+      const fn = 'art/' + crypto.createHash('sha1').update(_f).digest('hex') + '.' + ext
+      if (!fs.existsSync(fn)) {
+        fs.writeFile(fn, pic.data, (err) => {
+          if (err) return console.error(err)
+          console.log('art saved to ', fn)
+        })
+      } else {
+        console.log('skipping art: exists')
+      }
+    }
+
+    database.addMusic.song(song, rescan, uuid)
+      .then(() => {
+        return Promise.resolve()
       })
-    } else {
-      console.log('skipping art: exists')
-    }
+  } catch (e) {
+    console.log('Metadata lookup failed for: ' + path.dirname(pathname) + '/' + dirent.name)
+    console.log(e)
   }
-
-  database.addMusic.song(song, rescan, uuid)
-    .then(() => {
-      return Promise.resolve()
-    })
 }
 
 function getHome () {
