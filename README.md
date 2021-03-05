@@ -19,14 +19,10 @@ npm start
 Create the admin password then login. Once you're in, head to http://localhost:3000 and click on "Settings" on the left. Where it says "directories" click on "Add directory" and find the directory you want to add, then click add. Finally, click on "Update database".
 
 ### TODO
-Lots!
-* User authentication
-    * Admin account at setup (done) [REQUIRES WARNINGS]
-    * Login (done) [REQUIRES WARNINGS]
-    * User database
-        * Add user
-        * Edit user
-        * Remove user
+* Users
+    * Add user
+    * Edit user
+    * Remove user
 * Artist art (will need to come from an online source, musicbrainz?)
 * Queue
     * Clear queue

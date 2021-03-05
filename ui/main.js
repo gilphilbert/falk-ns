@@ -27,6 +27,12 @@ const vmLogin = function (params) {
         console.log(err)
       })
   }
+  this.enterCheck = (o, e) => {
+    const kc = e.keyCode
+    if (kc === 13) {
+      this.login()
+    }
+  }
 }
 ko.components.register('login', {
   viewModel: vmLogin,
@@ -211,12 +217,19 @@ const vmApp = function (params) {
     self.playing.art(song.art)
 
     if ('mediaSession' in navigator) {
+      const fullart = window.location.origin + song.art
+      console.log(fullart)
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: self.playing.title,
         artist: self.playing.artist,
         album: self.playing.album,
         artwork: [
-          { src: 'https://dummyimage.com/96x96', sizes: '96x96', type: 'image/png' }
+          { src: fullart, sizes: '1000x1000', type: 'image/jpg' }
+          // { src: 'https://dummyimage.com/128x128', sizes: '128x128', type: 'image/png' },
+          // { src: 'https://dummyimage.com/192x192', sizes: '192x192', type: 'image/png' },
+          // { src: 'https://dummyimage.com/256x256', sizes: '256x256', type: 'image/png' },
+          // { src: 'https://dummyimage.com/384x384', sizes: '384x384', type: 'image/png' },
+          // { src: 'https://dummyimage.com/512x512', sizes: '512x512', type: 'image/png' },
         ]
       })
     }

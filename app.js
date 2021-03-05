@@ -1,9 +1,12 @@
+// express framework
 const express = require('express')
 const app = express()
 
+// parse JSON body
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
+// parse cookies
 const cookieParser = require('cookie-parser')
 app.use(cookieParser())
 
@@ -15,8 +18,16 @@ const crypto = require('crypto')
 // for authentication
 const jwt = require('jsonwebtoken')
 
+// other modules (self explanatory)
 const database = require('./database')
 const scanner = require('./scanner')
+const keygen = require('./keygen')
+
+// port we're listening on
+const port = 3000
+
+// let's check we have keys
+keygen.start()
 
 app.post('/api/login', (req, res) => {
   const user = req.body.username || null
@@ -257,4 +268,6 @@ app.get('*', (req, res) => {
   res.sendFile('ui/index.html', { root: __dirname })
 })
 
-app.listen(3000)
+app.listen(port, () => {
+  console.log(`[START] Listening on ${port}`)
+})

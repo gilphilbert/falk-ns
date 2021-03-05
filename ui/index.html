@@ -124,11 +124,11 @@
             <p class="subtitle is-4">Please login to access your music!</p>
             <br/>
             <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">
-              <input data-bind="value: username" class="input" type="text" placeholder="Username" autofocus="true" />
+              <input data-bind="value: username, event: { 'keyup': enterCheck }" class="input" type="text" placeholder="Username" autofocus="true" />
             </fieldset>
             <br/>
             <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">
-              <input data-bind="value: password" class="input" type="password" placeholder="Password" />
+              <input data-bind="value: password, event: { 'keyup': enterCheck }" class="input" type="password" placeholder="Password" />
             </fieldset>
             <span class="message-danger" data-bind="text: loginError, css: { 'is-hidden': loginError() === '' }"></span>
             <br/>
