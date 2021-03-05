@@ -31,7 +31,6 @@ Lots!
         * Add user
         * Edit user
         * Remove user
-    * User-based database entries (use a "users" array per entry with the userIDs in an array)
 * Artist art (will need to come from an online source, musicbrainz?)
 * Queue
     * Clear queue
@@ -56,6 +55,8 @@ Lots!
 * Home page
 * Artist page (header image, etc)
 * Package as docker container
+* Scanner
+    * Remove missing files
 * Restore queue after refresh (warning, this will also be browser/tab close/open)
     * Need a localstorage value for "restore playing state"
     * Save:
