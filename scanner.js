@@ -6,7 +6,6 @@ const crypto = require('crypto')
 
 const database = require('./database')
 
-let rescan = false
 let uuid = ''
 async function walkFunc (err, pathname, dirent) {
   if (err) {
@@ -27,6 +26,7 @@ async function walkFunc (err, pathname, dirent) {
 
   try {
     const meta = await mm.parseFile(path.dirname(pathname) + '/' + dirent.name)
+    console.log(meta)
 
     const song = {
       location: path.dirname(pathname) + '/' + dirent.name,
@@ -69,7 +69,7 @@ async function walkFunc (err, pathname, dirent) {
       }
     }
 
-    database.addMusic.song(song, rescan, uuid)
+    database.addMusic.song(song, uuid)
       .then(() => {
         return Promise.resolve()
       })
@@ -104,11 +104,10 @@ async function getDirs (dir) {
   return promise
 }
 
-function scan (doRescan, newuuid) {
-  rescan = doRescan || false
+function scan (newuuid) {
   uuid = newuuid
   const promise = new Promise(function (resolve, reject) {
-    database.settings.getDirs(uuid)
+    database.settings.locations(uuid)
       .then(data => {
         data.forEach(dir => {
           Walk.walk(dir, walkFunc)

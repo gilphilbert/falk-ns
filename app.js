@@ -70,22 +70,19 @@ app.use(serveStatic('ui', { index: ['index.html'] }))
 app.use(function (req, res, next) {
   const token = req.cookies.jwt
 
-  database.users.check()
-    .then(data => {
-      if (data > 0) {
-        const publicKey = fs.readFileSync('jwtRS256.key.pub', 'utf8')
-        jwt.verify(token, publicKey, (err, user) => {
-          if (err) {
-            res.status(403).json({ error: 'unauthorized' })
-          } else {
-            res.locals.uuid = user.uuid
-            next()
-          }
-        })
+  if (database.users.check() > 0) {
+    const publicKey = fs.readFileSync('jwtRS256.key.pub', 'utf8')
+    jwt.verify(token, publicKey, (err, user) => {
+      if (err) {
+        res.status(403).json({ error: 'unauthorized' })
       } else {
-        res.status(400).send({ welcome: true })
+        res.locals.uuid = user.uuid
+        next()
       }
     })
+  } else {
+    res.status(400).send({ welcome: true })
+  }
 })
 
 app.get('/api/logout', function (req, res) {
@@ -245,9 +242,10 @@ app.get('/art/:artist', function (req, res) {
   res.sendFile(path.resolve(__dirname, 'placeholder.png'))
 })
 
+// both currently do the same thing... rescan needs to check for dead files
 app.get('/api/update', function (req, res) {
   const uuid = res.locals.uuid
-  scanner.scan(false, uuid)
+  scanner.scan(uuid)
     .then(() => {
       console.log('update complete')
     })
@@ -256,7 +254,7 @@ app.get('/api/update', function (req, res) {
 })
 app.get('/api/rescan', function (req, res) {
   const uuid = res.locals.uuid
-  scanner.scan(true, uuid)
+  scanner.scan(uuid)
     .then(() => {
       console.log('rescan complete')
     })
