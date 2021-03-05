@@ -238,7 +238,7 @@ app.get('/art/:artist/:album', function (req, res) {
   if (fs.existsSync(fn)) {
     res.sendFile(fn)
   } else {
-    res.send(path.resolve(__dirname, 'placeholder.png'))
+    res.sendFile(path.resolve(__dirname, 'placeholder.png'))
   }
 })
 app.get('/art/:artist', function (req, res) {

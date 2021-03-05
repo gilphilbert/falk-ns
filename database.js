@@ -52,7 +52,7 @@ const get = {
       musicDB.find({ uuids: uuid }, { 'meta.albumartist': 1 }, (err, data) => {
         let artists = []
         if (!err && data.length > 0) {
-          artists = [...new Set(data.map(song => song.meta.albumartist))]
+          artists = [...new Set(data.map(song => song.meta.albumartist))].sort((a, b) => { return a - b })
           resolve(artists)
         }
         reject(err)
