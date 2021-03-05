@@ -1,5 +1,11 @@
 const ko = window.ko
 
+// use this so we don't get flashes as the proper page loads...
+ko.components.register('blank', {
+  viewModel: () => {},
+  template: '<div></div>'
+})
+
 // login view model
 const vmLogin = function (params) {
   this.username = window.ko.observable('')
@@ -16,7 +22,7 @@ const vmLogin = function (params) {
           console.log('try again...')
         }
       })
-  } 
+  }
 }
 ko.components.register('login', {
   viewModel: vmLogin,
@@ -493,6 +499,14 @@ const vmApp = function (params) {
         .then(data => {
           self.settings.locations.list(data)
         })
+      // update the stats (in case the library has changd)
+      window.fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+          self.stats.songs = data.songs
+          self.stats.albums = data.albums
+          self.stats.artists = data.artists
+        })
     })
     .resolve()
 }
@@ -505,7 +519,7 @@ ko.components.register('app', {
 function AppViewModel () {
   const self = this
 
-  self.mainContainer = ko.observable('login')
+  self.mainContainer = ko.observable('blank')
 
   window.fetch('/api/check')
     .then(response => {
