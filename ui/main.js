@@ -8,19 +8,23 @@ ko.components.register('blank', {
 
 // login view model
 const vmLogin = function (params) {
-  this.username = window.ko.observable('')
-  this.password = window.ko.observable('')
+  this.username = ko.observable('')
+  this.password = ko.observable('')
+  this.loginError = ko.observable('')
   this.login = () => {
     const body = JSON.stringify({ username: this.username(), password: this.password() })
     window.fetch('/api/login', { method: 'post', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
       .then(response => response.json())
       .then(data => {
-        if (data.state) {
-          params.mainContainer('app')
-        } else {
+        if (data.state === 'failed') {
           // show a message that login failed
-          console.log('try again...')
+          this.loginError('Invalid username and/or password')
+        } else {
+          params.mainContainer('app')
         }
+      })
+      .catch(err => {
+        console.log(err)
       })
   }
 }
@@ -34,22 +38,37 @@ const vmWelcome = function (params) {
   this.username = 'admin'
   this.password = ko.observable('')
   this.vpassword = ko.observable('')
+  this.passwordMessage = ko.observable('')
+  this.vpasswordMessage = ko.observable('')
   this.setPassword = function () {
-    if (this.username !== '' && this.password() !== '' && this.password() === this.vpassword()) {
-      const body = JSON.stringify({ username: this.username, password: this.password() })
-      window.fetch('/api/welcome', { method: 'post', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
-        .then(response => response.json())
-        .then((data) => {
-          if (data.state) {
-            params.mainContainer('login')
-          } else {
-            // no reason we should actually get here, only if someone's trying to hack us...
-            console.log('failed... nice try')
-          }
-        })
-    } else {
-      console.log('bad entry')
+    let err = false
+    let pwm = ''
+    let vpm = ''
+    if (this.password().length < 8) {
+      pwm = 'Passwords must be at least 8 characters long'
+      err = true
     }
+    if (this.password() !== this.vpassword()) {
+      vpm = 'Passwords do not match'
+      err = true
+    }
+    if (err) {
+      this.passwordMessage(pwm)
+      this.vpasswordMessage(vpm)
+      return
+    }
+    this.vpasswordMessage('')
+    const body = JSON.stringify({ username: this.username, password: this.password() })
+    window.fetch('/api/welcome', { method: 'post', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
+      .then(response => response.json())
+      .then((data) => {
+        if (data.state) {
+          params.mainContainer('login')
+        } else {
+          // no reason we should actually get here, only if someone's trying to hack us...
+          console.log('failed... nice try')
+        }
+      })
   }
 }
 ko.components.register('welcome', {
@@ -506,6 +525,12 @@ const vmApp = function (params) {
           self.stats.songs = data.songs
           self.stats.albums = data.albums
           self.stats.artists = data.artists
+        })
+    })
+    .on('/logout', () => {
+      window.fetch('/api/logout')
+        .then(() => {
+          window.location.href = '/'
         })
     })
     .resolve()

@@ -37,6 +37,7 @@
           <li><a href="/albums" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#disc"></use></svg><div class="detail">Albums</div></a></li>
           <li><a href="/genres" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#music"></use></svg><div class="detail">Genres</div></a></li>
           <li><a href="/settings" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#settings"></use></svg><div class="detail">Settings</div></a></li>
+          <li><a href="/logout" data-navigo><svg class="feather"><use href="/img/feather-sprite.svg#log-out"></use></svg><div class="detail">Log Out</div></a></li>
         </ul>
       </aside>
       <div id="control-bar" class="is-active">
@@ -115,16 +116,22 @@
     </template>
 
     <template id="t-login">
-      <div class="container">
-        <div class="row">
-          <div class="col">
-            <h1>Log in</h1>
-            <fieldset style="margin: 5px 0">
-              <input data-bind="value: username" class="input" type="text" placeholder="Username" />
+      <div class="container" style="height: 100vh">
+        <div class="row" style="height: 100%; align-items: center;">
+          <div class="col-xs-6 col-xs-offset-3 has-text-centered">
+            <img src="/img/falk-blue-white.svg"/>
+            <h1>Soundbyte</h1>
+            <p class="subtitle is-4">Please login to access your music!</p>
+            <br/>
+            <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">
+              <input data-bind="value: username" class="input" type="text" placeholder="Username" autofocus="true" />
             </fieldset>
-            <fieldset style="margin: 5px 0">
-              <input data-bind="value: password" class="input" type="password" placeholder="Password" autofocus />
+            <br/>
+            <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">
+              <input data-bind="value: password" class="input" type="password" placeholder="Password" />
             </fieldset>
+            <span class="message-danger" data-bind="text: loginError, css: { 'is-hidden': loginError() === '' }"></span>
+            <br/>
             <button class="button is-rounded is-primary" data-bind="click: login">Log In</button>
           </div>
         </div>
@@ -132,21 +139,25 @@
     </template>
 
     <template id="t-welcome">
-      <div class="container">
-        <div class="row">
-          <div class="col">
+      <div class="container" style="height: 100vh">
+        <div class="row" style="height: 100%; align-items: center;">
+          <div class="col-xs-6 col-xs-offset-3 has-text-centered">
+            <img src="/img/falk-blue-white.svg"/>
             <h1>Welcome!</h1>
-            <p>It looks like you're new around here. First of all, you need to set the password for the admin account, then you can add your music and start listening!</p>
-            <fieldset style="margin: 5px 0; max-width: 300px;">
+            <p class="subtitle is-3">It looks like you're new around here</p><p class="is-6 has-text-centered">Before you can log in you'll need to set the admin account password<br><br></p>
+            <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">
               <input style="background-color: #404040; border-color: #404040" data-bind="value: username" class="input" type="text" readonly />
+              <p class="small"></p>
             </fieldset>
-            <fieldset style="margin: 5px 0; max-width: 300px;">
-              <input data-bind="value: password" class="input" type="password" placeholder="Password" autofocus />
+            <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">
+              <input data-bind="value: password" class="input" type="password" placeholder="Password" autofocus="true" />
+              <p class="has-text-danger" data-bind="text: passwordMessage"></p>
             </fieldset>
-            <fieldset style="margin: 5px 0; max-width: 300px;">
+            <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">
               <input data-bind="value: vpassword" class="input" type="password" placeholder="Verify password" />
+              <p class="has-text-danger" data-bind="text: vpasswordMessage"></p>
             </fieldset>
-            <fieldset style="margin: 5px 0; max-width: 300px;">
+            <fieldset style="margin: 5px 0">
               <button class="button is-rounded is-primary" data-bind="click: setPassword">Set Password</button>
             </fieldset>
           </div>
