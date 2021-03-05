@@ -64,7 +64,7 @@ const get = {
   },
   albums: (uuid) => {
     return new Promise(function (resolve, reject) {
-      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).map(e => { return { album: e.meta.album, artist: e.meta.albumartist } }).simplesort('album').data()
+      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).map(e => { return { album: e.meta.album, albumartist: e.meta.albumartist } }).simplesort('album').data()
       const albums = songs.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
       albums.forEach(e => { delete (e.meta); delete (e.$loki) })
       resolve(albums)

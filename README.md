@@ -11,6 +11,18 @@ ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
 openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
 ```
 
+Alternatively, build a docker container:
+```bash
+git clone https://github.com/gilphilbert/falk-ns.git
+cd falk-ns
+docker build -t falkns
+docker run -D -p3000:3000 -v /path/to/your/music:/music -v /path/for/config/data:/app/data falkns:latest
+```
+The container will not support SSL, it runs purely over HTTP on port 3000. If you're opening this up to the world, I suggest the use of a proxy. I use this one: https://hub.docker.com/r/jwilder/nginx-proxy. It's stateless, just open port 443 from your router to your host and open 443 on the proxy. On the falk-ns container, add:
+* VIRTUAL_PROTO = http
+* VIRTUAL_PORT = 80
+* VIRTUAL_HOST = your.personal.url
+
 ### Running
 ```bash
 npm start
@@ -19,6 +31,10 @@ npm start
 Create the admin password then login. Once you're in, head to http://localhost:3000 and click on "Settings" on the left. Where it says "directories" click on "Add directory" and find the directory you want to add, then click add. Finally, click on "Update database".
 
 ### TODO
+* Event service
+* Notification when library is updating
+* Search
+* Better progress bar
 * Users
     * Add user
     * Edit user
@@ -46,7 +62,6 @@ Create the admin password then login. Once you're in, head to http://localhost:3
         * Favorites
 * Home page
 * Artist page (header image, etc)
-* Package as docker container
 * Scanner
     * Remove missing files
 * Restore queue after refresh (warning, this will also be browser/tab close/open)

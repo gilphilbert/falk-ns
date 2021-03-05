@@ -169,11 +169,12 @@ const vmApp = function (params) {
   self.playing = {
     state: ko.observable(false),
     title: ko.observable('Not playing'),
-    artist: ko.observable(''),
+    artist: ko.observable('Select some music!'),
     album: ko.observable(''),
     art: ko.observable('/art/placeholder.png'),
     duration: ko.observable(0),
-    elapsed: ko.observable(0)
+    elapsed: ko.observable(0),
+    quality: ko.observable('')
   }
 
   /* playback control */
@@ -215,8 +216,10 @@ const vmApp = function (params) {
 
     self.playing.title(song.title)
     self.playing.artist(song.albumartist)
+    self.playing.album(song.album)
     self.playing.duration(song.duration)
     self.playing.art(song.art)
+    self.playing.quality(song.shortformat)
 
     if ('mediaSession' in navigator) {
       const fullart = window.location.origin + song.art
@@ -351,7 +354,9 @@ const vmApp = function (params) {
       }
     },
     database: {
-      rescan: ko.observable(false),
+      rescan: function () {
+        // do some stuff
+      },
       update: function () {
         const url = '/api/' + ((self.settings.database.rescan()) ? 'rescan' : 'update')
         console.log(url)
@@ -361,6 +366,20 @@ const vmApp = function (params) {
           })
       }
     }
+  }
+
+  self.queueVisible = ko.observable(false)
+  self.showQueue = function (el) {
+    self.queueVisible(true)
+  }
+  self.toggleQueue = function (el) {
+    self.queueVisible(!(self.queueVisible()))
+  }
+  self.menuToggle = function (el) {
+    self.menuState(!(self.menuState()))
+  }
+  self.menuShow = function (el) {
+    self.menuState(true)
   }
 
   // this is called when a new link is added to the page (these are manual!)
@@ -573,6 +592,20 @@ function AppViewModel () {
     })
     .catch(() => { /* do nothing */ })
 }
+
+const events = ['tap', 'doubletap', 'hold', 'rotate', 'drag', 'dragstart', 'dragend', 'dragleft', 'dragright', 'dragup', 'dragdown', 'transform', 'transformstart', 'transformend', 'swipe', 'swipeleft', 'swiperight', 'swipeup', 'swipedown', 'pinch', 'pinchin', 'pinchout']
+ko.utils.arrayForEach(events, function (eventName) {
+  ko.bindingHandlers[eventName] = {
+    init: function (element, valueAccessor) {
+      const hammer = new window.Hammer(element)
+      hammer.get('swipe').set({ direction: window.Hammer.DIRECTION_ALL })
+      const value = valueAccessor()
+      hammer.on(eventName, function (e) {
+        value(e)
+      })
+    }
+  }
+})
 
 ko.applyBindings(new AppViewModel())
 
