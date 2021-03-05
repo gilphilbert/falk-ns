@@ -1,8 +1,10 @@
 const ko = window.ko
 
-// use this so we don't get flashes as the proper page loads...
+// use this so we don't get flashes as the correct page loads...
+const vmBlank = function (params) {
+}
 ko.components.register('blank', {
-  viewModel: () => {},
+  viewModel: vmBlank,
   template: '<div></div>'
 })
 
@@ -220,9 +222,9 @@ const vmApp = function (params) {
       const fullart = window.location.origin + song.art
       console.log(fullart)
       navigator.mediaSession.metadata = new window.MediaMetadata({
-        title: self.playing.title,
-        artist: self.playing.artist,
-        album: self.playing.album,
+        title: self.playing.title(),
+        artist: self.playing.artist(),
+        album: self.playing.album(),
         artwork: [
           { src: fullart, sizes: '1000x1000', type: 'image/jpg' }
           // { src: 'https://dummyimage.com/128x128', sizes: '128x128', type: 'image/png' },

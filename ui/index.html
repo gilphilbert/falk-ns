@@ -171,7 +171,7 @@
     <template id="t-tiles">
       <div class="container-fluid">
         <h1 class="is-capitalized" data-bind="text: pageTitle"></h1>
-        <div class="row" data-bind="foreach: tiles">
+        <div class="row art-container" data-bind="foreach: tiles">
           <div class="col-lg-2 col-xs-4 art has-text-centered item-tile" data-bind="template: { name: ((surl !== '') ? 't-tile-subtitle-link' : 't-tile-subtitle' ) }"></div>
         </div>
       </div>
