@@ -74,7 +74,11 @@ app.use(function (req, res, next) {
     const publicKey = fs.readFileSync('data/jwtRS256.key.pub', 'utf8')
     jwt.verify(token, publicKey, (err, user) => {
       if (err) {
-        res.status(403).json({ error: 'unauthorized' })
+        if (req.url.startsWith('/api')) {
+          res.status(403).json({ error: 'unauthorized' })
+        } else {
+          res.writeHead(301, { Location: '/' })
+        }
       } else {
         res.locals.uuid = user.uuid
         next()
@@ -91,6 +95,7 @@ app.get('/api/logout', function (req, res) {
 })
 
 app.get('/api/stats', function (req, res) {
+  console.log(req)
   database.getMusic.stats(res.locals.uuid)
     .then(data => {
       res.send(data)
