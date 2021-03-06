@@ -3,8 +3,8 @@ const { exec } = require('child_process')
 
 function start () {
   return new Promise(function (resolve, reject) {
-    const privateKey = 'jwtRS256.key'
-    const publicKey = 'jwtRS256.key.pub'
+    const privateKey = 'data/jwtRS256.key'
+    const publicKey = 'data/jwtRS256.key.pub'
     if (!fs.existsSync(privateKey)) {
       console.log('[START] Generating Private Key')
       exec(`ssh-keygen -t rsa -b 4096 -m PEM -f ${privateKey} -N ""`, (error, stdout, stderr) => {

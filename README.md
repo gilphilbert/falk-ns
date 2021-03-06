@@ -32,6 +32,7 @@ Create the admin password then login. Once you're in, head to http://localhost:3
 
 ### TODO
 * Redirect to home instead of 403 for non API requests
+* Move keys to data (for persistence)
 * Event service
 * Notification when library is updating
 * Search

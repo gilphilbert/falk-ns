@@ -38,7 +38,7 @@ app.post('/api/login', (req, res) => {
   // do some stuff like username/password verification, get the uuid back from the database
   database.users.getUUID(user, pass)
     .then(data => {
-      const privateKey = fs.readFileSync('jwtRS256.key')
+      const privateKey = fs.readFileSync('data/jwtRS256.key')
       const token = jwt.sign({ uuid: data.uuid }, privateKey, { algorithm: 'RS256' })
       res.cookie('jwt', token, { httpOnly: true })
       res.send({ state: true, error: 'none' })
@@ -71,7 +71,7 @@ app.use(function (req, res, next) {
   const token = req.cookies.jwt
 
   if (database.users.check() > 0) {
-    const publicKey = fs.readFileSync('jwtRS256.key.pub', 'utf8')
+    const publicKey = fs.readFileSync('data/jwtRS256.key.pub', 'utf8')
     jwt.verify(token, publicKey, (err, user) => {
       if (err) {
         res.status(403).json({ error: 'unauthorized' })
