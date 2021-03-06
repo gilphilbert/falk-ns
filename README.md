@@ -37,10 +37,6 @@ Create the admin password then login. Once you're in, head to http://localhost:3
     * Notification when library is updating
 * Search
 * Better progress bar
-* Users
-    * Add user
-    * Edit user
-    * Remove user
 * Artist art (will need to come from an online source, musicbrainz?)
 * Queue
     * Clear queue
@@ -62,7 +58,6 @@ Create the admin password then login. Once you're in, head to http://localhost:3
         * Most played
         * Most recently added
         * Favorites
-* Home page
 * Artist page (header image, etc)
 * Scanner
     * Remove missing files
