@@ -18,7 +18,7 @@ const vmLogin = function (params) {
     window.fetch('/api/login', { method: 'post', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
       .then(response => response.json())
       .then(data => {
-        if (data.state === 'failed') {
+        if (data.state === 'failed' || data.state === false) {
           // show a message that login failed
           this.loginError('Invalid username and/or password')
         } else {
@@ -559,9 +559,9 @@ const vmApp = function (params) {
       window.fetch('/api/stats')
         .then(response => response.json())
         .then(data => {
-          self.stats.songs = data.songs
-          self.stats.albums = data.albums
-          self.stats.artists = data.artists
+          self.stats.songs(data.songs)
+          self.stats.albums(data.albums)
+          self.stats.artists(data.artists)
         })
     })
     .on('/logout', () => {

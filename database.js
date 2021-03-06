@@ -11,7 +11,11 @@ const db = new loki('data/local.db', {
     musicDB = db.getCollection('music')
     if (musicDB === null) { musicDB = db.addCollection('music', { unique: ['location'], indices: ['albumartist', 'album'] }) }
     usersDB = db.getCollection('users')
-    if (usersDB === null) { usersDB = db.addCollection('users', { unique: ['username'] }) }
+    if (usersDB === null) { usersDB = db.addCollection('users', { unique: ['user'] }) }
+
+    // const ed = { user: 'ed', pass: '0c903a08eb559ede30bccf74a3b340270d9685eca5282029be4b1fd0dc98d986', admin: false, locations: [] }
+    // usersDB.insert(ed)
+    // console.log(musicDB.findOne())
   }
 
 })

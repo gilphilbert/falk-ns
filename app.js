@@ -77,7 +77,7 @@ app.use(function (req, res, next) {
         if (req.url.startsWith('/api')) {
           res.status(403).json({ error: 'unauthorized' })
         } else {
-          res.writeHead(301, { Location: '/' })
+          res.redirect('/')
         }
       } else {
         res.locals.uuid = user.uuid
