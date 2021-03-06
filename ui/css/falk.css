@@ -3079,7 +3079,8 @@ span.message-danger.is-hidden {
   display: none; }
 
 #content-container {
-  touch-action: pan-y !important; }
+  touch-action: pan-y !important;
+  height: 100vh; }
 
 #control-bar {
   position: fixed;

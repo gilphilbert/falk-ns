@@ -381,6 +381,9 @@ const vmApp = function (params) {
   self.menuShow = function (el) {
     self.menuState(true)
   }
+  self.menuHide = function (el) {
+    self.menuState(false)
+  }
 
   // this is called when a new link is added to the page (these are manual!)
   self.updateLinks = function () {
