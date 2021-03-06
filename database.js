@@ -1,10 +1,10 @@
-const loki = require('lokijs')
+const Loki = require('lokijs')
 const crypto = require('crypto')
 
 let musicDB = null
 let usersDB = null
 
-const db = new loki('data/local.db', {
+const db = new Loki('data/local.db', {
   autoload: true,
   autosave: true,
   autoloadCallback: () => {
