@@ -95,7 +95,6 @@ app.get('/api/logout', function (req, res) {
 })
 
 app.get('/api/stats', function (req, res) {
-  console.log(req)
   database.getMusic.stats(res.locals.uuid)
     .then(data => {
       res.send(data)

@@ -49,7 +49,9 @@ const get = {
   artistAlbums: (uuid, artist) => {
     const promise = new Promise(function (resolve, reject) {
       const songs = musicDB.chain().find({ uuids: { $contains: [uuid] }, 'meta.albumartist': artist }).map(e => { return { album: e.meta.album, albumartist: e.meta.albumartist, year: e.meta.year } }).simplesort('album').data()
-      const albums = songs.filter((tag, index, array) => array.findIndex(t => t.meta.album === tag.meta.album) === index)
+      console.log(songs)
+      const albums = songs.filter((tag, index, array) => array.findIndex(t => t.album === tag.album) === index)
+      console.log(albums)
       albums.forEach(e => { delete (e.meta); delete (e.$loki) })
       resolve(albums)
     })
