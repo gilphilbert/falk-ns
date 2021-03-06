@@ -62,7 +62,7 @@ const get = {
   album: (uuid, artist, album) => {
     return new Promise(function (resolve, reject) {
       const data = musicDB.find({ uuids: { $contains: [uuid] }, 'meta.albumartist': artist, 'meta.album': album })
-      const metas = data.map(s => { s.meta._id = s.$loki; return s.meta }).sort((a, b) => { return a.disc - b.disc }).sort((a, b) => { return a.track - b.track })
+      const metas = data.map(s => { s.meta._id = s.$loki; return s.meta }).sort((a, b) => { return a.track - b.track }).sort((a, b) => { return a.disc - b.disc })
       resolve(metas)
     })
   },
