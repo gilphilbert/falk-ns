@@ -31,7 +31,6 @@ npm start
 Create the admin password then login. Once you're in, head to http://localhost:3000 and click on "Settings" on the left. Where it says "directories" click on "Add directory" and find the directory you want to add, then click add. Finally, click on "Update database".
 
 ### TODO
-* Redirect to home instead of 403 for non API requests
 * Event service
     * Notification when library is updating
 * Search
