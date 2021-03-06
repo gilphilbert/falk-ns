@@ -3082,6 +3082,9 @@ span.message-danger.is-hidden {
   touch-action: pan-y !important;
   min-height: 100vh; }
 
+fieldset {
+  margin: 6px 0; }
+
 #control-bar {
   position: fixed;
   height: 100px;

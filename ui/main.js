@@ -297,6 +297,7 @@ const vmApp = function (params) {
   }
 
   self.settings = {
+    isAdmin: ko.observable(false),
     locations: {
       list: ko.observableArray([]),
       add: (e) => {
@@ -364,6 +365,18 @@ const vmApp = function (params) {
           .catch(err => {
             console.log(err)
           })
+      }
+    },
+    users: {
+      list: ko.observableArray([]),
+      remove: function (user) {
+        console.log(user)
+      },
+      add: {
+        name: ko.observable(''),
+        password: ko.observable(''),
+        vpassword: ko.observable(''),
+        admin: ko.observable(false)
       }
     }
   }
@@ -553,7 +566,8 @@ const vmApp = function (params) {
       window.fetch('/api/locations')
         .then(response => response.json())
         .then(data => {
-          self.settings.locations.list(data)
+          self.settings.locations.list(data.locations)
+          self.settings.isAdmin(data.admin)
         })
       // update the stats (in case the library has changd)
       window.fetch('/api/stats')
@@ -563,6 +577,15 @@ const vmApp = function (params) {
           self.stats.albums(data.albums)
           self.stats.artists(data.artists)
         })
+      // get users (if we're an admin)
+      if (self.settings.isAdmin) {
+        window.fetch('/api/users')
+          .then(response => response.json())
+          .then(data => {
+            console.log(data)
+            self.settings.users.list(data)
+          })
+      }
     })
     .on('/logout', () => {
       window.fetch('/api/logout')

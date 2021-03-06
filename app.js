@@ -41,7 +41,7 @@ app.post('/api/login', (req, res) => {
       const privateKey = fs.readFileSync('data/jwtRS256.key')
       const token = jwt.sign({ uuid: data.uuid }, privateKey, { algorithm: 'RS256' })
       res.cookie('jwt', token, { httpOnly: true })
-      res.send({ state: true, error: 'none' })
+      res.send({ state: true, error: 'none', admin: data.admin })
     })
     .catch(() => {
       res.status(400).json({ state: false, error: 'invalid' })
@@ -193,7 +193,8 @@ app.get('/api/stream/:id', function (req, res) {
 app.get('/api/locations', function (req, res) {
   database.settings.locations(res.locals.uuid)
     .then(data => {
-      res.json(data)
+      const admin = database.users.getAdmin(res.locals.uuid)
+      res.json({ admin: admin, locations: data })
     }).catch(e => {
       res.json([])
     })
@@ -244,6 +245,11 @@ app.get('/art/:artist/:album', function (req, res) {
 })
 app.get('/art/:artist', function (req, res) {
   res.sendFile(path.resolve(__dirname, 'placeholder.png'))
+})
+
+app.get('/api/users', function (req, res) {
+  const users = database.users.getAll(res.locals.uuid)
+  res.send(users)
 })
 
 // both currently do the same thing... rescan needs to check for dead files

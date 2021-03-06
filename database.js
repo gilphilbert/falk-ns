@@ -130,7 +130,7 @@ const settings = {
   removeLocation: function (uuid, location) {
     return new Promise(function (resolve, reject) {
       const user = usersDB.findOne({ $loki: uuid })
-      user.locations.pull(location)
+      user.locations = user.locations.filter(function (v, i, arr) { return v !== location })
       usersDB.update(user)
       resolve(user.locations)
     })
@@ -162,12 +162,25 @@ const users = {
       if (user !== null) {
         const hash = crypto.createHash('sha256').update(password).digest('hex')
         if (user.pass === hash) {
-          resolve({ uuid: user.$loki })
+          resolve({ uuid: user.$loki, admin: user.admin })
         }
         reject(new Error('incorrect password'))
       }
       reject(new Error('not found'))
     })
+  },
+  getAdmin: function (uuid) {
+    const user = usersDB.get(uuid)
+    return user.admin
+  },
+  getAll: function (uuid) {
+    const user = usersDB.get(uuid)
+    let users = []
+    if (user.admin === true) {
+      users = usersDB.find()
+      users = users.map(e => { return { user: e.user, uuid: e.$loki, admin: e.admin } })
+    }
+    return users
   }
 }
 
