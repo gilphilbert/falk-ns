@@ -22,7 +22,7 @@
     <div data-bind="component: { name: mainContainer, params: { mainContainer: mainContainer } }"></div>
 
     <template id="t-app">
-      <div id="content-container" style="touch-action: pan-y !important" data-bind="template: pageContainer, swiperight: menuShow"></div>
+      <div id="content-container" data-bind="template: pageContainer, swiperight: menuShow"></div>
 
       <aside class="menu" data-bind="css: { 'is-active': menuState }, swipeleft: menuToggle">
         <figure class="image menu-brand">
