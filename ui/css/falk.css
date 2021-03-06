@@ -3078,6 +3078,9 @@ span.message-danger {
 span.message-danger.is-hidden {
   display: none; }
 
+#content-container {
+  touch-action: pan-y !important; }
+
 #control-bar {
   position: fixed;
   height: 100px;
