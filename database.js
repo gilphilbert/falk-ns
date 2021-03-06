@@ -181,6 +181,35 @@ const users = {
       users = users.map(e => { return { user: e.user, uuid: e.$loki, admin: e.admin } })
     }
     return users
+  },
+  add: function (uuid, newUser) {
+    const user = usersDB.get(uuid)
+    if (user.admin === true) {
+      const account = {
+        user: newUser.user,
+        pass: crypto.createHash('sha256').update(newUser.pass).digest('hex'),
+        admin: newUser.admin,
+        locations: ((newUser.inherit === true) ? user.locations : [])
+      }
+      const acc = usersDB.insert(account)
+      if (newUser.inherit === true) {
+        // here we need to find all files that are associated with uuid and add the new user
+        musicDB.chain().find({ uuids: { $contains: [uuid] } }).update(function (obj) {
+          obj.uuids.push(acc.$loki)
+        })
+      }
+    }
+    return users.getAll(uuid)
+  },
+  remove: function (uuid, userUUID) {
+    const user = usersDB.get(uuid)
+    if (user.admin === true) {
+      const userDel = usersDB.get(userUUID)
+      if (userDel.user !== 'admin') {
+        usersDB.remove(userDel)
+      }
+    }
+    return users.getAll(uuid)
   }
 }
 

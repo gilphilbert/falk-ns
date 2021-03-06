@@ -128,14 +128,10 @@ const vmApp = function (params) {
     pos: ko.observable(0),
     trigger: true,
     changePos: (song) => {
-      // console.log(song.id)
       self.queue.list().forEach((s, i) => {
         if (s._id === song._id) {
           self.queue.pos(i)
-        //  s.playing(true)
-        }// else {
-        //  s.playing(false)
-        // }
+        }
       })
     },
     remove: (song) => {
@@ -223,7 +219,6 @@ const vmApp = function (params) {
 
     if ('mediaSession' in navigator) {
       const fullart = window.location.origin + song.art
-      console.log(fullart)
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: self.playing.title(),
         artist: self.playing.artist(),
@@ -360,7 +355,6 @@ const vmApp = function (params) {
       },
       update: function () {
         const url = '/api/' + ((self.settings.database.rescan()) ? 'rescan' : 'update')
-        console.log(url)
         window.fetch(url)
           .catch(err => {
             console.log(err)
@@ -370,13 +364,53 @@ const vmApp = function (params) {
     users: {
       list: ko.observableArray([]),
       remove: function (user) {
-        console.log(user)
+        const body = JSON.stringify({ uuid: user.uuid })
+        console.log(body)
+        window.fetch('/api/users', { method: 'delete', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
+          .then(response => response.json())
+          .then(data => {
+            // update variables
+            self.settings.users.list(data)
+          })
       },
       add: {
         name: ko.observable(''),
         password: ko.observable(''),
         vpassword: ko.observable(''),
-        admin: ko.observable(false)
+        admin: ko.observable(false),
+        inherit: ko.observable(false),
+        error: ko.observable(''),
+        visible: ko.observable(false),
+        setVisible: function () { self.settings.users.add.visible(true) },
+        unsetVisible: function () {
+          self.settings.users.add.visible(false)
+          self.settings.users.add.name('')
+          self.settings.users.add.password('')
+          self.settings.users.add.vpassword('')
+          self.settings.users.add.inherit(false)
+          self.settings.users.add.admin(false)
+          self.settings.users.add.error('')
+        },
+        process: function () {
+          if (self.settings.users.add.name().length > 0 && self.settings.users.add.password().length > 7 && self.settings.users.add.password() === self.settings.users.add.vpassword()) {
+            const body = JSON.stringify({ user: self.settings.users.add.name(), pass: self.settings.users.add.password(), admin: self.settings.users.add.admin(), inherit: self.settings.users.add.inherit() })
+            window.fetch('/api/users', { method: 'post', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
+              .then(response => response.json())
+              .then(data => {
+                self.settings.users.list(data)
+                // self.settings.users.add.visible(false)
+                self.settings.users.add.unsetVisible()
+              })
+          } else {
+            if (self.settings.users.add.password().length < 8) {
+              self.settings.users.add.error('Password too short')
+            } else if (self.settings.users.add.password() !== self.settings.users.add.vpassword()) {
+              self.settings.users.add.error('Passwords don\'t match')
+            } else {
+              self.settings.users.add.error('You must supply a username')
+            }
+          }
+        }
       }
     }
   }
@@ -582,7 +616,6 @@ const vmApp = function (params) {
         window.fetch('/api/users')
           .then(response => response.json())
           .then(data => {
-            console.log(data)
             self.settings.users.list(data)
           })
       }

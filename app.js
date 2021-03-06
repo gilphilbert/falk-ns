@@ -251,6 +251,15 @@ app.get('/api/users', function (req, res) {
   const users = database.users.getAll(res.locals.uuid)
   res.send(users)
 })
+app.post('/api/users', function (req, res) {
+  const users = database.users.add(res.locals.uuid, req.body)
+  res.json(users)
+})
+app.delete('/api/users', function (req, res) {
+  const delUUID = req.body.uuid
+  const users = database.users.remove(res.locals.uuid, delUUID)
+  res.json(users)
+})
 
 // both currently do the same thing... rescan needs to check for dead files
 app.get('/api/update', function (req, res) {
