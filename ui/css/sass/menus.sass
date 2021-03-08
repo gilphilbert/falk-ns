@@ -1,13 +1,17 @@
 //this contains the left hand menu
 aside.menu
   height: 100%
-  background: $grey-darker
+  background: var(--menu-background)
+  color: var(--menu-text)
   position: fixed
   top: 0
   left: 0
   width: 90px
   z-index: 2
   transition: width 250ms
+
+  .feather
+    stroke: var(--menu-text)
 
   .image.menu-brand
     width: 55px
@@ -16,6 +20,10 @@ aside.menu
     svg
       width: 100%
       height: auto
+      path
+        fill: var(--brand-logo)
+      circle
+        fill: var(--brand-inner)
  
   .menu-label, .menu-list a
     color: #ffffff

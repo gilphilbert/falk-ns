@@ -11,10 +11,11 @@ body
   background-attachment: fixed
   min-height: 100vh
   overflow-x: hidden
-  color: $white
-  background: $grey-darkest
-  scrollbar-color: light(light($grey-darker)) dark(dark($grey-darker))
-
+  color: var(--text-color)
+  background: var(--background-color)
+  scrollbar-color: var(--gray-quite-dark) var(--gray-darker)
+  &.light
+    --background: var(--gray)
 a
   text-decoration: none
   &:hover
@@ -32,7 +33,7 @@ h1
 
 p, a
   font-weight: normal
-  color: $white
+  color: var(--text-color)
   padding: 2px 0
   word-break: break-word
   &.is-1
@@ -50,7 +51,7 @@ p, a
   &.subtitle
     margin-top: -0.3rem
     font-weight: normal
-    color: $grey-dark
+    color: var(--subtitle-color)
     &.is-1
       font-size: 1.4rem
     &.is-2
@@ -72,7 +73,7 @@ table
   th
     text-align: left
     font-size: 1.2rem
-    border-bottom: 3px solid $grey-darker
+    border-bottom: 3px solid var(--gray-darker)
   td
     vertical-align: middle
     &.is-narrow
@@ -89,40 +90,45 @@ figure
       width: 40px
       height: 40px
 
+fieldset
+  margin: 6px 0
+
 .button
   border: none
-  background: $grey
+  background: var(--gray)
   padding: 7px 19px
   margin: 0 0.5rem 0.5rem 0
-  color: $white
+  color: var(--white)
   transition: background 0.25s ease
+  &.button.no-v
+    margin-bottom: 0
   &:focus
     outline: none
   &:hover
-    background: $grey-hover
+    background: var(--gray-hover)
   &.is-primary
-    background-color: $primary
+    background-color: var(--primary)
     &:hover
-      background-color: light($primary)
+      background-color: var(--primary-light)
   &.is-danger
-    background-color: $danger
+    background-color: var(--danger)
     &:hover
-      background-color: light($danger)
+      background-color: var(--danger-light)
   &.has-no-margin
     margin: 0
 
 .tag
   font-weight: normal
   border-radius: 1000px
-  background-color: $primary
-  color: $white
+  background-color: var(--primary)
+  color: var(--white)
   display: inline-block
   padding: 7px 10px
   &.is-grey
-    background-color: $grey
+    background-color: var(--gray)
 
 .box
-  background: light($grey-darkest)
+  background: var(--highlight-background)
   border-radius: 7px
   padding: 20px 0
   margin: 10px 0      
@@ -135,6 +141,22 @@ figure
 .has-text-right
   text-align: right
 
+.has-text-danger
+  color: var(--danger)
+
+input.has-danger
+  border-color: var(--danger)!important
+
+span.message-danger
+  padding: 8px 12px
+  margin: 8px 0
+  border-radius: 5px
+  color: #c93844
+  background: #ffabb1
+  display: inline-block
+span.message-danger.is-hidden
+  display: none
+
 .is-capitalized
   text-transform: capitalize
 
@@ -145,7 +167,7 @@ figure
   overflow: hidden
 
 .has-background-darker-grey
-  background-color: $grey-darker
+  background-color: var(--gray-darker)
 
 .is-hidden
   display: none
@@ -157,27 +179,74 @@ figure
   cursor: pointer
 
 .label
-  color: $white
+  color: var(--text-color)
 
 .select select, .textarea, .input
-  background: light(light($grey-darkest))
-  border: 2px solid light(light($grey-darkest))
+  background: var(--input-background)
+  border: 2px solid var(--input-background)
   border-radius: 7px
-  color: $white
+  color: var(--text-color)
   padding: 6px 8px
   width: 100%
   &:focus
     outline: none
-    // background: $grey-darker
-    border-bottom: 2px solid $primary
+    // background: var(--gray-darker)
+    border-bottom: 2px solid var(--primary)
   &::-webkit-input-placeholder
-    color: $grey-dark
+    color: var(--gray-dark)
   &:-moz-placeholder
-    color: $grey-dark
+    color: var(--gray-dark)
   &::-moz-placeholder
-    color: $grey-dark
+    color: var(--gray-dark)
   &:-ms-input-placeholder
-    color: $grey-dark
+    color: var(--gray-dark)
+
+.switch 
+  position: relative
+  display: inline-block
+  width: 47px
+  height: 23px
+  input 
+    opacity: 0
+    width: 0
+    height: 0
+
+.slider 
+  position: absolute
+  cursor: pointer
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  background-color: var(--gray)
+  -webkit-transition: .4s
+  transition: .4s
+  &.round 
+    border-radius: 1000px
+    &:before 
+      border-radius: 50%
+
+  &:before 
+    position: absolute
+    content: ""
+    height: 15px
+    width: 15px
+    left: 4px
+    bottom: 4px
+    background-color: var(--gray-lighter)
+    -webkit-transition: .4s
+    transition: .4s
+
+input:checked + .slider 
+  background-color: var(--primary)
+
+input:focus + .slider 
+  box-shadow: 0 0 1px var(--primary)
+
+input:checked + .slider:before 
+  -webkit-transform: translateX(23px)
+  -ms-transform: translateX(23px)
+  transform: translateX(23px)
 
 .has-no-vpadding
   padding-top: 0
@@ -200,7 +269,7 @@ figure
   width: 100vw
   height: 100vh
   background-color: rgba(0,0,0,0.4)
-  color: $white
+  color: var(--text-color)
   z-index: 100
   display: flex
   align-items: center
@@ -221,27 +290,27 @@ figure
   .title-icon
     margin-bottom: 1em
   .title
-    color: $white
+    color: var(--text-color)
   .buttons
     margin-top: 1em
   .select select option
-    color: $primary
+    color: var(--primary)
 
 .feather
   width: 24px
   height: 24px
-  stroke: $white
+  stroke: var(--text-color)
   stroke-width: 2
   stroke-linecap: round
   stroke-linejoin: round
   fill: none
   &.is-active
-    stroke: $primary
+    stroke: var(--primary)
   &.is-small
     height: 20px
     width: 20px
   &.is-filled
-    fill: $white
+    fill: var(--text-color)
 
 .delete
   height: 18px
@@ -283,6 +352,8 @@ figure
 #content-container
   // padding: 2.5em 1.5em calc(100px + .75em) calc(1.5em + 90px)
   padding: 0 0 120px 90px
+  touch-action: pan-y !important
+  min-height: 100vh
   @include media("≤tablet")
     // padding: 24px 9px 100px 90px
     padding: 0 0 88px 0
@@ -361,7 +432,7 @@ table.songs
   tr
     &:hover
       td
-        background: $grey-darker
+        background: var(--gray-darker)
   td
     vertical-align: middle
     padding: 5px 0 2px 0
@@ -388,7 +459,7 @@ table.songs
 
 .art
   figure
-    background-color: rgba(255,255,255,0.1)
+    background-color: var(--icon-background)
     overflow: hidden
     border-radius: 7px
     position: relative
@@ -415,7 +486,7 @@ body.no-controls #queue-list
       // height: calc(100% - 73px)
       height: calc(100% - 50px - 1.8rem)
 #queue-list
-  color: $grey-light
+  color: var(--text-color)
   position: fixed
   top: 0
   height: 100vh
@@ -423,14 +494,13 @@ body.no-controls #queue-list
   right: -450px
   transition: right 0.3s ease-in-out
   display: block
-  background: $grey-darker
-  color: $grey-light
+  background: var(--gray-darker)
   padding: 0
   // padding: 20px 30px 100px 30px
   &.is-active
     right: 0
     &:hover
-      color: $primary
+      color: var(--primary)
   .is-playing
     figure
       position: relative
@@ -451,15 +521,15 @@ body.no-controls #queue-list
         height: 0
         border-top: 9px solid transparent
         border-bottom: 9px solid transparent
-        border-left: 12px solid $grey-light
+        border-left: 12px solid var(--gray-lighter)
   h1
     margin: 0
     padding: 0
   a
-    color: $grey-light
+    color: var(--gray-lighter)
     text-decoration: underline
   #queue-header
-    background: $grey-darkest
+    background: var(--gray-darkest)
     padding: 25px 20px 25px 20px
   #queue-items
     padding: 0 20px 0 20px
@@ -496,7 +566,7 @@ body.no-controls #queue-list
   .label
     color: inherit
   p.title
-    border-bottom: 2px solid $primary
+    border-bottom: 2px solid var(--primary)
     &:not(:first-child)
       padding-top: 17px
       margin-top: 17px
@@ -543,7 +613,7 @@ body.no-controls #queue-list
     &:focus
       width: 150px
       transition: width 250ms ease 0s
-      color: $grey-light
+      color: var(--gray-lighter)
       outline: none
 
 #disconnect-message
@@ -554,7 +624,7 @@ body.no-controls #queue-list
   width: 100vw
   // top: 0
   left: 0
-  background: $primary
+  background: var(--primary)
   z-index: 1000
   display: flex
   align-items: center
@@ -572,13 +642,13 @@ body.no-controls #queue-list
 
 /* Track */
 ::-webkit-scrollbar-track
-  background-color: dark(dark($grey-darkest))
+  background-color: var(--gray-darkest)
  
 /* Handle */
 ::-webkit-scrollbar-thumb
-  background: light(light($grey-darkest))
+  background: var(--gray-quite-dark)
   border-radius: 5px
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover 
-  background: $grey-dark
+  background: var(--gray-dark)

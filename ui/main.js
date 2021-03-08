@@ -107,6 +107,32 @@ const vmApp = function (params) {
   }
   self.stats.update()
 
+  /*
+  self.data = {
+    db: null,
+    music: null,
+    populate: function () {
+      const db = new loki ('local.db', {
+        autoload: true,
+        autoloadCallback: function () {
+          self.data.music = db.getCollection('songs')
+          if (!self.data.music) {
+            self.data.music = db.addCollection('songs', { unique: ['location'] })
+          }
+          window.fetch('/api/songs/all')
+            .then(response => response.json())
+            .then(data => {
+              self.data.music.insert(data)
+            })
+        },
+        autosave: true,
+        autosaveInterval: 4000
+      })
+    }
+  }
+  self.data.populate()
+  */
+
   self.pageContainer = ko.observable('t-home')
 
   // set the page title

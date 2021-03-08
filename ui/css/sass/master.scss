@@ -12,52 +12,74 @@
     @return $new-color;
 }
 
-// Set your brand colors
-$green: #4BBE87;
-$blue: #4D84C3;
-$yellow: #E3B505;
-$orange: #FF6B35;
-$white: #FFFFFF;
+:root {
+  --blue: #4D84C3;
+  --blue-light: #5f90c9;
+  --white: #FFFFFF;
+  --black: #000000; // not used
+  --green: #4BBE87; // not used
+  --orange: #FF6B35; // not used
+  --red: #A31621;
+  --red-light: #c01a27;
+  --yellow: #E3B505; // not used
 
-$red: #A31621;
-$danger: $red;
+  --primary: var(--blue);
+  --primary-light: var(--blue-light);
+  --danger: var(--red);
+  --danger-light: var(--red-light);
+  --success: var(--green); //not used
+  --warning: var(--yellow); //not used
 
-$grey-lighter: #F7F7F7;
-$grey-light: #f1f1f1;
-$grey: #7a7a7a;
-$grey-hover: #888888;
-$grey-dark: #bbb; // #9c9c9c;
-$grey-darkest: #2A2A2A;
-$grey-darker: light($grey-darkest);
+  --darken: rgba(0,0,0,0.1);
 
-$black: #000;
+  --gray-lighter: #F7F7F7;
+  --gray-light: #f1f1f1;
+  --gray-mid: #d5d5d5;
+  --gray: #7a7a7a;
+  --gray-hover: #888888;
+  --gray-dark: #bbbbbb;
+  --gray-quite-dark: #6f6f6f;
+  --gray-darker: #3f3f3f;
+  --gray-darkest: #2A2A2A;
 
-$darken: rgba(0,0,0,0.1);
+  --background-color: var(--gray-darkest);
+  --text-color: var(--white);
+  --subtitle-color: var(--gray-dark);
 
-// Update Bulma's global variables
+  --menu-background: var(--gray-darker);
+  --menu-text: var(--white);
+
+  --icon-background: var(--gray-darkest);
+
+  --highlight-background: var(--gray-darker);
+
+  --input-background: var(--gray-quite-dark);
+
+  --control-bar: #383838; // a shade darker than the sidebar for differentiation
+
+  --brand-logo: var(--primary);
+  --brand-inner: var(--white);  
+}
+html.light {
+  --background-color: var(--white);
+  --text-color: #5d5d5d;
+  --subtitle-color: var(--gray-hover);
+
+  --menu-background: var(--primary);
+
+  --icon-background: var(--gray-dark);
+
+  --highlight-background: var(--gray-light);
+
+  --input-background: var(--gray-mid);
+
+  --control-bar: var(--gray-lighter);
+
+  --brand-logo: var(--white);
+  --brand-inner: var(--primary);
+}
+
 $family-sans-serif: 'Lexend Deca', sans-serif;
-$primary: $blue;
-$link: $grey-dark;
-$link-hover: $blue;
-
-$text: $white;
-$title-color: $white;
-$subtitle-color: $white;
-
-$table-color: inherit;
-$table-cell-heading-color: inherit;
-$table-head-cell-color: inherit;
-$table-background-color: transparent !default;
-$table-cell-border: 1px solid transparent !default;
-
-$input-grey: #eee;
-$input-grey-light: #f5f5f5;
-$input-grey-dark: #ddd;
-
-$input-border-color: #eeeeee;
-$input-background-color: #eeeeee;
-$input-shadow: none;
-$input-focus-box-shadow-size: 0;
 
 * {
     box-sizing: border-box;
@@ -69,7 +91,7 @@ $transition-duration-newsPaper: .7s;
 $transition-duration-3dslit: .5s;
 
 $modal-perspective: 1300px;
-$modal-bg-color: rgba($black,.86);
+$modal-bg-color: rgba(var(--black),.86);
 
 @import "components/_normalize";
 @import "components/_reset";
@@ -80,7 +102,6 @@ $modal-bg-color: rgba($black,.86);
 @import "components/modal-fx";
 
 @import "falk.sass";
-@import "falk-ns.sass";
 @import "control-bar.sass";
 @import "menus.sass";
 @import "audio-wave.sass";

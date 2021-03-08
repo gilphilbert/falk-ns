@@ -51,21 +51,36 @@ async function walkFunc (err, pathname, dirent) {
     }
 
     if (meta.common.picture !== undefined) {
-      const pic = meta.common.picture[0]
-      let ext = 'png'
-      if (pic.format === 'image/jpeg') {
-        ext = 'jpg'
-      }
-      const _f = song.album.toLowerCase() + song.albumartist.toLowerCase()
-      const fn = 'art/' + crypto.createHash('sha1').update(_f).digest('hex') + '.' + ext
-      if (!fs.existsSync(fn)) {
-        fs.writeFile(fn, pic.data, (err) => {
-          if (err) return console.error(err)
-          console.log('art saved to ', fn)
-        })
-      } else {
-        console.log('skipping art: exists')
-      }
+      meta.common.picture.forEach(pic => {
+        let fn = null
+        let ext = null
+
+        if (pic.format === 'image/jpeg') {
+          ext = 'jpg'
+        } else if (pic.format === 'image/png') {
+          ext = 'png'
+        }
+
+        switch (pic.type) {
+          case 'Cover (front)':
+            fn = 'art/' + crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-cover.' + ext
+            break
+          case 'Media (e.g. label side of CD)':
+            fn = 'art/' + crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-disc.' + ext
+            break
+          case 'Artist/performer':
+            fn = 'art/' + crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '.' + ext
+            break
+        }
+        if (ext !== null && fn !== null && !fs.existsSync(fn)) {
+          fs.writeFile(fn, pic.data, (err) => {
+            if (err) return console.error(err)
+          })
+        }
+        if (ext === null) {
+          console.log('[PIC] Unsupported filetype: "' + pic.filetype + '"')
+        }
+      })
     }
 
     database.addMusic.song(song, uuid)

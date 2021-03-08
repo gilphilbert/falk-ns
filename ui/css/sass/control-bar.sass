@@ -4,14 +4,10 @@
   height: 100px
   width: 100%
   bottom: 0
-  background: #383838
+  background: var(--control-bar)
   z-index: 3
   line-height: 1
-  color: $white
-  .title
-    color: $white
-  .subtitle
-    color: $grey-dark
+  color: var(--text-color)
   box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.15)
   -webkit-box-shadow: 0px -2px 3px 0px rgba(0,0,0,0.15)
   -moz-box-shadow: 0px -2px 3px 0px rgba(0,0,0,0.15)
@@ -29,14 +25,14 @@
     height: 48px
     min-width: 48px
     max-width: 48px
-    background: $blue
+    background: var(--primary)
     border-radius: 1000px
     display: inline-flex
     align-items: center
     @include media("≤tablet")
       margin: 0 7px
     .feather
-      stroke: $white
+      stroke: var(--white)
     svg
       margin: 0 auto
   //icons
@@ -66,7 +62,7 @@
     align-items: center
     >.feather
       cursor: pointer
-      stroke: $white
+      stroke: var(--text-color)
       padding: 12px
       box-sizing: content-box
       height: 24px
@@ -84,12 +80,12 @@
         &:last-child
           margin-left: 12px
     .is-active
-      stroke: $blue
+      stroke: var(--primary)
   .queue
     margin: 0 10px
   //random, repeat
   .progress-topper
-    background-color: $blue
+    background-color: var(--primary)
     width: 0
     height: 3px
     position: absolute
@@ -103,8 +99,8 @@
       top: -4px
       height: 6px
       width: 6px
-      background-color: $grey-darkest
-      border: 3px solid $blue
+      background-color: var(--gray-darkest)
+      border: 3px solid var(--primary)
       border-radius: 1000px
 
 .mobile-controls
@@ -114,7 +110,7 @@
   line-height: 0.8
   svg.feather
     margin: 0 25px
-      stroke: $white
+      stroke: var(--text-color)
     &.is-small
       height: 17px
       width: 17px
@@ -123,25 +119,25 @@
     min-width: 48px
     max-width: 48px
     padding: 0
-    background: $primary
+    background: var(--primary)
     display: flex
     align-items: center
     .feather
       margin: 0 auto
-      stroke: $white
+      stroke: var(--text-color)
 
 #mobile-progress
   display: none
-  background: $darken
+  background: var(--darken)
   &::-moz-progress-value
-    background: $white
+    background: var(--white)
   &::-moz-progress-bar
-    background: $darken
+    background: var(--darken)
   &::-webkit-progress-value
-    background: $white
+    background: var(--white)
     border-radius: none
   &::-webkit-progress-bar
-    background: $darken
+    background: var(--darken)
 
 #mobile-progress-bar
   margin-top: 15px
@@ -153,7 +149,7 @@
     position: relative
     width: 0
     height: 100%
-    background: $blue
+    background: var(--primary)
     border-radius: 3px
     &::after
       content: ''
@@ -162,8 +158,8 @@
       top: -5px
       height: 6px
       width: 6px
-      background: $grey-darkest
-      border: 3px solid $blue
+      background: var(--gray-darkest)
+      border: 3px solid var(--primary)
       border-radius: 9px
 
 body.no-controls

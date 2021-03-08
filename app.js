@@ -103,6 +103,13 @@ app.get('/api/stats', function (req, res) {
     })
 })
 
+app.get('/api/songs/all/:offset?/:qty?', function (req, res) {
+  const offset = req.params.offset || 0
+  const limit = req.params.qty || 10
+  const songs = database.getMusic.all(res.locals.uuid, offset, limit)
+  res.json(songs)
+})
+
 app.get('/api/artists', function (req, res) {
   database.getMusic.artists(res.locals.uuid)
     .then(data => {
@@ -230,21 +237,37 @@ app.post('/api/directories', function (req, res) {
     })
 })
 
-app.get('/art/:artist/:album', function (req, res) {
-  const artist = req.params.artist
-  const album = req.params.album.substr(0, req.params.album.lastIndexOf('.'))
-  const _f = album.toLowerCase() + artist.toLowerCase()
+app.get('/art/:artist/:album/', function (req, res) {
+  const type = req.query.type || 'cover'
+
+  const artist = req.params.artist.toLowerCase()
+  const album = req.params.album.substr(0, req.params.album.lastIndexOf('.')).toLowerCase()
+  const fn = 'art/' + crypto.createHash('sha1').update(album + artist).digest('hex') + '-' + type + '.'
+
+  const ext = ['jpg', 'png']
+  let sent = false
+  ext.forEach(e => {
+    const tfn = path.resolve(__dirname, fn + e)
+    if (fs.existsSync(tfn)) {
+      res.sendFile(tfn)
+      sent = true
+    }
+  })
+
+  if (!sent) {
+    res.sendFile(path.resolve(__dirname, 'placeholder.png'))
+  }
+})
+app.get('/art/:artist', function (req, res) {
   const ext = 'jpg'
-  let fn = 'art/' + crypto.createHash('sha1').update(_f).digest('hex') + '.' + ext
+  const artist = req.params.artist.toLowerCase().substr(0, req.params.artist.lastIndexOf('.'))
+  let fn = 'art/' + crypto.createHash('sha1').update(artist).digest('hex') + '.' + ext
   fn = path.resolve(__dirname, fn)
   if (fs.existsSync(fn)) {
     res.sendFile(fn)
   } else {
     res.sendFile(path.resolve(__dirname, 'placeholder.png'))
   }
-})
-app.get('/art/:artist', function (req, res) {
-  res.sendFile(path.resolve(__dirname, 'placeholder.png'))
 })
 
 app.get('/api/users', function (req, res) {
