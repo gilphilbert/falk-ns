@@ -1,6 +1,18 @@
 // express framework
 const express = require('express')
 const app = express()
+const compression = require('compression')
+app.use(compression())
+app.use(compression({ filter: shouldCompress }))
+function shouldCompress (req, res) {
+  if (req.url.startsWith('/art')) {
+    // don't try to compress images (they're already compressed...)
+    return false
+  }
+
+  // fallback to standard filter function
+  return compression.filter(req, res)
+}
 
 // parse JSON body
 const bodyParser = require('body-parser')
