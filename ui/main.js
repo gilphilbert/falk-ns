@@ -1,5 +1,201 @@
 const ko = window.ko
 
+class DatabaseHandler {
+  constructor (callback) {
+    this.db = new loki ('falkns0113.db', {
+      autoload: true,
+      autoloadCallback: async () => {
+        // load the collection (or create if it's empty)
+        this.music = this.db.getCollection('songs')
+        if (!this.music) {
+          this.music = this.db.addCollection('songs', { unique: ['id'] })
+        }
+        // load the collection (or create if it's empty)
+        this.artists = this.db.getCollection('artists')
+        if (!this.artists) {
+          this.artists = this.db.addCollection('artists', { unique: ['name'] })
+        }
+        //  if there's at least some music, call the callback
+        // if (this.music.count() > 0 && typeof callback === 'function') {
+        //   callback()
+        //   this.update()
+        // } else {
+        //   // otherwise we might as well load the database before we begin
+        this.update(callback)
+        // }
+      },
+      autosave: true,
+      autosaveInterval: 4000
+    })
+  }
+
+  async update (callback) {
+    // load the data from the API (needs some error handling)
+    let data = await window.fetch('/api/songs/all')
+    data = await data.json()
+
+    // add the songs to the database
+    data.data.forEach(s => {
+      this.addSong(s)
+    })
+
+    // pull the remaining songs from the API, using the limit provided by the API
+    let remain = data.remain
+    const limit = data.data.length
+
+    let offset = limit
+    while (remain > 0) {
+      data = await window.fetch('/api/songs/all/' + offset + '/' + limit)
+      data = await data.json()
+      data.data.forEach(s => {
+        this.addSong(s)
+      })
+
+      remain = data.remain
+      offset = offset + limit
+    }
+
+    if (callback !== undefined) {
+      callback()
+    }
+  }
+
+  addSong (song) {
+    try {
+      // get the song from the database using the index (very fast!)
+      const dbSong = this.music.get(song.$loki) || null
+      // if the song isn't in the database
+      if (dbSong === null) {
+        // simply insert it, then correct the ID and metadata as sent by the server
+        const s = this.music.insert({ info: song.info, favorite: song.favorite, playCount: song.playCount, cached: false })
+        s.$loki = song.$loki
+        s.meta = song.meta
+        this.music.update(s)
+      } else {
+        // the song already exists, let's check if the metadata has changed
+        if (JSON.stringify(dbSong.info) !== JSON.stringify(song.info)) {
+          // info has changed, update
+          dbSong.info = song.info
+          this.music.update(dbSong)
+          // now we need to check to see if the other data has changed... <----------------------------------------------------------
+        }
+      }
+    } catch (e) {
+      console.error('Could not add song to database')
+    }
+
+    try {
+      const artist = this.artists.by('name', song.info.albumartist) || null
+      const curart = ((artist !== null) ? artist.art || null : null)
+      if (artist === null) {
+        this.artists.insert({ name: song.info.albumartist, art: song.info.art.artist })
+      } else if (song.info.art.artist !== '') {
+        if (curart === null) {
+          artist.art = song.info.art.artist
+          this.artists.update(artist)
+        }
+      }
+    } catch (e) {
+      console.log('Could not add artist')
+      console.log(e)
+    }
+  }
+
+  async getStats () {
+    const ret = { songs: 0, albums: 0, artists: 0 }
+    const allSongs = this.music.find()
+    ret.songs = allSongs.length
+    ret.artists = [...new Set(allSongs.map(song => song.info.albumartist))].length
+    ret.albums = [...new Set(allSongs.map(song => song.info.album))].length
+    return ret
+  }
+
+  async getArtists () {
+    const artists = this.artists.find()
+    return artists.map(a => { return { title: a.name, art: '/art/' + ((a.art !== '') ? a.art : 'placeholder.png'), url: `/artist/${encodeURIComponent(a.name)}`, subtitle: '', surl: '' } })
+  }
+
+  async getArtist (artist) {
+    const songs = this.music.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
+    const albums = songs.map(e => {
+      return {
+        art: '/art/' + e.info.art.cover,
+        title: e.info.album,
+        url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
+        subtitle: e.info.year,
+        surl: ''
+      }
+    }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
+    return { albums: albums }
+  }
+
+  async getAlbums () {
+    const songs = this.music.chain().find().simplesort('info.album').data()
+    const albums = songs.map(e => {
+      return {
+        art: '/art/' + e.info.art.cover,
+        title: e.info.album,
+        url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
+        subtitle: e.info.albumartist,
+        surl: `/artist/${encodeURIComponent(e.info.albumartist)}`
+      }
+    }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
+    return albums
+  }
+
+  async getAlbum (artist, album) {
+    const data = this.music.chain().find({ 'info.albumartist': artist, 'info.album': album }).compoundsort(['info.disc', 'info.track']).data()
+    const info = data.map(s => {
+      s.info._id = s.$loki
+      s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
+      s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
+      return s.info
+    })
+    console.log(info)
+    return {
+      title: info[0].album,
+      art: '/art/' + info[0].art.cover,
+      artist: info[0].albumartist,
+      year: info[0].year,
+      genre: info[0].genre,
+      shortformat: info[0].shortformat,
+      tracks: info
+    }
+  }
+
+  async getGenres () {
+    const songs = this.music.chain().find().simplesort('info.genre').data()
+    const genres = songs.map(e => {
+      return {
+        art: '/art/' + e.info.art.cover,
+        title: e.info.genre,
+        url: `/genre/${encodeURIComponent(e.info.genre)}`,
+        subtitle: '',
+        surl: ''
+      }
+    }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.title !== '') === index)
+    return genres
+  }
+
+  async getGenre (genre) {
+    const songs = this.music.chain().find({ 'info.genre': genre }).simplesort('info.album').data()
+    const albums = songs.map(e => {
+      return {
+        art: '/art/' + e.info.art.cover,
+        title: e.info.album,
+        url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
+        subtitle: e.info.albumartist,
+        surl: `/artist/${encodeURIComponent(e.info.albumartist)}`
+      }
+    }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
+    return albums
+  }
+}
+
+
+
+
+
 // use this so we don't get flashes as the correct page loads...
 const vmBlank = function (params) {
 }
@@ -40,6 +236,10 @@ ko.components.register('login', {
   viewModel: vmLogin,
   template: { element: 't-login' }
 })
+
+
+
+
 
 // welcome view model
 const vmWelcome = function (params) {
@@ -84,54 +284,12 @@ ko.components.register('welcome', {
   template: { element: 't-welcome' }
 })
 
+
+
+
+
 const vmApp = function (params) {
   const self = this
-  // quick link to the audio player
-  self.audio = document.getElementById('audio-player')
-
-  self.stats = {
-    songs: ko.observable(0),
-    albums: ko.observable(0),
-    artists: ko.observable(0),
-    update: function () {
-      window.fetch('/api/stats')
-        .then(response => response.json())
-        .then(data => {
-          self.stats.songs(data.songs)
-          self.stats.albums(data.albums)
-          self.stats.artists(data.artists)
-        }).catch(err => {
-          console.log(err)
-        })
-    }
-  }
-  self.stats.update()
-
-  /*
-  self.data = {
-    db: null,
-    music: null,
-    populate: function () {
-      const db = new loki ('local.db', {
-        autoload: true,
-        autoloadCallback: function () {
-          self.data.music = db.getCollection('songs')
-          if (!self.data.music) {
-            self.data.music = db.addCollection('songs', { unique: ['location'] })
-          }
-          window.fetch('/api/songs/all')
-            .then(response => response.json())
-            .then(data => {
-              self.data.music.insert(data)
-            })
-        },
-        autosave: true,
-        autosaveInterval: 4000
-      })
-    }
-  }
-  self.data.populate()
-  */
 
   self.pageContainer = ko.observable('t-home')
 
@@ -147,6 +305,15 @@ const vmApp = function (params) {
   self.tiles = ko.observableArray([])
   // this holds information about the current album (null means information is hidden)
   self.album = ko.observable(null)
+
+  // quick link to the audio player
+  self.audio = document.getElementById('audio-player')
+
+  self.stats = {
+    songs: ko.observable(0),
+    albums: ko.observable(0),
+    artists: ko.observable(0)
+  }
 
   // queue observables
   self.queue = {
@@ -215,7 +382,10 @@ const vmApp = function (params) {
 
   // clear queue and play album, from specific song
   self.playAlbumSong = song => {
-    self.queue.list(self.album().tracks)
+    const tracks = self.album().tracks
+    // append a "playing" observable to each track
+    tracks.forEach(e => { e.playing = ko.observable(false) })
+    self.queue.list(tracks)
 
     self.queue.list().forEach((s, i) => {
       if (s._id === song._id) {
@@ -230,21 +400,21 @@ const vmApp = function (params) {
   // play the song at queue.pos
   self.play = () => {
     const song = self.queue.list()[self.queue.pos()]
-
-    const id = song._id
+    console.log(song)
     const ext = song.location.substr(song.location.lastIndexOf('.'))
-    const url = `/api/stream/${id}${ext}`
+    const url = `/api/stream/${song._id}${ext}`
+    console.log(url)
     self.audio.src = url
 
     self.playing.title(song.title)
-    self.playing.artist(song.albumartist)
+    self.playing.artist(song.artist)
     self.playing.album(song.album)
     self.playing.duration(song.duration)
-    self.playing.art(song.art)
+    self.playing.art('/art/' + song.art.cover)
     self.playing.quality(song.shortformat)
 
     if ('mediaSession' in navigator) {
-      const fullart = window.location.origin + song.art
+      const fullart = window.location.origin + '/' + song.art.cover
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: self.playing.title(),
         artist: self.playing.artist(),
@@ -391,7 +561,6 @@ const vmApp = function (params) {
       list: ko.observableArray([]),
       remove: function (user) {
         const body = JSON.stringify({ uuid: user.uuid })
-        console.log(body)
         window.fetch('/api/users', { method: 'delete', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
           .then(response => response.json())
           .then(data => {
@@ -463,196 +632,145 @@ const vmApp = function (params) {
     self.router.updatePageLinks()
   }
 
-  self.router = new window.Navigo('/')
-  self.router
-    .hooks({
-      after (match) {
-        self.menuState(false)
-      }
-    })
-    .on('/', () => {
-      self.tiles([])
-      self.pageTitle('Home')
-      self.pageContainer('t-home')
-    }, {
-      before: (done) => {
-        document.body.classList.add('no-controls')
-        done()
-      },
-      leave: (done) => {
-        document.body.classList.remove('no-controls')
-        done()
-      }
-    })
-    .on('/playlists', () => {
-      self.pageTitle('Playlists')
-      self.tiles([])
-      self.pageContainer('t-tiles')
-    })
-    .on('/artists', () => {
-      window.fetch('/api/artists')
-        .then(response => response.json())
-        .then(data => {
-          if (data.length > 0) {
-            data.forEach(e => {
-              e.title = e.artist,
-              e.url = `/artist/${encodeURIComponent(e.artist)}`,
-              e.subtitle = '',
-              e.surl = ''
-            })
-            self.tiles(data)
-            self.pageTitle('Artists')
-            self.pageContainer('t-tiles')
-          } else {
-            // nothing in the library!
-          }
-        })
-    })
-    .on('/artist/:artist', (params) => {
-      const artist = params.data.artist
-      window.fetch('/api/artist/' + encodeURIComponent(artist))
-        .then(response => response.json())
-        .then(data => {
-          if (data.length > 0) {
-            data.forEach(e => {
-              e.title = e.album,
-              e.url = `/album/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}`,
-              e.subtitle = e.year,
-              e.surl = ''
-            })
-            self.tiles(data)
-            self.pageTitle(artist)
-            self.pageContainer('t-tiles')
-          } else {
-            // nothing in the library!
-          }
-        })
-    })
-    .on('/album/:artist/:album', (params) => {
-      const artist = params.data.artist
-      const album = params.data.album
-      window.fetch(`/api/album/${encodeURIComponent(artist)}/${encodeURIComponent(album)}`)
-        .then(response => response.json())
-        .then(data => {
-          data.tracks.forEach(e => {
-            // e.title = e.track + '. ' + e.title
-            e.shortformat = (e.format.samplerate / 1000) + 'kHz ' + ((e.format.bits) ? e.format.bits + 'bit' : '')
-            e.playing = ko.observable(false)
+  self.buildRoutes = () => {
+    self.router = new window.Navigo('/')
+    self.router
+      .hooks({
+        after (match) {
+          self.menuState(false)
+        }
+      })
+      .on('/', () => {
+        self.tiles([])
+        self.pageTitle('Home')
+        self.pageContainer('t-home')
+      }, {
+        before: (done) => {
+          document.body.classList.add('no-controls')
+          done()
+        },
+        leave: (done) => {
+          document.body.classList.remove('no-controls')
+          done()
+        }
+      })
+      .on('/playlists', () => {
+        self.pageTitle('Playlists')
+        self.tiles([])
+        self.pageContainer('t-tiles')
+      })
+      .on('/artists', () => {
+        self.data.getArtists()
+          .then(data => {
+            if (data.length > 0) {
+              self.tiles(data)
+              self.pageTitle('Artists')
+              self.pageContainer('t-tiles')
+            } else {
+              // nothing in the library!
+            }
           })
-          if (data.tracks.length > 0) {
-            data.year = data.tracks[0].year
-            data.genre = data.tracks[0].genre
-            data.shortformat = ((data.tracks.every((i) => i.shortformat === data.tracks[0].shortformat)) ? data.tracks[0].shortformat : 'Mixed')
-          }
-          self.album(data)
-          self.pageTitle(album + ' - ' + artist)
-          self.pageContainer('t-album')
-          self.tiles([])
-        })
-    }, {
-      leave: (done) => {
-        self.album(null)
-        done()
-      }
-    })
-    .on('/albums', () => {
-      window.fetch('/api/albums')
-        .then(response => response.json())
-        .then(data => {
-          if (data.length > 0) {
-            data.forEach(e => {
-              e.title = e.album,
-              e.url = `/album/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}`,
-              e.subtitle = e.albumartist,
-              e.surl = `/artist/${encodeURIComponent(e.albumartist)}`
-            })
-            self.tiles(data)
-            self.pageTitle('Albums')
-            self.pageContainer('t-tiles')
-          } else {
-            // nothing in the library!
-          }
-        })
-    })
-    .on('/genres', () => {
-      window.fetch('/api/genres')
-        .then(response => response.json())
-        .then(data => {
-          if (data.length > 0) {
-            const arr = data.map(e => {
-              return {
-                title: e,
-                art: '/art/genre.jpg',
-                url: `/genre/${encodeURIComponent(e)}`,
-                subtitle: '',
-                surl: ''
-              }
-            })
-            self.tiles(arr)
-            self.pageTitle('Genres')
-            self.pageContainer('t-tiles')
-          } else {
-            // nothing in the library!
-          }
-        })
-    })
-    .on('/genre/:genre', (params) => {
-      const genre = params.data.genre
-      window.fetch('/api/genre/' + genre)
-        .then(response => response.json())
-        .then(data => {
-          if (data.length > 0) {
-            data.forEach(e => {
-              e.title = e.album,
-              e.url = `/album/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}`,
-              e.subtitle = e.albumartist,
-              e.surl = `/artist/${encodeURIComponent(e.albumartist)}`
-            })
-            self.tiles(data)
-            self.pageTitle(genre)
-            self.pageContainer('t-tiles')
-          } else {
-            // nothing in the library!
-          }
-        })
-    })
-    .on('/settings', () => {
-      self.pageTitle('Settings')
-      self.tiles([])
-      self.pageContainer('t-settings')
-      // load the directory browser
-      self.settings.directories.load('')
-      // get the current directories
-      window.fetch('/api/locations')
-        .then(response => response.json())
-        .then(data => {
-          self.settings.locations.list(data.locations)
-          self.settings.isAdmin(data.admin)
-        })
-      // update the stats (in case the library has changd)
-      window.fetch('/api/stats')
-        .then(response => response.json())
-        .then(data => {
-          self.stats.songs(data.songs)
-          self.stats.albums(data.albums)
-          self.stats.artists(data.artists)
-        })
-      // get users (if we're an admin)
-      if (self.settings.isAdmin) {
-        window.fetch('/api/users')
+      })
+      .on('/artist/:artist', (params) => {
+        const artist = params.data.artist
+        self.data.getArtist(artist)
+          .then(data => {
+            if (data.albums.length > 0) {
+              self.tiles(data.albums)
+              self.pageTitle(artist)
+              self.pageContainer('t-tiles')
+            }
+          })
+      })
+      .on('/albums', () => {
+        self.data.getAlbums()
+          .then(data => {
+            if (data.length > 0) {
+              self.tiles(data)
+              self.pageTitle('Albums')
+              self.pageContainer('t-tiles')
+            }
+          })
+      })
+      .on('/album/:artist/:album', (params) => {
+        const artist = params.data.artist
+        const album = params.data.album
+
+        self.data.getAlbum(artist, album)
+          .then(data => {
+            console.log(data)
+            self.album(data)
+            self.pageTitle(album + ' - ' + artist)
+            self.pageContainer('t-album')
+            self.tiles([])
+          })
+      }, {
+        leave: (done) => {
+          self.album(null)
+          done()
+        }
+      })
+      .on('/genres', () => {
+        self.data.getGenres()
+          .then(data => {
+            if (data.length > 0) {
+              self.tiles(data)
+              self.pageTitle('Genres')
+              self.pageContainer('t-tiles')
+            }
+          })
+      })
+      .on('/genre/:genre', (params) => {
+        const genre = params.data.genre
+        self.data.getGenre(genre)
+          .then(data => {
+            if (data.length > 0) {
+              self.tiles(data)
+              self.pageTitle(genre)
+              self.pageContainer('t-tiles')
+            }
+          })
+      })
+      .on('/settings', () => {
+        self.pageTitle('Settings')
+        self.tiles([])
+        self.pageContainer('t-settings')
+        // load the directory browser
+        self.settings.directories.load('')
+        // get the current directories
+        window.fetch('/api/locations')
           .then(response => response.json())
           .then(data => {
-            self.settings.users.list(data)
+            self.settings.locations.list(data.locations)
+            self.settings.isAdmin(data.admin)
           })
-      }
-    })
-    .on('/logout', () => {
-      window.fetch('/api/logout')
-        .then(() => {
-          window.location.href = '/'
-        })
-    })
-    .resolve()
+        // update the stats (in case the library has changd)
+        self.data.getStats()
+          .then(data => {
+            self.stats.songs(data.songs)
+            self.stats.albums(data.albums)
+            self.stats.artists(data.artists)
+          })
+        // get users (if we're an admin)
+        if (self.settings.isAdmin) {
+          window.fetch('/api/users')
+            .then(response => response.json())
+            .then(data => {
+              self.settings.users.list(data)
+            })
+        }
+      })
+      .on('/logout', () => {
+        window.fetch('/api/logout')
+          .then(() => {
+            window.location.href = '/'
+          })
+      })
+      .resolve()
+  }
+
+  // inituialize the database and then load the routes (prevents pages loading before the database is ready)
+  self.data = new DatabaseHandler(self.buildRoutes)
 }
 ko.components.register('app', {
   viewModel: vmApp,

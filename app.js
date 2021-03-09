@@ -13,7 +13,7 @@ app.use(cookieParser())
 // for serving files
 const fs = require('fs')
 const path = require('path')
-const crypto = require('crypto')
+// const crypto = require('crypto')
 
 // for authentication
 const jwt = require('jsonwebtoken')
@@ -85,7 +85,11 @@ app.use(function (req, res, next) {
       }
     })
   } else {
-    res.status(400).send({ welcome: true })
+    if (req.url.startsWith('/api')) {
+      res.status(400).send({ welcome: true })
+    } else {
+      res.redirect('/')
+    }
   }
 })
 
@@ -94,6 +98,14 @@ app.get('/api/logout', function (req, res) {
   res.json({ message: 'logged out' })
 })
 
+app.get('/api/songs/all/:offset?/:qty?', function (req, res) {
+  const offset = req.params.offset || 0
+  const limit = req.params.qty || 10
+  const songs = database.getMusic.all(res.locals.uuid, offset, limit)
+  res.json(songs)
+})
+
+/*
 app.get('/api/stats', function (req, res) {
   database.getMusic.stats(res.locals.uuid)
     .then(data => {
@@ -101,13 +113,6 @@ app.get('/api/stats', function (req, res) {
     }).catch(e => {
       res.send({})
     })
-})
-
-app.get('/api/songs/all/:offset?/:qty?', function (req, res) {
-  const offset = req.params.offset || 0
-  const limit = req.params.qty || 10
-  const songs = database.getMusic.all(res.locals.uuid, offset, limit)
-  res.json(songs)
 })
 
 app.get('/api/artists', function (req, res) {
@@ -152,7 +157,7 @@ app.get('/api/album/:artist/:album', function (req, res) {
 app.get('/api/albums', function (req, res) {
   database.getMusic.albums(res.locals.uuid)
     .then(data => {
-      data.forEach(e => { e.art = `/art/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}.jpg` })
+      // data.forEach(e => { e.art = `/art/${encodeURIComponent(e.albumartist)}/${encodeURIComponent(e.album)}.jpg` })
       res.send(data)
     }).catch(e => {
       res.send({})
@@ -186,16 +191,13 @@ app.get('/api/stream/:id', function (req, res) {
     // now go find the file
     database.getMusic.url(res.locals.uuid, id)
       .then(data => {
-        // streaming the file doesn't allow seeking (annoying)
-        //  -> res.setHeader("content-type", "audio/flac")
-        //  -> fs.createReadStream(data.location).pipe(res)
-        // so let's send the whole file
-        res.sendFile(data.location)
+        res.sendFile(data.info.location)
       }).catch(e => {
         res.send()
       })
   }
 })
+*/
 
 app.get('/api/locations', function (req, res) {
   database.settings.locations(res.locals.uuid)
@@ -236,7 +238,7 @@ app.post('/api/directories', function (req, res) {
       res.send(data)
     })
 })
-
+/*
 app.get('/art/:artist/:album/', function (req, res) {
   const type = req.query.type || 'cover'
 
@@ -258,7 +260,7 @@ app.get('/art/:artist/:album/', function (req, res) {
     res.sendFile(path.resolve(__dirname, 'placeholder.png'))
   }
 })
-app.get('/art/:artist', function (req, res) {
+app.get('/art/:filename', function (req, res) {
   const ext = 'jpg'
   const artist = req.params.artist.toLowerCase().substr(0, req.params.artist.lastIndexOf('.'))
   let fn = 'art/' + crypto.createHash('sha1').update(artist).digest('hex') + '.' + ext
@@ -267,6 +269,20 @@ app.get('/art/:artist', function (req, res) {
     res.sendFile(fn)
   } else {
     res.sendFile(path.resolve(__dirname, 'placeholder.png'))
+  }
+})
+*/
+app.get('/art/:filename', function (req, res) {
+  const filename = req.params.filename || null
+  if (filename !== null && filename.indexOf('/') === -1) {
+    const fn = path.resolve(__dirname, 'art/' + filename)
+    if (fs.existsSync(fn)) {
+      res.sendFile(fn)
+    } else {
+      res.sendFile(path.resolve(__dirname, 'placeholder.png'))
+    }
+  } else {
+    res.send({})
   }
 })
 

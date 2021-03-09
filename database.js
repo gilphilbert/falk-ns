@@ -16,6 +16,7 @@ const db = new Loki('data/local.db', {
 })
 
 const get = {
+  /*
   stats: (uuid) => {
     return new Promise(function (resolve, reject) {
       const ret = { songs: 0, albums: 0, artists: 0 }
@@ -26,22 +27,26 @@ const get = {
       resolve(ret)
     })
   },
+  */
   all: (uuid, offset, limit) => {
-    const allSongs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).offset(offset).limit(limit).data()
-    return allSongs
+    const count = musicDB.count()
+    const rem = count - offset - limit
+    const allSongs = musicDB.chain().find({ uuid: uuid }).offset(offset).limit(limit).data()
+    return { data: allSongs, total: count, remain: ((rem > 0) ? rem : 0) }
   },
   url: (uuid, id) => {
     return new Promise(function (resolve, reject) {
       const data = musicDB.get(id)
       // check this song is in your library
-      if (data.uuids.includes(uuid)) {
+      if (data.uuid === uuid) {
         // yep, let's send it
         resolve(data)
       }
       // otherwise this ID isn't in your database (how did you get here?!)
       resolve({})
     })
-  },
+  } // ,
+  /*
   artists: (uuid) => {
     return new Promise(function (resolve, reject) {
       const songs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).map(e => { return { artist: e.info.albumartist } }).simplesort('artist').data()
@@ -51,7 +56,7 @@ const get = {
   },
   artistAlbums: (uuid, artist) => {
     const promise = new Promise(function (resolve, reject) {
-      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] }, 'info.albumartist': artist }).map(e => { return { album: e.info.album, albumartist: e.info.albumartist, year: e.info.year } }).simplesort('album').data()
+      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] }, 'info.albumartist': artist }).map(e => { return { album: e.info.album, albumartist: e.info.albumartist, year: e.info.year, art: e.info.art } }).simplesort('album').data()
       const albums = songs.filter((tag, index, array) => array.findIndex(t => t.album === tag.album) === index).sort((a, b) => { return a.year - b.year })
       albums.forEach(e => { delete (e.meta); delete (e.$loki) })
       resolve(albums)
@@ -67,7 +72,7 @@ const get = {
   },
   albums: (uuid) => {
     return new Promise(function (resolve, reject) {
-      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).map(e => { return { album: e.info.album, albumartist: e.info.albumartist } }).simplesort('album').data()
+      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).map(e => { return { album: e.info.album, albumartist: e.info.albumartist, artistart: e.info.art.artist } }).simplesort('album').data()
       const albums = songs.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
       albums.forEach(e => { delete (e.meta); delete (e.$loki) })
       resolve(albums)
@@ -89,24 +94,28 @@ const get = {
       resolve(albums)
     })
   }
+  */
 }
 
 const add = {
   song: (info, uuid) => {
     return new Promise(function (resolve, reject) {
-      const song = musicDB.findOne({ location: info.location })
+      const song = musicDB.findOne({ 'info.location': info.location, uuid: uuid })
       if (song === null) {
         // add the song with our UUID attached
-        const newSong = { location: info.location, info: info, uuids: [uuid] }
+        const newSong = { uuid: uuid, info: info, favorite: false, playCount: false }
         musicDB.insert(newSong)
       } else {
         // song exists, let's update the metadata and add ourselves to the list of uuids
-        if (song.uuids.includes(uuid) === false) {
-          song.uuids.push(uuid)
-        }
         song.info = info
         musicDB.update(song)
       }
+      resolve()
+      const songs = musicDB.find({ 'info.location': info.location, uuid: { $ne: uuid } })
+      songs.forEach(s => {
+        s.info = info
+        musicDB.update(s)
+      })
     })
   }
 }

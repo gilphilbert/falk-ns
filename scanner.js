@@ -26,9 +26,9 @@ async function walkFunc (err, pathname, dirent) {
 
   try {
     const meta = await mm.parseFile(path.dirname(pathname) + '/' + dirent.name)
-
     const song = {
       location: path.dirname(pathname) + '/' + dirent.name,
+      type: dirent.name.substr(dirent.name.lastIndexOf('.') + 1),
       title: meta.common.title,
       album: meta.common.album,
       albumartist: (('albumartist' in meta.common) ? meta.common.albumartist : meta.common.artist),
@@ -45,9 +45,11 @@ async function walkFunc (err, pathname, dirent) {
         bits: meta.format.bitsPerSample,
         codec: meta.format.codec
       },
-      playcount: 1,
-      dateadded: Date.now(),
-      favorite: false
+      art: {
+        artist: '',
+        cover: '',
+        disc: ''
+      }
     }
 
     if (meta.common.picture !== undefined) {
@@ -63,15 +65,19 @@ async function walkFunc (err, pathname, dirent) {
 
         switch (pic.type) {
           case 'Cover (front)':
-            fn = 'art/' + crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-cover.' + ext
+            fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-cover.' + ext
+            song.art.cover = fn
             break
           case 'Media (e.g. label side of CD)':
-            fn = 'art/' + crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-disc.' + ext
+            fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-disc.' + ext
+            song.art.disc = fn
             break
           case 'Artist/performer':
-            fn = 'art/' + crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '.' + ext
+            fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '.' + ext
+            song.art.artist = fn
             break
         }
+        fn = path.resolve(__dirname, 'art/' + fn)
         if (ext !== null && fn !== null && !fs.existsSync(fn)) {
           fs.writeFile(fn, pic.data, (err) => {
             if (err) return console.error(err)
