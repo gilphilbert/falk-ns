@@ -112,7 +112,7 @@ app.get('/api/logout', function (req, res) {
 
 app.get('/api/songs/all/:offset?/:qty?', function (req, res) {
   const offset = req.params.offset || 0
-  const limit = req.params.qty || 2000
+  const limit = req.params.qty || 4000
   const songs = database.getMusic.all(res.locals.uuid, offset, limit)
   res.json(songs)
 })
