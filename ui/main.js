@@ -192,10 +192,6 @@ class DatabaseHandler {
   }
 }
 
-
-
-
-
 // use this so we don't get flashes as the correct page loads...
 const vmBlank = function (params) {
 }
@@ -236,10 +232,6 @@ ko.components.register('login', {
   viewModel: vmLogin,
   template: { element: 't-login' }
 })
-
-
-
-
 
 // welcome view model
 const vmWelcome = function (params) {
@@ -283,10 +275,6 @@ ko.components.register('welcome', {
   viewModel: vmWelcome,
   template: { element: 't-welcome' }
 })
-
-
-
-
 
 const vmApp = function (params) {
   const self = this
@@ -820,3 +808,7 @@ document.body.addEventListener('click', (e) => {
     })
   }
 })
+
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.register('serviceworker.js')
+}

@@ -15,10 +15,16 @@
     <link rel="stylesheet" href="/css/falk.css">  
   </head>
   <body>
-    <div data-bind="component: { name: mainContainer, params: { mainContainer: mainContainer } }"></div>
+    <div data-bind="component: { name: mainContainer, params: { mainContainer: mainContainer } }">
+      <noscript>
+        <h1>Oh No!</h1>
+        <p>This site requires JavaScript. You'll need to make sure you enable it to enjoy your music!</p> 
+      </noscript>
+    </div>
 
     <template id="t-app">
-      <div id="content-container" data-bind="template: pageContainer, swiperight: menuShow, swipeleft: menuHide"></div>
+      <div id="content-container" data-bind="template: pageContainer, swiperight: menuShow, swipeleft: menuHide">
+      </div>
 
       <aside class="menu" data-bind="css: { 'is-active': menuState }">
         <figure class="image menu-brand">
