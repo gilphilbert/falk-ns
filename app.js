@@ -100,7 +100,7 @@ app.get('/api/logout', function (req, res) {
 
 app.get('/api/songs/all/:offset?/:qty?', function (req, res) {
   const offset = req.params.offset || 0
-  const limit = req.params.qty || 10
+  const limit = req.params.qty || 500
   const songs = database.getMusic.all(res.locals.uuid, offset, limit)
   res.json(songs)
 })
@@ -272,7 +272,7 @@ app.get('/art/:filename', function (req, res) {
   }
 })
 */
-app.get('/art/:filename', function (req, res) {
+app.get('/art/:filename?', function (req, res) {
   const filename = req.params.filename || null
   if (filename !== null && filename.indexOf('/') === -1) {
     const fn = path.resolve(__dirname, 'art/' + filename)
