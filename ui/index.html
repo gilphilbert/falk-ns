@@ -60,12 +60,12 @@
           </div>
           <div class="col-xs no-grow col-md playing-controls misc-controls">
             <svg class="random feather hidden--to-desktop"><use href="/img/feather-sprite.svg#shuffle"></use></svg>
-            <svg class="feather prev" data-bind="click: playPrev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
-            <span class="play-button pointer" data-bind="click: togglePlay">
+            <svg class="feather prev" data-bind="click: player.prev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
+            <span class="play-button pointer" data-bind="click: player.toggle">
               <svg class="feather" data-bind="css: { 'is-hidden': playing.state() == true }"><use href="/img/feather-sprite.svg#play"></use></svg>
               <svg class="feather" data-bind="css: { 'is-hidden': playing.state() != true }"><use href="/img/feather-sprite.svg#pause"></use></svg>
             </span>
-            <svg class="feather next" data-bind="click: playNext"><use href="/img/feather-sprite.svg#skip-forward"></use></svg>
+            <svg class="feather next" data-bind="click: player.next"><use href="/img/feather-sprite.svg#skip-forward"></use></svg>
             <svg class="repeat feather hidden--to-desktop"><use href="/img/feather-sprite.svg#repeat"></use></svg>
           </div>
           <div class="col-md has-text-right hidden--to-desktop">
@@ -382,5 +382,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/navigo/8.9.1/navigo.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lokijs/1.5.11/lokijs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.9.0/localforage.min.js"></script>
   <script src="main.js"></script>
 </html>

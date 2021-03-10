@@ -273,7 +273,6 @@ app.get('/art/:filename', function (req, res) {
 
 app.get('/stream/:id', function (req, res) {
   let id = req.params.id || null
-  console.log(id)
   if (id !== null) {
     // remove the extension
     id = id.substr(0, id.lastIndexOf('.'))

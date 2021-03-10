@@ -420,36 +420,6 @@ const vmApp = function (params) {
 
     document.title = song.title + ' - ' + song.albumartist + ' | FALK'
   }
-  self.playPrev = () => {
-    if (self.queue.pos() > 0) {
-      self.queue.pos(self.queue.pos() - 1)
-    }
-  }
-  self.playNext = () => {
-    if (self.queue.pos() < self.queue.list().length - 1) {
-      self.queue.pos(self.queue.pos() + 1)
-    } else {
-      self.playStop()
-    }
-  }
-  self.playStop = () => {
-    self.audio.src = ''
-  }
-
-  self.togglePlay = () => {
-    if (self.audio.paused) {
-      self.audio.play()
-    } else {
-      self.audio.pause()
-    }
-  }
-
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.setActionHandler('play', self.togglePlay)
-    navigator.mediaSession.setActionHandler('pause', self.togglePlay)
-    navigator.mediaSession.setActionHandler('previoustrack', self.playPrev)
-    navigator.mediaSession.setActionHandler('nexttrack', self.playNext)
-  }
 
   self.player = {
     complete: () => {
@@ -466,7 +436,36 @@ const vmApp = function (params) {
     },
     pause: () => {
       self.playing.state(false)
+    },
+    prev: () => {
+      if (self.queue.pos() > 0) {
+        self.queue.pos(self.queue.pos() - 1)
+      }
+    },
+    next: () => {
+      if (self.queue.pos() < self.queue.list().length - 1) {
+        self.queue.pos(self.queue.pos() + 1)
+      } else {
+        self.player.stop()
+      }
+    },
+    togglePlay: () => {
+      if (self.audio.paused) {
+        self.audio.play()
+      } else {
+        self.audio.pause()
+      }
+    },
+    stop: () => {
+      self.audio.src = ''
     }
+  }
+
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.setActionHandler('play', self.player.toggle)
+    navigator.mediaSession.setActionHandler('pause', self.player.toggle)
+    navigator.mediaSession.setActionHandler('previoustrack', self.player.prev)
+    navigator.mediaSession.setActionHandler('nexttrack', self.player.next)
   }
   /* playback control ends */
 

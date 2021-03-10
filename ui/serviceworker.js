@@ -4,7 +4,28 @@ const APP_CACHE = `main-${CACHE_VERSION}`
 const IMAGE_CACHE = 'imageV1'
 
 // these are the routes we are going to cache for offline support
-const cacheFiles = ['/']
+const cacheFiles = [
+  '/',
+  '/css/falk.css',
+
+  '/img/falk-blue-white-square.svg',
+  '/img/falk-blue-white.svg',
+  '/img/feather-sprite.svg',
+
+  '/android-chrome-192x192.png',
+  '/android-chrome-512x512.png',
+  '/apple-touch-icon.png',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/favicon.ico',
+  '/maskable_icon.png',
+  '/mstile-150x150.png',
+  '/safari-pinned-tab.svg',
+  '/browserconfig.xml',
+
+  '/main.js',
+  '/site.webmanifest'
+]
 
 // on activation we clean up the previously registered service workers
 self.addEventListener('activate', evt =>
@@ -55,8 +76,6 @@ const fromCache = request => {
 // cache the current page to make it available for offline
 const update = request => {
   const cacheName = ((request.url.indexOf('/art/') >= 0) ? IMAGE_CACHE : APP_CACHE)
-  console.log(request.url)
-  console.log(cacheName)
   caches
     .open(cacheName)
     .then(cache =>
