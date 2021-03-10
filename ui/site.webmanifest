@@ -1,6 +1,7 @@
 {
-    "name": "FALK PA-01",
-    "short_name": "FALK PA-01",
+    "name": "FALK NS",
+    "short_name": "FALK NS",
+    "description": "Stream your own music from your own home!",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
@@ -19,6 +20,7 @@
           "purpose": "any maskable"
         }
     ],
+    "start_url": "/index.html",
     "theme_color": "#2A2A2A",
     "background_color": "#2A2A2A",
     "display": "standalone"
