@@ -5,7 +5,7 @@ const compression = require('compression')
 app.use(compression())
 app.use(compression({ filter: shouldCompress }))
 function shouldCompress (req, res) {
-  if (req.url.startsWith('/art')) {
+  if (req.url.startsWith('/art') || req.url.startsWith('/stream')) {
     // don't try to compress images (they're already compressed...)
     return false
   }
@@ -195,20 +195,6 @@ app.get('/api/genre/:genre', function (req, res) {
     })
 })
 
-app.get('/api/stream/:id', function (req, res) {
-  let id = req.params.id || null
-  if (id !== null) {
-    // remove the extension
-    id = id.substr(0, id.lastIndexOf('.'))
-    // now go find the file
-    database.getMusic.url(res.locals.uuid, id)
-      .then(data => {
-        res.sendFile(data.info.location)
-      }).catch(e => {
-        res.send()
-      })
-  }
-})
 */
 
 app.get('/api/locations', function (req, res) {
@@ -284,6 +270,25 @@ app.get('/art/:filename', function (req, res) {
   }
 })
 */
+
+app.get('/stream/:id', function (req, res) {
+  let id = req.params.id || null
+  console.log(id)
+  if (id !== null) {
+    // remove the extension
+    id = id.substr(0, id.lastIndexOf('.'))
+    // now go find the file
+    database.getMusic.url(res.locals.uuid, id)
+      .then(data => {
+        res.sendFile(data.info.location)
+        // res.setHeader('content-type', 'audio/flac')
+        // fs.createReadStream(data.location).pipe(res)
+      }).catch(e => {
+        res.send()
+      })
+  }
+})
+
 app.get('/art/:filename?', function (req, res) {
   const filename = req.params.filename || null
   if (filename !== null && filename.indexOf('/') === -1) {

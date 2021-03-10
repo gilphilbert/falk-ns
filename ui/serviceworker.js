@@ -1,59 +1,80 @@
-const cacheName = 'falknsv1'
+// the cache version gets updated every time there is a new deployment
+const CACHE_VERSION = 1
+const APP_CACHE = `main-${CACHE_VERSION}`
+const IMAGE_CACHE = 'imageV1'
 
-self.oninstall = function () {
-  caches.open(cacheName).then(function (cache) {
-    cache.addAll([
-      '/',
+// these are the routes we are going to cache for offline support
+const cacheFiles = ['/']
 
-      '/css/falk.css',
-
-      'https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/navigo/8.9.1/navigo.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/lokijs/1.5.11/lokijs.min.js',
-      'https://fonts.googleapis.com/css2?family=Lexend+Deca&display=swap',
-      'https://fonts.gstatic.com/s/lexenddeca/v7/K2F1fZFYk-dHSE0UPPuwQ5qnJy8.woff2',
-
-      '/img/falk-blue-white.svg',
-      '/img/falk-blue.svg',
-      '/img/falk-white.svg',
-      '/img/feather-sprite.svg',
-
-      '/android-chrome-192x192.png',
-      '/android-chrome-512x512.png',
-      '/apple-touch-icon.png',
-      '/browserconfig.xml',
-      '/favicon-16x16.png',
-      '/favicon-32x32.png',
-      '/favicon.ico',
-      '/main.js',
-      '/mstile-150x150.png',
-      '/safari-pinned-tab.svg',
-      '/site.webmanifest'
-    ])
-      .catch(e => { console.log(e) })
-  })
-    .catch(e => { console.log(e) })
-}
-
-self.onactivate = function (event) {
-  console.log('PWA Running')
-}
-
-self.onfetch = function (event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(async function (cachedFiles) {
-        if (cachedFiles) {
-          return cachedFiles
-        } else {
-          const res = fetch(event.request)
-          if (event.request.url.startswith('/api/songs') === false) { //don't cache requests for data
-            const cache = await caches.open(cacheName)
-            cache.put(event.request, res)
+// on activation we clean up the previously registered service workers
+self.addEventListener('activate', evt =>
+  evt.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== APP_CACHE && cacheName !== IMAGE_CACHE) {
+            return caches.delete(cacheName)
           }
-          return res
-        }
-      })
+        })
+      )
+    })
   )
+)
+
+// on install we download the routes we want to cache for offline
+self.addEventListener('install', evt =>
+  evt.waitUntil(
+    caches.open(APP_CACHE).then(cache => {
+      return cache.addAll(cacheFiles)
+    })
+  )
+)
+
+// fetch the resource from the network
+const fromNetwork = (request, timeout) =>
+  new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(reject, timeout)
+    fetch(request).then(response => {
+      clearTimeout(timeoutId)
+      resolve(response)
+      update(request)
+    }, reject)
+  })
+
+// fetch the resource from the browser cache
+const fromCache = request => {
+  const cacheName = ((request.url.indexOf('/art/') >= 0) ? IMAGE_CACHE : APP_CACHE)
+  return caches
+    .open(cacheName)
+    .then(cache =>
+      cache
+        .match(request)
+        .then(matching => matching)
+    )
 }
+// cache the current page to make it available for offline
+const update = request => {
+  const cacheName = ((request.url.indexOf('/art/') >= 0) ? IMAGE_CACHE : APP_CACHE)
+  console.log(request.url)
+  console.log(cacheName)
+  caches
+    .open(cacheName)
+    .then(cache =>
+      fetch(request).then(response => cache.put(request, response)).catch(() => {})
+    )
+}
+
+// general strategy when making a request (eg if online try to fetch it
+// from the network with a timeout, if something fails serve from cache)
+self.addEventListener('fetch', evt => {
+  const ignoredURLs = ['/api/check', '/api/songs/']
+  for (let i = 0; i < ignoredURLs.length; i++) {
+    if (evt.request.url.indexOf(ignoredURLs[i]) >= 0) {
+      return
+    }
+  }
+  evt.respondWith(
+    fromNetwork(evt.request, 10000).catch(() => fromCache(evt.request))
+  )
+  evt.waitUntil(update(evt.request))
+})

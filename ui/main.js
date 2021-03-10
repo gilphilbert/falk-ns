@@ -31,30 +31,33 @@ class DatabaseHandler {
 
   async update (callback) {
     // load the data from the API (needs some error handling)
-    let data = await window.fetch('/api/songs/all')
-    data = await data.json()
-
-    // add the songs to the database
-    data.data.forEach(s => {
-      this.addSong(s)
-    })
-
-    // pull the remaining songs from the API, using the limit provided by the API
-    let remain = data.remain
-    const limit = data.data.length
-
-    let offset = limit
-    while (remain > 0) {
-      data = await window.fetch('/api/songs/all/' + offset + '/' + limit)
+    try {
+      let data = await window.fetch('/api/songs/all')
       data = await data.json()
+
+      // add the songs to the database
       data.data.forEach(s => {
         this.addSong(s)
       })
 
-      remain = data.remain
-      offset = offset + limit
-    }
+      // pull the remaining songs from the API, using the limit provided by the API
+      let remain = data.remain
+      const limit = data.data.length
 
+      let offset = limit
+      while (remain > 0) {
+        data = await window.fetch('/api/songs/all/' + offset + '/' + limit)
+        data = await data.json()
+        data.data.forEach(s => {
+          this.addSong(s)
+        })
+
+        remain = data.remain
+        offset = offset + limit
+      }
+    } catch (e) {
+      console.log('Could not connect to API to update library')
+    }
     if (callback !== undefined) {
       callback()
     }
@@ -151,7 +154,6 @@ class DatabaseHandler {
       s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
       return s.info
     })
-    console.log(info)
     return {
       title: info[0].album,
       art: '/art/' + info[0].art.cover,
@@ -388,10 +390,8 @@ const vmApp = function (params) {
   // play the song at queue.pos
   self.play = () => {
     const song = self.queue.list()[self.queue.pos()]
-    console.log(song)
     const ext = song.location.substr(song.location.lastIndexOf('.'))
-    const url = `/api/stream/${song._id}${ext}`
-    console.log(url)
+    const url = `/stream/${song._id}${ext}`
     self.audio.src = url
 
     self.playing.title(song.title)
@@ -402,7 +402,7 @@ const vmApp = function (params) {
     self.playing.quality(song.shortformat)
 
     if ('mediaSession' in navigator) {
-      const fullart = window.location.origin + '/' + song.art.cover
+      const fullart = window.location.origin + '/art/' + song.art.cover
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: self.playing.title(),
         artist: self.playing.artist(),
@@ -621,7 +621,7 @@ const vmApp = function (params) {
   }
 
   self.buildRoutes = () => {
-    self.router = new window.Navigo('/')
+    self.router = new window.Navigo('/', { hash: true })
     self.router
       .hooks({
         after (match) {
@@ -686,7 +686,6 @@ const vmApp = function (params) {
 
         self.data.getAlbum(artist, album)
           .then(data => {
-            console.log(data)
             self.album(data)
             self.pageTitle(album + ' - ' + artist)
             self.pageContainer('t-album')
@@ -775,13 +774,21 @@ function AppViewModel () {
     .then(response => {
       if (response.status === 200) {
         self.mainContainer('app')
+        window.localStorage.setItem('loggedIn', 'true')
       } else if (response.status === 403) {
         self.mainContainer('login')
+        window.localStorage.setItem('loggedIn', 'false')
       } else {
         self.mainContainer('welcome')
+        window.localStorage.setItem('loggedIn', 'false')
       }
     })
-    .catch(() => { /* do nothing */ })
+    .catch(() => {
+      if (window.localStorage.getItem('loggedIn') === 'true') {
+        self.mainContainer('app')
+      }
+      // else we need to show a "you must be connected" screen
+    })
 }
 
 const events = ['tap', 'doubletap', 'hold', 'rotate', 'drag', 'dragstart', 'dragend', 'dragleft', 'dragright', 'dragup', 'dragdown', 'transform', 'transformstart', 'transformend', 'swipe', 'swipeleft', 'swiperight', 'swipeup', 'swipedown', 'pinch', 'pinchin', 'pinchout']
