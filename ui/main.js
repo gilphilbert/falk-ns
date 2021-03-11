@@ -114,7 +114,7 @@ class DatabaseHandler {
   }
 
   async getArtists () {
-    const artists = this.artists.find()
+    const artists = this.artists.chain().find().simplesort('name').data()
     return artists.map(a => { return { title: a.name, art: '/art/' + ((a.art !== '') ? a.art : 'placeholder.png'), url: `/artist/${encodeURIComponent(a.name)}`, subtitle: '', surl: '' } })
   }
 
@@ -122,7 +122,7 @@ class DatabaseHandler {
     const songs = this.music.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
     const albums = songs.map(e => {
       return {
-        art: '/art/' + e.info.art.cover,
+        art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
         title: e.info.album,
         url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
         subtitle: e.info.year,
@@ -136,7 +136,7 @@ class DatabaseHandler {
     const songs = this.music.chain().find().simplesort('info.album').data()
     const albums = songs.map(e => {
       return {
-        art: '/art/' + e.info.art.cover,
+        art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
         title: e.info.album,
         url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
         subtitle: e.info.albumartist,
@@ -152,6 +152,7 @@ class DatabaseHandler {
       s.info._id = s.$loki
       s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
       s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
+      s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')
       return s.info
     })
     return {
@@ -169,7 +170,7 @@ class DatabaseHandler {
     const songs = this.music.chain().find().simplesort('info.genre').data()
     const genres = songs.map(e => {
       return {
-        art: '/art/' + e.info.art.cover,
+        art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : 'placeholder.png'),
         title: e.info.genre,
         url: `/genre/${encodeURIComponent(e.info.genre)}`,
         subtitle: '',
@@ -183,7 +184,7 @@ class DatabaseHandler {
     const songs = this.music.chain().find({ 'info.genre': genre }).simplesort('info.album').data()
     const albums = songs.map(e => {
       return {
-        art: '/art/' + e.info.art.cover,
+        art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : 'placeholder.png'),
         title: e.info.album,
         url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
         subtitle: e.info.albumartist,

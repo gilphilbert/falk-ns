@@ -1,5 +1,5 @@
 // the cache version gets updated every time there is a new deployment
-const CACHE_VERSION = 1
+const CACHE_VERSION = 2
 const APP_CACHE = `main-${CACHE_VERSION}`
 const IMAGE_CACHE = 'imageV1'
 
