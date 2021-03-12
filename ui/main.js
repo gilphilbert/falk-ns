@@ -16,13 +16,13 @@ class DatabaseHandler {
           this.artists = this.db.addCollection('artists', { unique: ['name'] })
         }
         //  if there's at least some music, call the callback
-        // if (this.music.count() > 0 && typeof callback === 'function') {
-        //   callback()
-        //   this.update()
-        // } else {
-        //   // otherwise we might as well load the database before we begin
-        this.update(callback)
-        // }
+        if (this.music.count() > 0 && typeof callback === 'function') {
+          callback()
+          this.update()
+        } else {
+          // otherwise we might as well load the database before we begin
+          this.update(callback)
+        }
       },
       autosave: true,
       autosaveInterval: 4000
@@ -30,10 +30,18 @@ class DatabaseHandler {
   }
 
   async update (callback) {
+    callback = callback || null
     // load the data from the API (needs some error handling)
     try {
       let data = await window.fetch('/api/songs/all')
       data = await data.json()
+
+      console.log(data)
+
+      // reset all songs to be missing
+      this.music.chain().find().update((song) => {
+        song.present = false
+      })
 
       // add the songs to the database
       data.data.forEach(s => {
@@ -55,10 +63,14 @@ class DatabaseHandler {
         remain = data.remain
         offset = offset + limit
       }
+
+      // remove anything we haven't seen
+      // console.log(this.music.chain().find({ present: false }).data())
+      this.music.chain().find({ present: false }).remove()
     } catch (e) {
       console.log('Could not connect to API to update library')
     }
-    if (callback !== undefined) {
+    if (callback !== null) {
       callback()
     }
   }
@@ -66,12 +78,11 @@ class DatabaseHandler {
   addSong (song) {
     try {
       // get the song from the database using the index (very fast!)
-      const dbSong = this.music.get(song.$loki) || null
+      const dbSong = this.music.findOne({ _id: song.$loki }) || null
       // if the song isn't in the database
       if (dbSong === null) {
         // simply insert it, then correct the ID and metadata as sent by the server
-        const s = this.music.insert({ info: song.info, favorite: song.favorite, playCount: song.playCount, cached: false })
-        s.$loki = song.$loki
+        const s = this.music.insert({ _id: song.$loki, info: song.info, favorite: song.favorite, playCount: song.playCount, cached: false, present: true })
         s.meta = song.meta
         this.music.update(s)
       } else {
@@ -79,12 +90,14 @@ class DatabaseHandler {
         if (JSON.stringify(dbSong.info) !== JSON.stringify(song.info)) {
           // info has changed, update
           dbSong.info = song.info
-          this.music.update(dbSong)
+          // mark the song as in the database
           // now we need to check to see if the other data has changed... <----------------------------------------------------------
         }
+        dbSong.present = true
+        this.music.update(dbSong)
       }
     } catch (e) {
-      console.error('Could not add song to database')
+      console.error('Could not add song to database', e)
     }
 
     try {
@@ -149,7 +162,7 @@ class DatabaseHandler {
   async getAlbum (artist, album) {
     const data = this.music.chain().find({ 'info.albumartist': artist, 'info.album': album }).compoundsort(['info.disc', 'info.track']).data()
     const info = data.map(s => {
-      s.info._id = s.$loki
+      s.info._id = s._id
       s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
       s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
       s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')
@@ -534,11 +547,8 @@ const vmApp = function (params) {
       }
     },
     database: {
-      rescan: function () {
-        // do some stuff
-      },
       update: function () {
-        const url = '/api/' + ((self.settings.database.rescan()) ? 'rescan' : 'update')
+        const url = '/api/update'
         window.fetch(url)
           .catch(err => {
             console.log(err)
@@ -758,6 +768,29 @@ const vmApp = function (params) {
 
   // inituialize the database and then load the routes (prevents pages loading before the database is ready)
   self.data = new DatabaseHandler(self.buildRoutes)
+  self.events = new window.EventSource('/events')
+  self.events.onmessage = (evt) => {
+    const eventData = JSON.parse(evt.data)
+    console.log(evt.data)
+    console.log(eventData)
+  }
+  self.events.addEventListener('update', (evt) => {
+    const data = JSON.parse(evt.data)
+    console.log(data)
+    if (data.status === 'started') {
+      // do some stuff
+      console.log('server updating')
+    } else if (data.status === 'complete') {
+      self.data.update(() => {
+        self.data.getStats()
+          .then(data => {
+            self.stats.songs(data.songs)
+            self.stats.albums(data.albums)
+            self.stats.artists(data.artists)
+          })
+      })  
+    }
+  })
 }
 ko.components.register('app', {
   viewModel: vmApp,
@@ -791,8 +824,8 @@ function AppViewModel () {
     })
 }
 
-const events = ['tap', 'doubletap', 'hold', 'rotate', 'drag', 'dragstart', 'dragend', 'dragleft', 'dragright', 'dragup', 'dragdown', 'transform', 'transformstart', 'transformend', 'swipe', 'swipeleft', 'swiperight', 'swipeup', 'swipedown', 'pinch', 'pinchin', 'pinchout']
-ko.utils.arrayForEach(events, function (eventName) {
+const hammerEvents = ['tap', 'doubletap', 'hold', 'rotate', 'drag', 'dragstart', 'dragend', 'dragleft', 'dragright', 'dragup', 'dragdown', 'transform', 'transformstart', 'transformend', 'swipe', 'swipeleft', 'swiperight', 'swipeup', 'swipedown', 'pinch', 'pinchin', 'pinchout']
+ko.utils.arrayForEach(hammerEvents, function (eventName) {
   ko.bindingHandlers[eventName] = {
     init: function (element, valueAccessor) {
       const hammer = new window.Hammer(element)

@@ -124,19 +124,24 @@ async function getDirs (dir) {
   return promise
 }
 
-function scan (newuuid) {
+async function scan (newuuid) {
   uuid = newuuid
-  const promise = new Promise(function (resolve, reject) {
-    database.settings.locations(uuid)
-      .then(data => {
-        data.forEach(dir => {
-          Walk.walk(dir, walkFunc)
-            .then(() => {})
-        })
-        resolve()
-      })
+  // const promise = new Promise(function (resolve, reject) {
+  const allSongs = database.raw.songs()
+  allSongs.forEach(song => {
+    if (!fs.existsSync(song.info.location)) {
+      database.raw.removeSong(song)
+    }
   })
-  return promise
+
+  const dirs = database.settings.locations(uuid)
+  for (let i = 0; i < dirs.length; i++) {
+    try {
+      await Walk.walk(dirs[i], walkFunc)
+    } catch (e) {
+      console.log(e)
+    }
+  }
 }
 
 module.exports = {

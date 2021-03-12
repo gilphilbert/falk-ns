@@ -1,5 +1,5 @@
 // the cache version gets updated every time there is a new deployment
-const CACHE_VERSION = 2
+const CACHE_VERSION = 0
 const APP_CACHE = `main-${CACHE_VERSION}`
 const IMAGE_CACHE = 'imageV1'
 
@@ -43,13 +43,14 @@ self.addEventListener('activate', evt =>
 )
 
 // on install we download the routes we want to cache for offline
-self.addEventListener('install', evt =>
+self.addEventListener('install', evt => {
   evt.waitUntil(
     caches.open(APP_CACHE).then(cache => {
       return cache.addAll(cacheFiles)
     })
   )
-)
+  self.skipWaiting()
+})
 
 // fetch the resource from the network
 const fromNetwork = (request, timeout) =>
@@ -58,7 +59,7 @@ const fromNetwork = (request, timeout) =>
     fetch(request).then(response => {
       clearTimeout(timeoutId)
       resolve(response)
-      update(request)
+      // update(request)
     }, reject)
   })
 
@@ -86,7 +87,7 @@ const update = request => {
 // general strategy when making a request (eg if online try to fetch it
 // from the network with a timeout, if something fails serve from cache)
 self.addEventListener('fetch', evt => {
-  const ignoredURLs = ['/api/check', '/api/songs/']
+  const ignoredURLs = ['/api/check', '/api/songs/', '/api/update', '/events']
   for (let i = 0; i < ignoredURLs.length; i++) {
     if (evt.request.url.indexOf(ignoredURLs[i]) >= 0) {
       return

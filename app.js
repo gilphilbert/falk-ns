@@ -2,10 +2,9 @@
 const express = require('express')
 const app = express()
 const compression = require('compression')
-app.use(compression())
 app.use(compression({ filter: shouldCompress }))
 function shouldCompress (req, res) {
-  if (req.url.startsWith('/art') || req.url.startsWith('/stream')) {
+  if (req.url.startsWith('/art') || req.url.startsWith('/stream') || req.url.startsWith('/events')) {
     // don't try to compress images (they're already compressed...)
     return false
   }
@@ -77,6 +76,7 @@ app.post('/api/welcome', (req, res) => {
 
 // serve the static files (the UI) - needs to come before authentication
 const serveStatic = require('serve-static')
+
 app.use(serveStatic('ui', { index: ['index.html'] }))
 
 app.use(function (req, res, next) {
@@ -105,6 +105,23 @@ app.use(function (req, res, next) {
   }
 })
 
+// track connected clients
+let eventClients = []
+// simple SSE middleware to provide a res.sendEvent(...) function
+app.use(function (req, res, next) {
+  res.sendEvent = (data, { event, uuid } = {}) => {
+    uuid = uuid || null
+    event = event || null
+    const packedData = ((event !== null) ? `event: ${event}\n` : '') + `data: ${JSON.stringify(data)}\n\n`
+    let clients = eventClients
+    if (uuid !== null) {
+      clients = clients.filter(c => c.uuid === res.locals.uuid)
+    }
+    clients.forEach(c => c.res.write(packedData))
+  }
+  next()
+})
+
 app.get('/api/logout', function (req, res) {
   res.cookie('jwt', null, { 'max-age': 0, httpOnly: true })
   res.json({ message: 'logged out' })
@@ -116,6 +133,171 @@ app.get('/api/songs/all/:offset?/:qty?', function (req, res) {
   const songs = database.getMusic.all(res.locals.uuid, offset, limit)
   res.json(songs)
 })
+
+app.get('/api/locations', function (req, res) {
+  const locations = database.settings.locations(res.locals.uuid)
+  const admin = database.users.getAdmin(res.locals.uuid)
+  res.json({ admin: admin, locations: locations })
+})
+app.post('/api/locations', function (req, res) {
+  const dir = req.body.location || ''
+  if (dir !== '') {
+    database.settings.addLocation(res.locals.uuid, dir)
+      .then(data => {
+        res.send(data)
+      }).catch(e => {
+        res.send([])
+      })
+  }
+})
+app.delete('/api/locations', function (req, res) {
+  const dir = req.body.location || ''
+  if (dir !== '') {
+    database.settings.removeLocation(res.locals.uuid, dir)
+      .then(data => {
+        res.send(data)
+      }).catch(e => {
+        res.send([])
+      })
+  }
+})
+
+app.post('/api/directories', function (req, res) {
+  const dir = req.body.location || ''
+  scanner.getDirs(dir)
+    .then((data) => {
+      res.send(data)
+    })
+})
+
+app.get('/stream/:id', function (req, res) {
+  let id = req.params.id || null
+  if (id !== null) {
+    // remove the extension
+    id = id.substr(0, id.lastIndexOf('.'))
+    // now go find the file
+    database.getMusic.url(res.locals.uuid, id)
+      .then(data => {
+        res.sendFile(data.info.location)
+        // res.setHeader('content-type', 'audio/flac')
+        // fs.createReadStream(data.location).pipe(res)
+      }).catch(e => {
+        res.send()
+      })
+  }
+})
+
+app.get('/art/:filename?', function (req, res) {
+  const filename = req.params.filename || null
+  if (filename !== null && filename.indexOf('/') === -1) {
+    const fn = path.resolve(__dirname, 'art/' + filename)
+    if (fs.existsSync(fn)) {
+      res.sendFile(fn)
+    } else {
+      res.sendFile(path.resolve(__dirname, 'placeholder.png'))
+    }
+  } else {
+    res.send({})
+  }
+})
+
+app.get('/api/users', function (req, res) {
+  const users = database.users.getAll(res.locals.uuid)
+  res.send(users)
+})
+app.post('/api/users', function (req, res) {
+  const users = database.users.add(res.locals.uuid, req.body)
+  res.json(users)
+})
+app.delete('/api/users', function (req, res) {
+  const delUUID = req.body.uuid
+  const users = database.users.remove(res.locals.uuid, delUUID)
+  res.json(users)
+})
+
+// both currently do the same thing... rescan needs to check for dead files
+app.get('/api/update', async function (req, res) {
+  const uuid = res.locals.uuid
+  res.send({ status: 'started' })
+  await scanner.scan(uuid)
+  res.sendEvent({ status: 'complete' }, { event: 'update' })
+  // this needs to be non-blocking...
+})
+
+// endpoint, use whatever name you wish
+app.get('/events', (req, res, next) => {
+  // set correct headers to keep connection open
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  // this will allow cross-domain access, only enable if you need it
+  // res.setHeader('Access-Control-Allow-Origin', '*')
+  res.flushHeaders()
+  // simple unique client ID
+  const clientID = Date.now()
+  // link to this client's open socket
+  const client = {
+    id: clientID,
+    uuid: res.locals.uuid,
+    res
+  }
+  // add new client to the list
+  eventClients.push(client)
+  // remove disconnected clients
+  req.on('close', () => {
+    eventClients = eventClients.filter(c => c.id !== clientID)
+  })
+  // setTimeout(() => res.sendEvent({ message: 'test' }, { event: 'test', broadcast: true }), 1000)
+})
+
+app.get('*', (req, res) => {
+  res.sendFile('ui/index.html', { root: __dirname })
+})
+
+app.listen(port, () => {
+  console.log(`[START] Listening on ${port}`)
+})
+
+/*
+const useServerSentEventsMiddleware = (req, res, next) => {
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+
+  // only if you want anyone to access this endpoint
+  res.setHeader('Access-Control-Allow-Origin', '*')
+
+  res.flushHeaders()
+
+  const sendEventStreamData = (data) => {
+    const sseFormattedResponse = `data: ${JSON.stringify(data)}\n\n`
+    res.write(sseFormattedResponse)
+  }
+
+  // we are attaching sendEventStreamData to res, so we can use it later
+  Object.assign(res, {
+    sendEventStreamData
+  })
+
+  next()
+}
+const streamRandomNumbers = (req, res) => {
+  // We are sending anyone who connects to /stream-random-numbers
+  // a random number that's encapsulated in an object
+  const interval = setInterval(function generateAndSendRandomNumber () {
+    const data = {
+      value: Math.random()
+    }
+    res.sendEventStreamData(data)
+    console.log('sent', data)
+  }, 1000)
+
+  // close
+  res.on('close', () => {
+    clearInterval(interval)
+    res.end()
+  })
+}
+app.get('/events', useServerSentEventsMiddleware, streamRandomNumbers)
+*/
 
 /*
 app.get('/api/stats', function (req, res) {
@@ -197,45 +379,6 @@ app.get('/api/genre/:genre', function (req, res) {
 
 */
 
-app.get('/api/locations', function (req, res) {
-  database.settings.locations(res.locals.uuid)
-    .then(data => {
-      const admin = database.users.getAdmin(res.locals.uuid)
-      res.json({ admin: admin, locations: data })
-    }).catch(e => {
-      res.json([])
-    })
-})
-app.post('/api/locations', function (req, res) {
-  const dir = req.body.location || ''
-  if (dir !== '') {
-    database.settings.addLocation(res.locals.uuid, dir)
-      .then(data => {
-        res.send(data)
-      }).catch(e => {
-        res.send([])
-      })
-  }
-})
-app.delete('/api/locations', function (req, res) {
-  const dir = req.body.location || ''
-  if (dir !== '') {
-    database.settings.removeLocation(res.locals.uuid, dir)
-      .then(data => {
-        res.send(data)
-      }).catch(e => {
-        res.send([])
-      })
-  }
-})
-
-app.post('/api/directories', function (req, res) {
-  const dir = req.body.location || ''
-  scanner.getDirs(dir)
-    .then((data) => {
-      res.send(data)
-    })
-})
 /*
 app.get('/art/:artist/:album/', function (req, res) {
   const type = req.query.type || 'cover'
@@ -270,76 +413,3 @@ app.get('/art/:filename', function (req, res) {
   }
 })
 */
-
-app.get('/stream/:id', function (req, res) {
-  let id = req.params.id || null
-  if (id !== null) {
-    // remove the extension
-    id = id.substr(0, id.lastIndexOf('.'))
-    // now go find the file
-    database.getMusic.url(res.locals.uuid, id)
-      .then(data => {
-        res.sendFile(data.info.location)
-        // res.setHeader('content-type', 'audio/flac')
-        // fs.createReadStream(data.location).pipe(res)
-      }).catch(e => {
-        res.send()
-      })
-  }
-})
-
-app.get('/art/:filename?', function (req, res) {
-  const filename = req.params.filename || null
-  if (filename !== null && filename.indexOf('/') === -1) {
-    const fn = path.resolve(__dirname, 'art/' + filename)
-    if (fs.existsSync(fn)) {
-      res.sendFile(fn)
-    } else {
-      res.sendFile(path.resolve(__dirname, 'placeholder.png'))
-    }
-  } else {
-    res.send({})
-  }
-})
-
-app.get('/api/users', function (req, res) {
-  const users = database.users.getAll(res.locals.uuid)
-  res.send(users)
-})
-app.post('/api/users', function (req, res) {
-  const users = database.users.add(res.locals.uuid, req.body)
-  res.json(users)
-})
-app.delete('/api/users', function (req, res) {
-  const delUUID = req.body.uuid
-  const users = database.users.remove(res.locals.uuid, delUUID)
-  res.json(users)
-})
-
-// both currently do the same thing... rescan needs to check for dead files
-app.get('/api/update', function (req, res) {
-  const uuid = res.locals.uuid
-  scanner.scan(uuid)
-    .then(() => {
-      console.log('update complete')
-    })
-  // this needs to be non-blocking...
-  res.send({ state: 'scanning' })
-})
-app.get('/api/rescan', function (req, res) {
-  const uuid = res.locals.uuid
-  scanner.scan(uuid)
-    .then(() => {
-      console.log('rescan complete')
-    })
-  // this needs to be non-blocking...
-  res.send({ state: 'scanning' })
-})
-
-app.get('*', (req, res) => {
-  res.sendFile('ui/index.html', { root: __dirname })
-})
-
-app.listen(port, () => {
-  console.log(`[START] Listening on ${port}`)
-})

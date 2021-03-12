@@ -9,11 +9,20 @@ const db = new Loki('data/local.db', {
   autosave: true,
   autoloadCallback: () => {
     musicDB = db.getCollection('music')
-    if (musicDB === null) { musicDB = db.addCollection('music', { unique: ['location'], indices: ['albumartist', 'album'] }) }
+    if (musicDB === null) { musicDB = db.addCollection('music', { unique: ['info.location'], indices: ['albumartist', 'album'] }) }
     usersDB = db.getCollection('users')
     if (usersDB === null) { usersDB = db.addCollection('users', { unique: ['user'] }) }
   }
 })
+
+const raw = {
+  songs: () => {
+    return musicDB.find()
+  },
+  removeSong: (song) => {
+    musicDB.remove(song)
+  }
+}
 
 const get = {
   /*
@@ -122,10 +131,8 @@ const add = {
 
 const settings = {
   locations: function (uuid) {
-    return new Promise(function (resolve, reject) {
-      const user = usersDB.findOne({ $loki: uuid })
-      resolve(user.locations)
-    })
+    const user = usersDB.findOne({ $loki: uuid })
+    return user.locations
   },
   addLocation: function (uuid, location) {
     return new Promise(function (resolve, reject) {
@@ -225,5 +232,6 @@ module.exports = {
   getMusic: get,
   addMusic: add,
   settings: settings,
-  users: users
+  users: users,
+  raw: raw
 }
