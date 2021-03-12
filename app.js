@@ -229,6 +229,7 @@ app.get('/events', (req, res, next) => {
   // set correct headers to keep connection open
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
   // this will allow cross-domain access, only enable if you need it
   // res.setHeader('Access-Control-Allow-Origin', '*')
   res.flushHeaders()
