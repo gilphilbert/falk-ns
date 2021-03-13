@@ -1,5 +1,5 @@
 // the cache version gets updated every time there is a new deployment
-const CACHE_VERSION = 0
+const CACHE_VERSION = 2
 const APP_CACHE = `main-${CACHE_VERSION}`
 const IMAGE_CACHE = 'imageV1'
 
@@ -64,16 +64,24 @@ const fromNetwork = (request, timeout) =>
   })
 
 // fetch the resource from the browser cache
-const fromCache = request => {
-  const cacheName = ((request.url.indexOf('/art/') >= 0) ? IMAGE_CACHE : APP_CACHE)
-  return caches
-    .open(cacheName)
-    .then(cache =>
-      cache
-        .match(request)
-        .then(matching => matching)
-    )
-}
+const fromCache = request =>
+  new Promise((resolve, reject) => {
+    const cacheName = ((request.url.indexOf('/art/') >= 0) ? IMAGE_CACHE : APP_CACHE)
+    caches
+      .open(cacheName)
+      .then(cache =>
+        cache
+          .match(request)
+          .then(matching => {
+            if (matching) {
+              resolve(matching)
+            } else {
+              reject(new Error('not in cache'))
+            }
+          })
+      )
+  })
+
 // cache the current page to make it available for offline
 const update = request => {
   const cacheName = ((request.url.indexOf('/art/') >= 0) ? IMAGE_CACHE : APP_CACHE)
@@ -93,8 +101,14 @@ self.addEventListener('fetch', evt => {
       return
     }
   }
-  evt.respondWith(
-    fromNetwork(evt.request, 10000).catch(() => fromCache(evt.request))
-  )
+  if (evt.request.url.indexOf('/art/') >= 0) {
+    evt.respondWith(
+      fromCache(evt.request).catch(() => fromNetwork(evt.request, 10000))
+    )
+  } else {
+    evt.respondWith(
+      fromNetwork(evt.request, 10000).catch(() => fromCache(evt.request))
+    )
+  }
   evt.waitUntil(update(evt.request))
 })
