@@ -33,39 +33,27 @@ class DatabaseHandler {
     callback = callback || null
     // load the data from the API (needs some error handling)
     try {
-      let data = await window.fetch('/api/songs/all')
-      data = await data.json()
-
-      console.log(data)
-
       // reset all songs to be missing
       this.music.chain().find().update((song) => {
         song.present = false
       })
 
-      // add the songs to the database
-      data.data.forEach(s => {
-        this.addSong(s)
-      })
-
-      // pull the remaining songs from the API, using the limit provided by the API
-      let remain = data.remain
-      const limit = data.data.length
-
+      let response = await window.fetch('/api/songs/all')
+      let res = await response.json()
+      const limit = res.data.length
       let offset = limit
-      while (remain > 0) {
-        data = await window.fetch('/api/songs/all/' + offset + '/' + limit)
-        data = await data.json()
-        data.data.forEach(s => {
+      // pull the remaining songs from the API, using the limit provided by the API
+      do {
+        res.data.forEach(s => {
           this.addSong(s)
         })
 
-        remain = data.remain
-        offset = offset + limit
-      }
+        response = await window.fetch('/api/songs/all/' + offset + '/' + limit)
+        res = await response.json()
+        offset = offset + res.data.length
+      } while (res.data.length === limit)
 
       // remove anything we haven't seen
-      // console.log(this.music.chain().find({ present: false }).data())
       this.music.chain().find({ present: false }).remove()
     } catch (e) {
       console.log('Could not connect to API to update library')

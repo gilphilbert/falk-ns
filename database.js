@@ -38,10 +38,8 @@ const get = {
   },
   */
   all: (uuid, offset, limit) => {
-    const count = musicDB.count()
-    const rem = count - offset - limit
     const allSongs = musicDB.chain().find({ uuid: uuid }).offset(offset).limit(limit).data()
-    return { data: allSongs, total: count, remain: ((rem > 0) ? rem : 0) }
+    return { data: allSongs }
   },
   url: (uuid, id) => {
     return new Promise(function (resolve, reject) {
