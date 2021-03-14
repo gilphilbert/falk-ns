@@ -85,6 +85,15 @@ $family-sans-serif: 'Lexend Deca', sans-serif;
     box-sizing: border-box;
 }
 
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
 // Modal minimal setup
 $transition-duration: .3s;
 $transition-duration-newsPaper: .7s;

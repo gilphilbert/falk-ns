@@ -178,7 +178,8 @@
         -->
         <div class="row">
           <div class="col-xs-10 col-md-3 has-margin-auto art">
-            <figure id="home-albumart" class="image is-1by1"><img loading="lazy" data-bind="attr: { src: playing.art }"></figure>
+            <figure id="home-albumart" class="image is-1by1"><img loading="lazy" data-bind="attr: { src: playing.art }" style="z-index: 1;"></figure>
+            <figure id="home-albumart" class="image is-1by1" data-bind="if: playing.discart() !== null" style="margin-top: -65%; background-color: transparent;"><img loading="lazy" data-bind="css: { 'rotate': playing.state() === true }, attr: { src: playing.discart }"></figure>
             <div id="mobile-toolbar" class="has-text-centered" data-bind="if: playing.album() !== ''">
               <div>
                 <svg class="feather"><use xlink:href="/img/feather-sprite.svg#heart"></use></svg>

@@ -353,6 +353,7 @@ const vmApp = function (params) {
     artist: ko.observable('Select some music!'),
     album: ko.observable(''),
     art: ko.observable('/art/placeholder.png'),
+    discart: ko.observable(null),
     duration: ko.observable(0),
     elapsed: ko.observable(0),
     quality: ko.observable('')
@@ -401,6 +402,7 @@ const vmApp = function (params) {
     self.playing.album(song.album)
     self.playing.duration(song.duration)
     self.playing.art('/art/' + song.art.cover)
+    self.playing.discart(((song.art.disc !== '') ? '/art/' + song.art.disc : null))
     self.playing.quality(song.shortformat)
 
     if ('mediaSession' in navigator) {

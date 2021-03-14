@@ -53,6 +53,12 @@ html.light {
 * {
   box-sizing: border-box; }
 
+@keyframes rotation {
+  from {
+    transform: rotate(0deg); }
+  to {
+    transform: rotate(359deg); } }
+
 article,
 aside,
 details,
@@ -2855,6 +2861,9 @@ input:checked + .slider:before {
       cursor: pointer; }
       .dropdown.is-active .dropdown-content span:hover {
         background-color: #ffffff28; }
+
+.rotate {
+  animation: rotation 2s infinite linear; }
 
 .row.center {
   align-items: center; }
