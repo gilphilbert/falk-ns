@@ -204,7 +204,11 @@
           <div id="mobile-controls" class="col-xs-12 mobile-controls hidden--for-desktop">
             <span><svg class="feather random is-small"><use xlink:href="/img/feather-sprite.svg#shuffle"></use></svg></span>
             <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-back"></use></svg></span>
-            <button class="button is-primary is-rounded has-no-margin"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#pause"></use></svg></button>
+            <button class="button is-primary is-rounded has-no-margin" data-bind="click: player.toggle">
+              <!--<svg class="feather"><use xlink:href="/img/feather-sprite.svg#pause"></use></svg>-->
+              <svg class="feather" data-bind="css: { 'is-hidden': playing.state() == true }"><use href="/img/feather-sprite.svg#play"></use></svg>
+              <svg class="feather" data-bind="css: { 'is-hidden': playing.state() != true }"><use href="/img/feather-sprite.svg#pause"></use></svg>
+            </button>
             <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-forward"></use></svg></span>
             <span><svg class="feather repeat is-small"><use xlink:href="/img/feather-sprite.svg#repeat"></use></svg></span>
           </div>

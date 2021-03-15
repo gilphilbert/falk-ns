@@ -59,7 +59,7 @@ const fromNetwork = (request, timeout) =>
     fetch(request).then(response => {
       clearTimeout(timeoutId)
       resolve(response)
-      // update(request)
+      update(request)
     }, reject)
   })
 
@@ -109,6 +109,6 @@ self.addEventListener('fetch', evt => {
     evt.respondWith(
       fromNetwork(evt.request, 10000).catch(() => fromCache(evt.request))
     )
+    evt.waitUntil(update(evt.request))
   }
-  evt.waitUntil(update(evt.request))
 })
