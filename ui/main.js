@@ -51,7 +51,7 @@ class DatabaseHandler {
         response = await window.fetch('/api/songs/all/' + offset + '/' + limit)
         res = await response.json()
         offset = offset + res.data.length
-      } while (res.data.length === limit)
+      } while (res.data.length > 0)
 
       // remove anything we haven't seen
       this.music.chain().find({ present: false }).remove()
