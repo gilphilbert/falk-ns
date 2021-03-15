@@ -87,7 +87,7 @@
         <div id="queue-items">
           <table data-bind="foreach: queue.list">
             <tr data-bind="css: { 'is-playing': playing() == true }">
-              <td data-bind="click: $parent.queue.changePos"><figure class="image is-40x40"><img data-bind="attr: { src: '/art/' + art.cover }" loading="lazy"></figure></td>
+              <td data-bind="click: $parent.queue.changePos"><figure class="image is-40x40"><img data-bind="attr: { src: '/art/' + art.cover }"></figure></td>
               <td data-bind="click: $parent.queue.changePos"><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: artist + ' - ' + (Math.floor(duration / 60) + ':' + ('0' + (duration % 60)).slice(-2, 3))"></p></td>
               <td data-bind="click: $parent.queue.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
             </tr>
@@ -178,8 +178,8 @@
         -->
         <div class="row">
           <div class="col-xs-10 col-md-3 has-margin-auto art">
-            <figure id="home-albumart" class="image is-1by1"><img loading="lazy" data-bind="attr: { src: playing.art }" style="z-index: 1;"></figure>
-            <figure id="home-albumart" class="image is-1by1" data-bind="if: playing.discart() !== null" style="margin-top: -65%; background-color: transparent;"><img loading="lazy" data-bind="css: { 'rotate': playing.state() === true }, attr: { src: playing.discart }"></figure>
+            <figure id="home-albumart" class="image is-1by1"><img data-bind="attr: { src: playing.art }" style="z-index: 1;"></figure>
+            <figure id="home-albumart" class="image is-1by1" data-bind="if: playing.discart() !== null" style="margin-top: -65%; background-color: transparent;"><img data-bind="css: { 'rotate': playing.state() === true }, attr: { src: playing.discart }"></figure>
             <div id="mobile-toolbar" class="has-text-centered" data-bind="if: playing.album() !== ''">
               <div>
                 <svg class="feather"><use xlink:href="/img/feather-sprite.svg#heart"></use></svg>
@@ -232,7 +232,7 @@
     </template>
     <template id="t-tile-subtitle-link">
       <a data-bind="attr: { href: url }, template: { afterRender: $parent.updateLinks }" data-navigo> <!--  -->
-        <figure class="image is-1by1"><img data-bind="attr: { src: art }" loading="lazy"></figure>
+        <figure class="image is-1by1"><img data-bind="attr: { src: art }"></figure>
         <p class="is-5 is-capitalized" data-bind="text: title"></p>
       </a>
       <a data-bind="attr: { href: surl }" data-navigo>
@@ -241,7 +241,7 @@
     </template>
     <template id="t-tile-subtitle">
       <a data-bind="attr: { href: url }, template: { afterRender: $parent.updateLinks }" data-navigo> <!--  -->
-        <figure class="image is-1by1"><img data-bind="attr: { src: art }" loading="lazy"></figure>
+        <figure class="image is-1by1"><img data-bind="attr: { src: art }"></figure>
         <p class="is-5 is-capitalized" data-bind="text: title"></p>
       </a>
       <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
@@ -253,7 +253,7 @@
             <div class="col-xs-12 col-md-5 has-text-centered-desktop">
               <div class="row album-detail">
                 <div class="col-md-8 col-md-offset-2 col-xs-4 art">
-                  <figure class="image"><img data-bind="attr: { src: art }" loading="lazy"></figure>
+                  <figure class="image"><img data-bind="attr: { src: art }"></figure>
                 </div>
                 <div class="col-md-8 col-md-offset-2 col-xs-8">
                   <h1 class="album-title" data-bind="text: title"></h1>
