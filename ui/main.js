@@ -165,7 +165,7 @@ class DatabaseHandler {
       year: info[0].year,
       genre: info[0].genre,
       shortformat: info[0].shortformat,
-      tracks: ko.observable(info)
+      tracks: info
     }
   }
 
@@ -393,10 +393,31 @@ const vmApp = function (params) {
   }
 
   // play the song at queue.pos
-  self.play = () => {
+  self.getSongURL = (id) => {
+    return new Promise((resolve, reject) => {
+      const open = indexedDB.open('cache', 1)
+      open.onsuccess = function () {
+        const db = open.result
+        const tx = db.transaction('music', 'readwrite')
+        const store = tx.objectStore('music')
+        const getSong = store.get(parseInt(id))
+        getSong.onsuccess = function () {
+          if (getSong.result) {
+            console.log(getSong.result)
+            const url = URL.createObjectURL(getSong.result.data)
+            resolve(url)
+          } else {
+            resolve(false)
+          }
+        }
+        tx.oncomplete = () => db.close()
+      }
+    })
+  }
+  self.play = async () => {
     const song = self.queue.list()[self.queue.pos()]
     const ext = song.location.substr(song.location.lastIndexOf('.'))
-    const url = `/stream/${song._id}${ext}`
+    const url = await self.getSongURL(song._id) || `/stream/${song._id}${ext}`
     self.audio.src = url
 
     self.playing.title(song.title)

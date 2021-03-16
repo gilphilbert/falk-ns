@@ -170,17 +170,43 @@ app.post('/api/directories', function (req, res) {
     })
 })
 
+function ext2MIME (ext) {
+  let val = false
+  switch (ext) {
+    case 'aac':
+      val = 'audio/aac'
+      break
+    case 'flac':
+      val = 'audio/flac'
+      break
+    case 'mp3':
+      val = 'audio/mpeg'
+      break
+    case 'oga':
+      val = 'audio/ogg'
+      break
+    case 'opus':
+      val = 'audio/opus'
+      break
+    case 'wav':
+      val = 'audio/wav'
+      break
+  }
+  return val
+}
+
 app.get('/stream/:id', function (req, res) {
   let id = req.params.id || null
   if (id !== null) {
     // remove the extension
+    const mime = ext2MIME(id.substr(id.lastIndexOf('.') + 1))
     id = id.substr(0, id.lastIndexOf('.'))
     // now go find the file
     database.getMusic.url(res.locals.uuid, id)
       .then(data => {
-        res.sendFile(data.info.location)
-        // res.setHeader('content-type', 'audio/flac')
-        // fs.createReadStream(data.location).pipe(res)
+        // res.sendFile(data.info.location)
+        res.setHeader('content-type', mime)
+        fs.createReadStream(data.info.location).pipe(res)
       }).catch(e => {
         res.send()
       })

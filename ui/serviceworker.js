@@ -1,7 +1,10 @@
 // the cache version gets updated every time there is a new deployment
-const CACHE_VERSION = 2
+const CACHE_VERSION = 1
 const APP_CACHE = `main-${CACHE_VERSION}`
 const IMAGE_CACHE = 'imageV1'
+
+// importScripts("/dist/localforage.js") <!-- use this to load localForge. Configure for indexeddb, then use. Switch the entire app to indexeddb?
+// We could use a serviceworker to populate the database and do background updates (That's pretty cool.)
 
 // these are the routes we are going to cache for offline support
 const cacheFiles = [
@@ -26,6 +29,28 @@ const cacheFiles = [
   '/main.js',
   '/site.webmanifest'
 ]
+
+function cacheSong (url, response) {
+  const id = parseInt(url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.')))
+  response.blob().then(blob => {
+    const idb = indexedDB.open('cache', 1)
+    idb.onupgradeneeded = function () {
+      const db = idb.result
+      const store = db.createObjectStore('music', { keyPath: 'id' })
+      const index = store.createIndex('date', 'added')
+    }
+    idb.onsuccess = function () {
+      const db = idb.result
+      const tx = db.transaction('music', 'readwrite')
+      const store = tx.objectStore('music')
+
+      store.add({ id: id, added: Date.now(), data: blob })
+      tx.oncomplete = function () {
+        db.close()
+      }
+    }
+  })
+}
 
 // on activation we clean up the previously registered service workers
 self.addEventListener('activate', evt =>
@@ -58,15 +83,26 @@ const fromNetwork = (request, timeout) =>
     const timeoutId = setTimeout(reject, timeout)
     fetch(request).then(response => {
       clearTimeout(timeoutId)
+      const cacheCopy = response.clone()
       resolve(response)
-      update(request)
+      // update(request)
+      if (request.url.includes('/stream/')) {
+        cacheSong(request.url, cacheCopy)
+      } else {
+        const cacheName = ((request.url.includes('/art/')) ? IMAGE_CACHE : APP_CACHE)
+        caches
+          .open(cacheName)
+          .then(cache =>
+            cache.put(request, cacheCopy)
+          )
+      }
     }, reject)
   })
 
 // fetch the resource from the browser cache
 const fromCache = request =>
   new Promise((resolve, reject) => {
-    const cacheName = ((request.url.indexOf('/art/') >= 0) ? IMAGE_CACHE : APP_CACHE)
+    const cacheName = ((request.url.includes('/art/')) ? IMAGE_CACHE : APP_CACHE)
     caches
       .open(cacheName)
       .then(cache =>
@@ -84,7 +120,7 @@ const fromCache = request =>
 
 // cache the current page to make it available for offline
 const update = request => {
-  const cacheName = ((request.url.indexOf('/art/') >= 0) ? IMAGE_CACHE : APP_CACHE)
+  const cacheName = ((request.url.includes('/art/')) ? IMAGE_CACHE : APP_CACHE)
   caches
     .open(cacheName)
     .then(cache =>
@@ -101,7 +137,7 @@ self.addEventListener('fetch', evt => {
       return
     }
   }
-  if (evt.request.url.indexOf('/art/') >= 0) {
+  if (evt.request.url.includes('/art/') || evt.request.url.includes('/stream/')) {
     evt.respondWith(
       fromCache(evt.request).catch(() => fromNetwork(evt.request, 10000))
     )
@@ -109,6 +145,6 @@ self.addEventListener('fetch', evt => {
     evt.respondWith(
       fromNetwork(evt.request, 10000).catch(() => fromCache(evt.request))
     )
-    evt.waitUntil(update(evt.request))
+    // evt.waitUntil(update(evt.request))
   }
 })
