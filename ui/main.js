@@ -120,10 +120,12 @@ class DatabaseHandler {
   }
 
   async getArtist (artist) {
+    const s_artist = this.artists.by('name', artist) || null
     const songs = this.music.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
     const albums = songs.map(e => {
       return {
         art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
+        artistart: '/art/' + ((s_artist.art !== '') ? s_artist.art : 'placeholder.png'),
         title: e.info.album,
         url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
         subtitle: e.info.year,
@@ -163,7 +165,7 @@ class DatabaseHandler {
       year: info[0].year,
       genre: info[0].genre,
       shortformat: info[0].shortformat,
-      tracks: info
+      tracks: ko.observable(info)
     }
   }
 
@@ -666,7 +668,7 @@ const vmApp = function (params) {
             if (data.albums.length > 0) {
               self.tiles(data.albums)
               self.pageTitle(artist)
-              self.pageContainer('t-tiles')
+              self.pageContainer('t-artist')
             }
           })
       })

@@ -247,6 +247,22 @@
       <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
     </template>
 
+    <template id="t-artist">
+      <div class="container-fluid">
+        <div class="row center">
+          <div class="col-md-1 hidden--to-tablet">
+            <figure class="image is-rounded has-no-overflow"><img data-bind="attr: { src: tiles()[0].artistart }"></figure>
+          </div>
+          <div class="col-xs-12 col-md-6">
+            <h1 data-bind="text: pageTitle"></h1>
+          </div>
+        </div>
+        <div class="row art-container" data-bind="foreach: tiles">
+          <div class="col-lg-2 col-xs-4 art has-text-centered item-tile" data-bind="template: { name: ((surl !== '') ? 't-tile-subtitle-link' : 't-tile-subtitle' ) }"></div>
+        </div>
+      </div>
+    </template>
+
     <template id="t-album">
         <div class="container-fluid" data-bind="with: album">
           <div class="row">
