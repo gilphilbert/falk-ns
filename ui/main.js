@@ -388,30 +388,25 @@ const vmApp = function (params) {
         s.playing(true)
       }
     })
-
-    self.play()
   }
 
   // play the song at queue.pos
   self.getSongURL = (id) => {
     return new Promise((resolve, reject) => {
-      const open = indexedDB.open('cache', 1)
-      open.onsuccess = function () {
-        const db = open.result
-        const tx = db.transaction('music', 'readwrite')
-        const store = tx.objectStore('music')
-        const getSong = store.get(parseInt(id))
-        getSong.onsuccess = function () {
-          if (getSong.result) {
-            console.log(getSong.result)
-            const url = URL.createObjectURL(getSong.result.data)
-            resolve(url)
-          } else {
+      const mdb = indexedDB.open('falk', 2).onsuccess = mdb => {
+        const tx = mdb.target.result.transaction('cache', 'readonly')
+        const store = tx.objectStore('cache')
+        store.get(id).onsuccess = (e) => {
+          if (!e.target.result || e.target.result.data === false) {
             resolve(false)
+          } else {
+            const url = URL.createObjectURL(e.target.result.data)
+            resolve(url)
           }
         }
-        tx.oncomplete = () => db.close()
+        tx.onerror = () => resolve(false) // the store doesn't exist
       }
+      mdb.onerror = () => resolve(false)
     })
   }
   self.play = async () => {

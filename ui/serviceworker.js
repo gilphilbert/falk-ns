@@ -30,24 +30,22 @@ const cacheFiles = [
   '/site.webmanifest'
 ]
 
+// create the database
+indexedDB.open('falk', 2).onupgradeneeded = function (e) {
+  const store = e.target.result.createObjectStore('cache', { keyPath: 'id' })
+  store.createIndex('date', 'added')
+}
+
 function cacheSong (url, response) {
   const id = parseInt(url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.')))
   response.blob().then(blob => {
-    const idb = indexedDB.open('cache', 1)
-    idb.onupgradeneeded = function () {
-      const db = idb.result
-      const store = db.createObjectStore('music', { keyPath: 'id' })
-      const index = store.createIndex('date', 'added')
-    }
-    idb.onsuccess = function () {
-      const db = idb.result
-      const tx = db.transaction('music', 'readwrite')
-      const store = tx.objectStore('music')
+    indexedDB.open('falk', 2).onsuccess = function (e) {
+      const db = e.target.result
+      const tx = db.transaction('cache', 'readwrite')
+      const store = tx.objectStore('cache')
 
-      store.add({ id: id, added: Date.now(), data: blob })
-      tx.oncomplete = function () {
-        db.close()
-      }
+      store.add({ id: id, added: Date.now(), played: Date.now(), data: blob })
+      tx.oncomplete = () => db.close()
     }
   })
 }
