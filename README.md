@@ -37,7 +37,6 @@ Create the admin password then login. Once you're in, head to http://localhost:3
     * Notification when library is updating
 * Search
 * Better progress bar
-* Artist art (will need to come from an online source, musicbrainz?)
 * Queue
     * Clear queue
     * Add song to queue (enqeue)
@@ -58,9 +57,6 @@ Create the admin password then login. Once you're in, head to http://localhost:3
         * Most played
         * Most recently added
         * Favorites
-* Artist page (header image, etc)
-* Scanner
-    * Remove missing files
 * Restore queue after refresh (warning, this will also be browser/tab close/open)
     * Need a localstorage value for "restore playing state"
     * Save:

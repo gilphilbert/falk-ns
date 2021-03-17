@@ -43,7 +43,7 @@
         </ul>
       </aside>
       <div id="control-bar" class="is-active" data-bind="swipeup: showQueue">
-        <div class="progress-topper" style="transition: all 1000ms linear" data-bind="style: { width: (playing.elapsed() / playing.duration() * 100) + '%' }"></div>
+        <div class="progress-topper" data-bind="style: { width: player.progress() + 'px' }"></div>
         <div class="row is-marginless">
           <div class="col-xs col-md">
             <div class="row now-playing">
@@ -87,8 +87,8 @@
         <div id="queue-items">
           <table data-bind="foreach: queue.list">
             <tr data-bind="css: { 'is-playing': playing() == true }">
-              <td data-bind="click: $parent.queue.changePos"><figure class="image is-40x40"><img data-bind="attr: { src: '/art/' + art.cover }"></figure></td>
-              <td data-bind="click: $parent.queue.changePos"><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: artist + ' - ' + (Math.floor(duration / 60) + ':' + ('0' + (duration % 60)).slice(-2, 3))"></p></td>
+              <td data-bind="click: $parent.player.setQueuePos"><figure class="image is-40x40"><img data-bind="attr: { src: '/art/' + art.cover }"></figure></td>
+              <td data-bind="click: $parent.player.setQueuePos"><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: artist + ' - ' + (Math.floor(duration / 60) + ':' + ('0' + (duration % 60)).slice(-2, 3))"></p></td>
               <td data-bind="click: $parent.queue.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
             </tr>
           </table>
@@ -116,7 +116,6 @@
           <p class="is-3">Reconnecting</p>
         </div>
       </div>
-      <audio preload="auto" autoplay id="audio-player" data-bind="event: { ended: player.complete, timeupdate: player.update, play: player.play, pause: player.pause }"></audio>
     </template>
 
     <template id="t-login">
@@ -205,7 +204,6 @@
             <span><svg class="feather random is-small"><use xlink:href="/img/feather-sprite.svg#shuffle"></use></svg></span>
             <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-back"></use></svg></span>
             <button class="button is-primary is-rounded has-no-margin" data-bind="click: player.toggle">
-              <!--<svg class="feather"><use xlink:href="/img/feather-sprite.svg#pause"></use></svg>-->
               <svg class="feather" data-bind="css: { 'is-hidden': playing.state() == true }"><use href="/img/feather-sprite.svg#play"></use></svg>
               <svg class="feather" data-bind="css: { 'is-hidden': playing.state() != true }"><use href="/img/feather-sprite.svg#pause"></use></svg>
             </button>
@@ -402,6 +400,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/navigo/8.9.1/navigo.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lokijs/1.5.11/lokijs.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.9.0/localforage.min.js"></script>
+  <script src="/js/dist.min.js"></script>
   <script src="main.js"></script>
 </html>
