@@ -10,11 +10,6 @@ class DatabaseHandler {
         if (!this.music) {
           this.music = this.db.addCollection('songs', { unique: ['id'] })
         }
-        // load the collection (or create if it's empty)
-        this.artists = this.db.getCollection('artists')
-        if (!this.artists) {
-          this.artists = this.db.addCollection('artists', { unique: ['name'] })
-        }
         //  if there's at least some music, call the callback
         if (this.music.count() > 0 && typeof callback === 'function') {
           callback()
@@ -87,22 +82,6 @@ class DatabaseHandler {
     } catch (e) {
       console.error('Could not add song to database', e)
     }
-
-    try {
-      const artist = this.artists.by('name', song.info.albumartist) || null
-      const curart = ((artist !== null) ? artist.art || null : null)
-      if (artist === null) {
-        this.artists.insert({ name: song.info.albumartist, art: song.info.art.artist })
-      } else if (song.info.art.artist !== '') {
-        if (curart === null) {
-          artist.art = song.info.art.artist
-          this.artists.update(artist)
-        }
-      }
-    } catch (e) {
-      console.log('Could not add artist')
-      console.log(e)
-    }
   }
 
   async getStats () {
@@ -115,17 +94,20 @@ class DatabaseHandler {
   }
 
   async getArtists () {
-    const artists = this.artists.chain().find().simplesort('name').data()
-    return artists.map(a => { return { title: a.name, art: '/art/' + ((a.art !== '') ? a.art : 'placeholder.png'), url: `/artist/${encodeURIComponent(a.name)}`, subtitle: '', surl: '' } })
+    const artists = this.music.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
+    return artists
+      .filter((tag, index, array) => array.findIndex(t => t.info.albumartist === tag.info.albumartist) === index)
+      .map(a => { return { title: a.info.albumartist, art: '/art/' + ((a.info.art.artist !== '') ? a.info.art.artist : 'placeholder.png'), url: `/artist/${encodeURIComponent(a.info.albumartist)}`, subtitle: '', surl: '' } })
   }
 
   async getArtist (artist) {
-    const s_artist = this.artists.by('name', artist) || null
+    // const s_artist = this.artists.by('name', artist) || null
+    const artistArt = this.music.chain().find({ 'info.albumartist': artist }).compoundsort([['info.artist.art', true], 'info.albumartist']).limit(1).data()[0].info.art.artist
     const songs = this.music.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
     const albums = songs.map(e => {
       return {
         art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
-        artistart: '/art/' + ((s_artist.art !== '') ? s_artist.art : 'placeholder.png'),
+        artistart: '/art/' + ((artistArt !== '') ? artistArt : 'placeholder.png'),
         title: e.info.album,
         url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
         subtitle: e.info.year,
@@ -318,6 +300,9 @@ const vmApp = function (params) {
           }
         }
       })
+    },
+    save: () => {
+      localStorage.setItem('queue', JSON.stringify(self.queue.list()))
     }
   }
   // sets the UI queue to show the correct song playing
@@ -427,7 +412,7 @@ const vmApp = function (params) {
         self.player.audio.addEventListener('play', self.player.evtHandlers.play)
         self.player.audio.addEventListener('pause', self.player.evtHandlers.pause)
         self.player.audio.addEventListener('next', self.player.evtHandlers.next)
-        self.player.audio.addEventListener('timeupdate', self.player.evtHandlers.update)
+        // self.player.audio.addEventListener('timeupdate', self.player.evtHandlers.update)
       }
     },
     _playQueue: async () => {
@@ -507,6 +492,7 @@ const vmApp = function (params) {
       // self.player.progress(0)
       self.player.audio.updateTracks(...tracks)
       self.player.play()
+      self.queue.save()
     },
     enqueue: (tracks) => {
 
