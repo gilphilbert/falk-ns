@@ -129,7 +129,7 @@ const update = request => {
 // general strategy when making a request (eg if online try to fetch it
 // from the network with a timeout, if something fails serve from cache)
 self.addEventListener('fetch', evt => {
-  const ignoredURLs = ['/api/check', '/api/songs/', '/api/update', '/events']
+  const ignoredURLs = ['/api/check', '/api/songs/', '/api/update', '/events', '/song/']
   for (let i = 0; i < ignoredURLs.length; i++) {
     if (evt.request.url.indexOf(ignoredURLs[i]) >= 0) {
       return

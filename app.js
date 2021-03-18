@@ -213,6 +213,21 @@ app.get('/stream/:id', function (req, res) {
   }
 })
 
+app.get('/song/:id', function (req, res) {
+  let id = req.params.id || null
+  if (id !== null) {
+    // remove the extension
+    id = id.substr(0, id.lastIndexOf('.'))
+    // now go find the file
+    database.getMusic.url(res.locals.uuid, id)
+      .then(data => {
+        res.sendFile(data.info.location)
+      }).catch(e => {
+        res.send()
+      })
+  }
+})
+
 app.get('/art/:filename?', function (req, res) {
   const filename = req.params.filename || null
   if (filename !== null && filename.indexOf('/') === -1) {

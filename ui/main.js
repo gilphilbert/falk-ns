@@ -302,7 +302,19 @@ const vmApp = function (params) {
       })
     },
     save: () => {
-      localStorage.setItem('queue', JSON.stringify(self.queue.list()))
+      const _q = { tracks: self.queue.list(), pos: self.queue.pos() }
+      window.localStorage.setItem('queue', JSON.stringify(_q))
+    },
+    restore: () => {
+      const _l = window.localStorage.getItem('queue')
+      if (_l && typeof _l === 'string' && _l !== '') {
+        const _q = JSON.parse(_l)
+        _q.tracks.forEach((s, i) => { s.playing = ko.observable(i === _q.pos) })
+        // console.log(_q)
+        self.queue.list(_q.tracks)
+        self.queue.pos(_q.pos)
+        self.player._playQueue(false)
+      }
     }
   }
   // sets the UI queue to show the correct song playing
@@ -415,7 +427,7 @@ const vmApp = function (params) {
         // self.player.audio.addEventListener('timeupdate', self.player.evtHandlers.update)
       }
     },
-    _playQueue: async () => {
+    _playQueue: async (play = true) => {
       const list = self.queue.list()
       const urls = []
       let found = false
@@ -427,7 +439,7 @@ const vmApp = function (params) {
           urls.push(url)
         }
       }
-      self.player.setTracks(urls)
+      self.player.setTracks(urls, play)
     },
     evtHandlers: {
       complete: () => {
@@ -487,11 +499,13 @@ const vmApp = function (params) {
     pause: () => {
       self.player.audio.play(false)
     },
-    setTracks: (tracks) => {
+    setTracks: (tracks, play = true) => {
       self.player._get()
       // self.player.progress(0)
       self.player.audio.updateTracks(...tracks)
-      self.player.play()
+      if (play) {
+        self.player.play()
+      }
       self.queue.save()
     },
     enqueue: (tracks) => {
@@ -821,6 +835,7 @@ const vmApp = function (params) {
     navigator.mediaSession.setActionHandler('previoustrack', self.player.prev)
     navigator.mediaSession.setActionHandler('nexttrack', self.player.next)
   }
+  self.queue.restore()
 }
 ko.components.register('app', {
   viewModel: vmApp,
