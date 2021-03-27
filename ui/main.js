@@ -1,3 +1,5 @@
+import { LocalPlayer } from './js/player.js'
+
 const ko = window.ko
 
 class DatabaseHandler {
@@ -310,7 +312,6 @@ const vmApp = function (params) {
       if (_l && typeof _l === 'string' && _l !== '') {
         const _q = JSON.parse(_l)
         _q.tracks.forEach((s, i) => { s.playing = ko.observable(i === _q.pos) })
-        // console.log(_q)
         self.queue.list(_q.tracks)
         self.queue.pos(_q.pos)
         self.player._playQueue(false)
@@ -393,9 +394,11 @@ const vmApp = function (params) {
     self.queue.list(tracks)
     self.queue.pos(pos)
     self.player._playQueue()
+    self.player.play(pos)
   }
 
   // play the song at queue.pos
+  /*
   self.getSongURL = (id) => {
     return new Promise((resolve, reject) => {
       const mdb = indexedDB.open('falk', 2).onsuccess = mdb => {
@@ -414,32 +417,32 @@ const vmApp = function (params) {
       mdb.onerror = () => resolve(false)
     })
   }
+  */
 
   self.player = {
     audio: null,
     progress: ko.observable(0),
     _get: () => {
       if (self.player.audio === null) {
-        self.player.audio = new window.PreciseAudio()
-        self.player.audio.addEventListener('play', self.player.evtHandlers.play)
-        self.player.audio.addEventListener('pause', self.player.evtHandlers.pause)
-        self.player.audio.addEventListener('next', self.player.evtHandlers.next)
-        // self.player.audio.addEventListener('timeupdate', self.player.evtHandlers.update)
+        self.player.audio = new LocalPlayer()
+        self.player.audio.on('play', self.player.evtHandlers.play)
+        self.player.audio.on('pause', self.player.evtHandlers.pause)
+        self.player.audio.on('next', self.player.evtHandlers.next)
+        self.player.audio.on('progress', self.player.evtHandlers.update)
       }
     },
     _playQueue: async (play = true) => {
       const list = self.queue.list()
-      const urls = []
-      let found = false
-      for (let i = 0; i < list.length; i++) {
-        if (found || list[i].playing()) {
-          found = true
-          const ext = list[i].location.substr(list[i].location.lastIndexOf('.'))
-          const url = await self.getSongURL(list[i]._id) || `/stream/${list[i]._id}${ext}`
-          urls.push(url)
-        }
-      }
-      self.player.setTracks(urls, play)
+      const q = list
+        .filter((v, i) => i >= self.queue.pos())
+        .map((e, i) => {
+          return {
+            id: e._id,
+            url: '/song/' + e._id + list[i].location.substr(list[i].location.lastIndexOf('.'))
+          }
+        })
+      self.player.audio.clearQueue()
+      self.player.audio.enqueue(q)
     },
     evtHandlers: {
       complete: () => {
@@ -448,13 +451,12 @@ const vmApp = function (params) {
           self.queue.pos(self.queue.pos() + 1)
         }
       },
-      update: () => {
-        // get the ms of playtime (ignoring anything send in the event, because that's nonsense)
-        const ms = Math.round(self.player.audio.currentTimeMillis)
+      update: (evt) => {
+        const detail = evt.detail
         // update the progress
-        self.player.progress(ms / self.player.audio.durationMillis * window.innerWidth)
+        self.player.progress(detail.elapsed / detail.duration * window.innerWidth)
         // set the elapsed value
-        self.playing.elapsed(Math.floor(ms / 1000))
+        self.playing.elapsed(Math.floor(detail.elapsed))
       },
       play: () => {
         self.playing.state(true)
@@ -474,7 +476,7 @@ const vmApp = function (params) {
       }
     },
     setQueuePos: (song) => {
-      const oldPos = self.queue.pos()
+      // const oldPos = self.queue.pos()
       self.queue.list().forEach((s, i) => {
         if (s._id === song._id) {
           self.queue.pos(i)
@@ -487,31 +489,32 @@ const vmApp = function (params) {
       self.player.audio.skip()
     },
     toggle: () => {
-      if (self.player.audio.paused) {
-        self.player.audio.play()
-      } else {
+      if (self.player.audio.isPlay()) {
         self.player.audio.pause()
+      } else {
+        self.player.audio.play()
       }
     },
     play: () => {
       self.player.audio.play()
     },
     pause: () => {
-      self.player.audio.play(false)
+      self.player.audio.pause()
     },
     setTracks: (tracks, play = true) => {
-      self.player._get()
+      // self.player._get()
       // self.player.progress(0)
-      self.player.audio.updateTracks(...tracks)
-      if (play) {
-        self.player.play()
-      }
-      self.queue.save()
+      // self.player.audio.updateTracks(...tracks)
+      // if (play) {
+      //   self.player.play()
+      // }
+      // self.queue.save()
     },
     enqueue: (tracks) => {
 
     }
   }
+  self.player._get()
 
   /* playback control ends */
 
@@ -882,6 +885,11 @@ ko.utils.arrayForEach(hammerEvents, function (eventName) {
     }
   }
 })
+
+indexedDB.open('falk', 2).onupgradeneeded = function (e) {
+  const store = e.target.result.createObjectStore('cache', { keyPath: 'id' })
+  store.createIndex('date', 'added')
+}
 
 ko.applyBindings(new AppViewModel())
 
