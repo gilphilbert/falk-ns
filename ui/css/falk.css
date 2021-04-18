@@ -3227,8 +3227,7 @@ body.no-controls #queue-list {
     height: 3px;
     position: absolute;
     top: 0;
-    left: 0;
-    transition: all 40ms ease; }
+    left: 0; }
     #control-bar .progress-topper::after {
       content: '';
       position: absolute;

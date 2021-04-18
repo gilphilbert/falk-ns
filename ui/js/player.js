@@ -9,21 +9,13 @@ const STATE_PAUSE = 2
 
 export class LocalPlayer {
   constructor (tick = 100) {
-    this.state = STATE_STOP
-    this.playMode = false
-
     this.sources = []
+    this.html5Init()
+    this.reset()
 
     this.gainNode = playerContext.createGain()
     this.gainNode.connect(playerContext.destination)
 
-    this.html5Init()
-
-    this.startTime = -1
-    this.timeLeft = -1
-
-    this.queue = []
-    this.queuePos = 0
 
     this.progressTick = tick
 
@@ -87,7 +79,7 @@ export class LocalPlayer {
     // create the HTML5 audio element
     this.html5Audio = new window.Audio()
     this.html5Audio.controls = false
-    this.html5Audio.addEventListener('canplay', () => {
+    this.html5Audio.addEventListener('canplaythrough', () => {
       this.html5Audio.play()
     })
     this.html5Audio.addEventListener('play', () => {
@@ -112,11 +104,18 @@ export class LocalPlayer {
     this.sources[index].addEventListener('ended', (evt) => {
       if (this.state === STATE_PLAY) {
         // kill old source
+        console.log('killing myself', evt.target)
         evt.target.disconnect(0)
         if (evt.target.buffer) {
           evt.target.buffer = null
         }
         this.sources.shift()
+        if (this.sources.length === 0) {
+          this.gainNode.disconnect(0)
+        }
+
+        this.queue[this.queuePos].data = null
+        console.log(this.queue)
 
         // this is our "next song" trigger, since web audio has no "play" event
         this.startTime = playerContext.currentTime
@@ -124,6 +123,7 @@ export class LocalPlayer {
 
         // shift the queue on
         this.queuePos++
+        // increment this song's timesPlayed in the localdb and backend <---------------------------------------------------------
 
         // if we're not at the end of the queue
         if (this.queue[this.queuePos + 1]) {
@@ -177,6 +177,7 @@ export class LocalPlayer {
   //
   */
   fetchTrack (item) {
+    console.log('fetching track with id ', item.id)
     return new Promise((resolve, reject) => {
       if (!item) {
         reject(new Error('Not in queue'))
@@ -204,6 +205,7 @@ export class LocalPlayer {
   //
   */
   loadTrack (index) {
+    console.log('Loading track at ', index)
     return new Promise((resolve, reject) => {
       const mdb = window.indexedDB.open('falk', 2).onsuccess = mdb => {
         const tx = mdb.target.result.transaction('cache', 'readonly')
@@ -230,7 +232,7 @@ export class LocalPlayer {
   switchToWebAudio () {
     this.webAudioInit(0)
     this.sources[0].buffer = this.queue[this.queuePos].data
-    // console.log('Switching to Web Audio API')
+    console.log('Switching to Web Audio API')
     const curTime = this.html5Audio.currentTime
     this.playMode = PLAY_MODE_WEBAUDIO
     if (this.state === STATE_PLAY) {
@@ -245,7 +247,7 @@ export class LocalPlayer {
     this.sources[1].buffer = this.queue[this.queuePos + 1].data
     const scheduleTime = this.startTime + this.timeLeft
     this.sources[1].start(scheduleTime)
-    // console.log('Next song scheduled')
+    console.log('Next song scheduled')
   }
 
   _handlers () {
@@ -281,6 +283,11 @@ export class LocalPlayer {
 
     // if no index was provided, use the current queue position
     if (index < 0) {
+      // if we're playing somewhere other than the current play position, make sure we clear any other status (play/pause)
+      this.state = STATE_STOP
+      this.html5Audio.src = ''
+      this.timeLeft = 0
+      this.startTime = 0
       index = this.queuePos
     }
 
@@ -289,11 +296,13 @@ export class LocalPlayer {
       throw new Error('Invalid queue position')
     }
 
-    // if we're already playing, stop
+    // if we're already playing, stop. This covers cases of clicking the same song again, or clicking a new song while playing
     if (this.state === STATE_PLAY) {
       if (this.playMode === PLAY_MODE_HTML5) {
         this.html5Audio.pause()
         this.html5Audio.src = ''
+        this.timeLeft = 0
+        this.startTime = 0
       } else {
         // supress 'ended' messages for web audio elements
         this.state = STATE_STOP
@@ -323,7 +332,7 @@ export class LocalPlayer {
       this.playMode = PLAY_MODE_WEBAUDIO
 
       if (this.queue[index + 1] && this.queue[index + 1].data) {
-        // queue up next song...
+        // queue up next song if we already have the data loaded
         this.prepareWebAudio()
       }
     } else {
@@ -366,6 +375,16 @@ export class LocalPlayer {
     this.timeLeft = 0
     this.startTime = 0
     this.queuePos = 0
+  }
+
+  skip () {
+    this.changePos(this.queuePos + 1)
+  }
+
+  prev () {
+    // check how long we've been playing for, if it's less than three seconds
+    // then skip back, otherwise just start at the beginning of the song
+    this.changePos(this.queuePos - 1)
   }
 
   async fetchQueue () {
@@ -432,11 +451,43 @@ export class LocalPlayer {
     }
   }
 
-  clearQueue () {
+  setTracks (tracks, pos = 0) {
+    this.reset()
+    this.queuePos = pos
+    this.enqueue(tracks)
+  }
+
+  clearQueueData () {
+    const tracks = this.queue.filter((tr, i) => { return (i < this.queuePos || i > this.queuePos + 2) })
+    console.log(tracks)
+  }
+
+  changePos (index) {
     this.stop()
+    // as long as the queue position is valid, set it
+    if (this.queue[index]) {
+      this.queuePos = index
+    }
+    // need to clear audio buffers for songs no longer in the immediate queue
+    this.play()
+    this.clearQueueData()
+  }
+
+  clearQueue () {
+    this.reset()
+  }
+
+  reset () {
+    this.state = STATE_STOP
+    this.playMode = false
+
+    this.stopAllWebAudio()
+    this.html5Audio.src = ''
+
+    this.startTime = -1
+    this.timeLeft = -1
+
     this.queue = []
     this.queuePos = 0
   }
-
-  // function to move the pointer to the current queue item
 }

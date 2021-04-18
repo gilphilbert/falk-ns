@@ -1,6 +1,7 @@
 // express framework
 const express = require('express')
 const app = express()
+const sharp = require('sharp')
 const compression = require('compression')
 app.use(compression({ filter: shouldCompress }))
 function shouldCompress (req, res) {
@@ -230,10 +231,21 @@ app.get('/song/:id', function (req, res) {
 
 app.get('/art/:filename?', function (req, res) {
   const filename = req.params.filename || null
+  const size = req.query.full || null
   if (filename !== null && filename.indexOf('/') === -1) {
     const fn = path.resolve(__dirname, 'art/' + filename)
     if (fs.existsSync(fn)) {
-      res.sendFile(fn)
+      const image = sharp(fn)
+      image
+        .metadata()
+        .then(m => {
+          res.type(m.format)
+          if (size === 'full') {
+            sharp(fn).resize(800).pipe(res)
+          } else {
+            sharp(fn).resize(350).pipe(res)
+          }
+        })
     } else {
       res.sendFile(path.resolve(__dirname, 'placeholder.png'))
     }

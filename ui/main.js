@@ -288,7 +288,7 @@ const vmApp = function (params) {
   self.queue = {
     list: ko.observableArray([]),
     pos: ko.observable(0),
-    trigger: true,
+    // trigger: true,
     remove: (song) => {
       self.queue.list().forEach((s, i) => {
         // find the song in the queue
@@ -297,18 +297,19 @@ const vmApp = function (params) {
           self.queue.list.splice(i, 1)
           if (i < self.queue.pos()) {
             // if the song is before the current playing position, turn off the trigger and decrement
-            self.queue.trigger = false
+            // self.queue.trigger = false
             self.queue.pos(self.queue.pos() - 1)
           }
         }
       })
     },
     save: () => {
-      const _q = { tracks: self.queue.list(), pos: self.queue.pos() }
-      window.localStorage.setItem('queue', JSON.stringify(_q))
+      // const _q = { tracks: self.queue.list(), pos: self.queue.pos() }
+      // window.localStorage.setItem('queue', JSON.stringify(_q))
     },
     restore: () => {
-      const _l = window.localStorage.getItem('queue')
+      /*
+      const _l = null // window.localStorage.getItem('queue')
       if (_l && typeof _l === 'string' && _l !== '') {
         const _q = JSON.parse(_l)
         _q.tracks.forEach((s, i) => { s.playing = ko.observable(i === _q.pos) })
@@ -316,6 +317,7 @@ const vmApp = function (params) {
         self.queue.pos(_q.pos)
         self.player._playQueue(false)
       }
+      */
     }
   }
   // sets the UI queue to show the correct song playing
@@ -338,6 +340,7 @@ const vmApp = function (params) {
     quality: ko.observable(''),
     update: () => {
       const song = self.queue.list()[self.queue.pos()]
+      console.log(song)
 
       self.playing.title(song.title)
       self.playing.artist(song.artist)
@@ -348,11 +351,12 @@ const vmApp = function (params) {
       self.playing.quality(song.shortformat)
 
       if ('mediaSession' in navigator) {
+        console.log('here')
         const fullart = window.location.origin + '/art/' + song.art.cover
         navigator.mediaSession.metadata = new window.MediaMetadata({
-          title: self.playing.title(),
-          artist: self.playing.artist(),
-          album: self.playing.album(),
+          title: song.title,
+          artist: song.artist,
+          album: song.album,
           artwork: [
             { src: fullart, sizes: '1000x1000', type: 'image/jpg' }
             // { src: 'https://dummyimage.com/128x128', sizes: '128x128', type: 'image/png' },
@@ -391,33 +395,8 @@ const vmApp = function (params) {
       e.playing = ko.observable(e._id === song._id)
       pos = ((e._id === song._id) ? i : pos)
     })
-    self.queue.list(tracks)
-    self.queue.pos(pos)
-    self.player._playQueue()
-    self.player.play(pos)
+    self.player.setTracks(tracks, pos)
   }
-
-  // play the song at queue.pos
-  /*
-  self.getSongURL = (id) => {
-    return new Promise((resolve, reject) => {
-      const mdb = indexedDB.open('falk', 2).onsuccess = mdb => {
-        const tx = mdb.target.result.transaction('cache', 'readonly')
-        const store = tx.objectStore('cache')
-        store.get(id).onsuccess = (e) => {
-          if (!e.target.result || e.target.result.data === false) {
-            resolve(false)
-          } else {
-            const url = URL.createObjectURL(e.target.result.data)
-            resolve(url)
-          }
-        }
-        tx.onerror = () => resolve(false) // the store doesn't exist
-      }
-      mdb.onerror = () => resolve(false)
-    })
-  }
-  */
 
   self.player = {
     audio: null,
@@ -431,6 +410,7 @@ const vmApp = function (params) {
         self.player.audio.on('progress', self.player.evtHandlers.update)
       }
     },
+    /*
     _playQueue: async (play = true) => {
       const list = self.queue.list()
       const q = list
@@ -441,9 +421,11 @@ const vmApp = function (params) {
             url: '/song/' + e._id + list[i].location.substr(list[i].location.lastIndexOf('.'))
           }
         })
-      self.player.audio.clearQueue()
-      self.player.audio.enqueue(q)
+      // self.player.audio.clearQueue()
+      // self.player.audio.enqueue(q)
+      // self.player.audio.setTracks(q)
     },
+    */
     evtHandlers: {
       complete: () => {
         self.playing.state(false)
@@ -476,13 +458,11 @@ const vmApp = function (params) {
       }
     },
     setQueuePos: (song) => {
-      // const oldPos = self.queue.pos()
-      self.queue.list().forEach((s, i) => {
-        if (s._id === song._id) {
-          self.queue.pos(i)
-        }
-      })
-      self.player._playQueue()
+      console.log(song)
+      const p = self.queue.list().findIndex(s => s._id === song._id)
+      console.log(p)
+      self.queue.pos(p)
+      self.player.audio.changePos(p)
     },
     next: () => {
       // this triggers a 'next' event, and is handled above
@@ -501,9 +481,18 @@ const vmApp = function (params) {
     pause: () => {
       self.player.audio.pause()
     },
-    setTracks: (tracks, play = true) => {
-      // self.player._get()
-      // self.player.progress(0)
+    setTracks: (tracks, pos = 0) => {
+      self.player.progress(0)
+      self.queue.list(tracks)
+      self.queue.pos(pos)
+      const tr = tracks.map((e, i) => {
+        return {
+          id: e._id,
+          url: '/song/' + e._id + e.location.substr(e.location.lastIndexOf('.'))
+        }
+      })
+      self.player.audio.setTracks(tr, pos)
+      self.player.play()
       // self.player.audio.updateTracks(...tracks)
       // if (play) {
       //   self.player.play()
