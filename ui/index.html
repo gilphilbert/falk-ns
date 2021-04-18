@@ -87,7 +87,7 @@
         <div id="queue-items">
           <table data-bind="foreach: queue.list">
             <tr data-bind="css: { 'is-playing': playing() == true }">
-              <td data-bind="click: $parent.player.setQueuePos"><figure class="image is-40x40"><img data-bind="attr: { src: '/art/' + art.cover }"></figure></td>
+              <td data-bind="click: $parent.player.setQueuePos"><figure class="image is-40x40"><img data-bind="attr: { src: '/art/' + art.cover }" load="lazy"></figure></td>
               <td data-bind="click: $parent.player.setQueuePos"><p class="is-5" data-bind="text: title"></p><p class="subtitle is-5" data-bind="text: artist + ' - ' + (Math.floor(duration / 60) + ':' + ('0' + (duration % 60)).slice(-2, 3))"></p></td>
               <td data-bind="click: $parent.queue.remove"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
             </tr>
@@ -230,7 +230,7 @@
     </template>
     <template id="t-tile-subtitle-link">
       <a data-bind="attr: { href: url }, template: { afterRender: $parent.updateLinks }" data-navigo> <!--  -->
-        <figure class="image is-1by1"><img data-bind="attr: { src: art }"></figure>
+        <figure class="image is-1by1"><img data-bind="attr: { src: art }" load="lazy"></figure>
         <p class="is-5 is-capitalized" data-bind="text: title"></p>
       </a>
       <a data-bind="attr: { href: surl }" data-navigo>
@@ -239,7 +239,7 @@
     </template>
     <template id="t-tile-subtitle">
       <a data-bind="attr: { href: url }, template: { afterRender: $parent.updateLinks }" data-navigo> <!--  -->
-        <figure class="image is-1by1"><img data-bind="attr: { src: art }"></figure>
+        <figure class="image is-1by1"><img data-bind="attr: { src: art }" load="lazy"></figure>
         <p class="is-5 is-capitalized" data-bind="text: title"></p>
       </a>
       <p class="subtitle is-5 is-capitalized" data-bind="text: subtitle"></p>
