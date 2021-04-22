@@ -340,7 +340,6 @@ const vmApp = function (params) {
     quality: ko.observable(''),
     update: () => {
       const song = self.queue.list()[self.queue.pos()]
-      console.log(song)
 
       self.playing.title(song.title)
       self.playing.artist(song.artist)
@@ -351,7 +350,6 @@ const vmApp = function (params) {
       self.playing.quality(song.shortformat)
 
       if ('mediaSession' in navigator) {
-        console.log('here')
         const fullart = window.location.origin + '/art/' + song.art.cover
         navigator.mediaSession.metadata = new window.MediaMetadata({
           title: song.title,
@@ -491,8 +489,7 @@ const vmApp = function (params) {
           url: '/song/' + e._id + e.location.substr(e.location.lastIndexOf('.'))
         }
       })
-      self.player.audio.setTracks(tr, pos)
-      self.player.play()
+      self.player.audio.setTracks(tr, pos, true)
       // self.player.audio.updateTracks(...tracks)
       // if (play) {
       //   self.player.play()

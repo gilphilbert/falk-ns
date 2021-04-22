@@ -16,10 +16,34 @@ export class LocalPlayer {
     this.gainNode = playerContext.createGain()
     this.gainNode.connect(playerContext.destination)
 
-
     this.progressTick = tick
 
     this._handlers()
+
+    this.cacheWorker = new Worker('/js/player-worker.js')
+    const handleMessageFromWorker = (msg) => {
+      const data = msg.data
+      console.log('[MAIN]', data)
+      if (data.cached) {
+        for (let i = this.queuePos; i < this.queue.length; i++) {
+          let el = this.queue[i]
+          if (el.id === data.id) {
+            el.cached = true
+            if (i < this.queuePos + 3) {
+              this.loadTrack(i)
+                .then(ab => {
+                  if (i === this.queuePos) {
+                    this.switchToWebAudio()
+                  } else if (i === this.queuePos + 1) {
+                    this.prepareWebAudio()
+                  }
+                })
+            }
+          }
+        }
+      }
+    }
+    this.cacheWorker.addEventListener('message', handleMessageFromWorker)
   }
 
   /* == simple event emitter ==
@@ -81,6 +105,8 @@ export class LocalPlayer {
     this.html5Audio.controls = false
     this.html5Audio.addEventListener('canplaythrough', () => {
       this.html5Audio.play()
+      // if we're playing HTMLAudio5 then we don't have the track cached. Let's fetch it now
+      this.cacheQueue()
     })
     this.html5Audio.addEventListener('play', () => {
       this.dispatchEvent('play', new window.Event('play'))
@@ -129,6 +155,7 @@ export class LocalPlayer {
         if (this.queue[this.queuePos + 1]) {
           this.dispatchEvent('next', new window.Event('next'))
           this.prepareWebAudio()
+          this.cacheQueue()
           if (this.queue[this.queuePos + 2]) {
             this.loadTrack(this.queuePos + 2)
               .then(ab => { this.queue[this.queuePos + 2].data = ab })
@@ -148,64 +175,13 @@ export class LocalPlayer {
     }
   }
 
-  /* == store the track in IndexedDB for offline playback ==
-  //
-  //   we store tracks in IndexedDB for faster Web Audio API playback
-  //   and for offline capability. Need to manage the cache so it doesn't
-  //   grow too large, especially on mobile devices
-  //
-  */
-  cacheTrack (id, blob) {
-    // need to check how much space we're consuming and then work out
-    // whether we need to delete the oldest track(s) first. This could
-    // consume a lot of space, especially for lossless / hires libraries
-    window.indexedDB.open('falk', 2).onsuccess = function (e) {
-      const db = e.target.result
-      const tx = db.transaction('cache', 'readwrite')
-      const store = tx.objectStore('cache')
-
-      store.add({ id: id, added: Date.now(), played: Date.now(), data: blob })
-      tx.oncomplete = () => db.close()
-    }
-  }
-
-  /* == called when the track isn't in the cache ==
-  //
-  //   For a cache miss, got and fetch the track from the server
-  //   and pass it through the audio decoder. Initiate caching
-  //   the track for next time.
-  //
-  */
-  fetchTrack (item) {
-    console.log('fetching track with id ', item.id)
-    return new Promise((resolve, reject) => {
-      if (!item) {
-        reject(new Error('Not in queue'))
-      }
-      window.fetch(item.url)
-        .then(response => response.blob())
-        .then(async blob => {
-          const ab = await blob.arrayBuffer()
-          playerContext.decodeAudioData(ab, function (buffer) {
-            resolve(buffer)
-          })
-          // this.cacheTrack(item.id, blob) // <=================================================================
-        })
-        .catch(e => {
-          reject(new Error('Could not fetch track'))
-        })
-    })
-  }
-
   /* == try to read the track from IndexedDB ==
   //
-  //   before we pull the track from online, try to grab the track
-  //   from the local cache - saves bandwidth and we don't need to
-  //   mess about with the HTML5 Audio element
+  //   retrieve a track from the cache
   //
   */
   loadTrack (index) {
-    console.log('Loading track at ', index)
+    console.log('Loading track from cache', index)
     return new Promise((resolve, reject) => {
       const mdb = window.indexedDB.open('falk', 2).onsuccess = mdb => {
         const tx = mdb.target.result.transaction('cache', 'readonly')
@@ -215,12 +191,42 @@ export class LocalPlayer {
 
         store.get(item.id).onsuccess = (e) => {
           if (e.target.result) {
-            resolve(e.target.result.data.arrayBuffer())
+            e.target.result.data.arrayBuffer()
+              .then(buf => {
+                playerContext.decodeAudioData(buf, function (buffer) {
+                  item.data = buffer
+                  resolve()
+                })    
+              })
+              .catch(e => reject(new Error('Cache invalid')))
           } else {
-            // the track isn't in the database, let's fetch it
-            this.fetchTrack(item)
-              .then(ab => resolve(ab))
-              .catch(e => reject(e))
+            reject(new Error('Not in cache'))
+            console.log(item)
+          }
+        }
+        tx.onerror = (e) => reject(e) // the store doesn't existself.path + 
+      }
+      mdb.onerror = (e) => reject(e) // couldn't open the database
+    })
+  }
+
+  /* == check if the track is cached in IndexedDB ==
+  //
+  //   check the IndexedDB db to see if this track is cached
+  //
+  */
+  isCached (id) {
+    return new Promise((resolve, reject) => {
+      const mdb = window.indexedDB.open('falk', 2).onsuccess = mdb => {
+        const tx = mdb.target.result.transaction('cache', 'readonly')
+        const store = tx.objectStore('cache')
+
+        store.get(id).onsuccess = (e) => {
+          if (e.target.result) {
+            resolve(true)
+          } else {
+            // the track isn't in the database
+            resolve(false)
           }
         }
         tx.onerror = (e) => reject(e) // the store doesn't exist
@@ -283,11 +289,6 @@ export class LocalPlayer {
 
     // if no index was provided, use the current queue position
     if (index < 0) {
-      // if we're playing somewhere other than the current play position, make sure we clear any other status (play/pause)
-      this.state = STATE_STOP
-      this.html5Audio.src = ''
-      this.timeLeft = 0
-      this.startTime = 0
       index = this.queuePos
     }
 
@@ -296,7 +297,7 @@ export class LocalPlayer {
       throw new Error('Invalid queue position')
     }
 
-    // if we're already playing, stop. This covers cases of clicking the same song again, or clicking a new song while playing
+    // if we're already playing, stop
     if (this.state === STATE_PLAY) {
       if (this.playMode === PLAY_MODE_HTML5) {
         this.html5Audio.pause()
@@ -308,33 +309,40 @@ export class LocalPlayer {
         this.state = STATE_STOP
         this.stopAllWebAudio()
       }
-      this.timeLeft = 0
-      this.startTime = 0
     }
 
     const item = this.queue[index]
 
     // check to see if the song is in the cache before we start playing the html5audio element
-    if (item.data) {
-      this.webAudioInit(0)
-      this.sources[0].buffer = item.data
-      const start = ((this.state === STATE_PAUSE) ? this.sources[0].buffer.duration - this.timeLeft : 0)
-      this.sources[0].start(0, start)
+    if (item.cached || item.data) {
+      const playWebAudio = () => {
+        this.webAudioInit(0)
+        this.sources[0].buffer = item.data
+        const start = ((this.state === STATE_PAUSE) ? this.sources[0].buffer.duration - this.timeLeft : 0)
+        this.sources[0].start(0, start)
 
-      this.startTime = playerContext.currentTime
-      if (this.state !== STATE_PAUSE) {
-        this.timeLeft = this.sources[0].buffer.duration
+        this.startTime = playerContext.currentTime
+        if (this.state !== STATE_PAUSE) {
+          this.timeLeft = this.sources[0].buffer.duration
+        }
+
+        // console.log('Playing Web Audio API from queue data')
+        this.dispatchEvent('play', new window.Event('play'))
+
+        this.playMode = PLAY_MODE_WEBAUDIO
+
+        if (this.queue[index + 1] && this.queue[index + 1].data) {
+          // queue up next song if we already have the data loaded
+          this.prepareWebAudio()
+        }
+      }
+      if (!item.data) {
+        this.loadTrack(index)
+          .then(playWebAudio)
+      } else {
+        playWebAudio()
       }
 
-      // console.log('Playing Web Audio API from queue data')
-      this.dispatchEvent('play', new window.Event('play'))
-
-      this.playMode = PLAY_MODE_WEBAUDIO
-
-      if (this.queue[index + 1] && this.queue[index + 1].data) {
-        // queue up next song if we already have the data loaded
-        this.prepareWebAudio()
-      }
     } else {
       this.html5Audio.src = item.url
       this.playMode = PLAY_MODE_HTML5
@@ -387,79 +395,40 @@ export class LocalPlayer {
     this.changePos(this.queuePos - 1)
   }
 
-  async fetchQueue () {
-    if (this.queueFetcherRunning === true) {
-      return
-    }
-    this.queueFetcherRunning = true
-    while (this.queueFetcher.length) {
-      const id = this.queueFetcher.shift()
-      const item = this.queue.find(e => e.id === id)
-      if (item.data === null) {
-        try {
-          const arrayBuffer = await this.fetchTrack(item)
-          const queueItem = this.queue.find(e => e.id === item.id)
-          if (queueItem) {
-            queueItem.data = arrayBuffer
-          }
-          if (this.state === STATE_PLAY && this.queue.findIndex(e => e.id === id) === this.queuePos) {
-            this.switchToWebAudio()
-          }
-          if (this.state === STATE_PAUSE && this.queue.findIndex(e => e.id === id) === this.queuePos) {
-            // switch to web audio while paused
-            // console.log('Switching to Web Audio while paused')
-            this.playMode = PLAY_MODE_WEBAUDIO
-          }
-          if (this.state === STATE_PLAY && this.queue.findIndex(e => e.id === id) === this.queuePos + 1) {
-            this.prepareWebAudio()
-          }
-        } catch (e) {
-          console.log(e)
-        }
-      }
-    }
-    this.queueFetcherRunning = false
-  }
-
-  populateQueue () {
-    this.queueFetcher = []
-    for (let i = this.queuePos; i <= this.queuePos + 2; i++) {
-      if (this.queue[i] && this.queue[i].data === null) {
-        this.queueFetcher.push(this.queue[i].id)
-      }
-    }
-    this.fetchQueue()
-  }
-
-  enqueueOne ({ id, url }) {
+  async enqueueOne ({ id, url }) {
     id = parseInt(id) || false
     url = url || false
     // check to make sure we have valid results
     if (id !== false && url !== false) {
+      let cacheState = false
+      try {
+        cacheState = await this.isCached(id)
+      } catch(e) {
+        console.log(e)
+      }
       // define the item
-      const item = { id: id, url: url, data: null }
-      // add to the array and get back the array length
-      this.queue.push(item)
-      // if this is one of the first two songs at queuePos
-      this.populateQueue()
+      const item = { id: id, url: url, data: null, cached: cacheState }
+      // add to the array
+      const len = this.queue.push(item)
     }
   }
 
-  enqueue (tracks) {
+  async enqueue (tracks) {
     if (Array.isArray(tracks)) {
-      tracks.forEach(t => this.enqueueOne(t))
+      for (let i = 0; i < tracks.length; i++) {
+        await this.enqueueOne(tracks[i])
+      }
     }
   }
 
-  setTracks (tracks, pos = 0) {
+  async setTracks (tracks, playPosition = 0, playOnLoad = false) {
     this.reset()
-    this.queuePos = pos
-    this.enqueue(tracks)
-  }
-
-  clearQueueData () {
-    const tracks = this.queue.filter((tr, i) => { return (i < this.queuePos || i > this.queuePos + 2) })
-    console.log(tracks)
+    this.cacheWorker.postMessage({ clear: true })
+    this.queuePos = playPosition
+    await this.enqueue(tracks)
+    if (playOnLoad) {
+      this.play()
+    }
   }
 
   changePos (index) {
@@ -473,8 +442,26 @@ export class LocalPlayer {
     this.clearQueueData()
   }
 
+  populateQueue() {
+    if (this.queue.length > 0) {
+      for (let i = this.queuePos; i < this.queue.length && i <= this.queuePos + 3; i++) {
+        console.log(this.queue[i])
+      }
+    }
+  }
+
   clearQueue () {
     this.reset()
+  }
+
+  clearQueueData () {
+    const tracks = this.queue.filter((tr, i) => { return (i < this.queuePos || i > this.queuePos + 2) })
+  }
+
+  cacheQueue() {
+    // get a list of songs in the queue, loading only the next five songs
+    const items = this.queue.slice(this.queuePos).filter(e => e.cached === false).slice(0, 5)
+    this.cacheWorker.postMessage({ items: items })
   }
 
   reset () {

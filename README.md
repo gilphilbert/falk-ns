@@ -5,11 +5,6 @@ git clone https://github.com/gilphilbert/falk-ns.git
 cd falk-ns
 npm install
 ```
-Generate some keys for authentication. When asked, do not enter a passphrase, just press [ ENTER ]
-```bash
-ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
-openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-```
 
 Alternatively, build a docker container:
 ```bash
