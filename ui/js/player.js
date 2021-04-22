@@ -29,6 +29,12 @@ export class LocalPlayer {
           let el = this.queue[i]
           if (el.id === data.id) {
             el.cached = true
+            if (i === this.queuePos) {
+              this.switchToWebAudio()
+            } else if (i === this.queuePos + 1) {
+              this.prepareWebAudio()
+            }
+/*
             if (i < this.queuePos + 3) {
               this.loadTrack(i)
                 .then(ab => {
@@ -39,6 +45,7 @@ export class LocalPlayer {
                   }
                 })
             }
+*/
           }
         }
       }
@@ -129,37 +136,32 @@ export class LocalPlayer {
     this.sources[index].connect(this.gainNode)
     this.sources[index].addEventListener('ended', (evt) => {
       if (this.state === STATE_PLAY) {
-        // kill old source
-        console.log('killing myself', evt.target)
+        // this is our "next song" trigger, since web audio has no "play" event
+        // if there's another now playing...
+        if (this.sources.length) {
+          this.startTime = playerContext.currentTime
+          this.timeLeft = this.sources[0].buffer.duration
+        } else {
+          this.startTime = -1
+          this.timeLeft = -1
+        }
+
+        // shift the queue on
+        this.queuePos++
+        // increment this song's timesPlayed in the localdb and backend <---------------------------------------------------------
+
+        // tidy up this mess...
         evt.target.disconnect(0)
         if (evt.target.buffer) {
           evt.target.buffer = null
         }
         this.sources.shift()
-        if (this.sources.length === 0) {
-          this.gainNode.disconnect(0)
-        }
-
-        this.queue[this.queuePos].data = null
-        console.log(this.queue)
-
-        // this is our "next song" trigger, since web audio has no "play" event
-        this.startTime = playerContext.currentTime
-        this.timeLeft = this.sources[0].buffer.duration
-
-        // shift the queue on
-        this.queuePos++
-        // increment this song's timesPlayed in the localdb and backend <---------------------------------------------------------
 
         // if we're not at the end of the queue
         if (this.queue[this.queuePos + 1]) {
           this.dispatchEvent('next', new window.Event('next'))
           this.prepareWebAudio()
           this.cacheQueue()
-          if (this.queue[this.queuePos + 2]) {
-            this.loadTrack(this.queuePos + 2)
-              .then(ab => { this.queue[this.queuePos + 2].data = ab })
-          }
         } else {
           this.queuePos = 0
           this.dispatchEvent('stop', new window.Event('stop'))
@@ -181,7 +183,6 @@ export class LocalPlayer {
   //
   */
   loadTrack (index) {
-    console.log('Loading track from cache', index)
     return new Promise((resolve, reject) => {
       const mdb = window.indexedDB.open('falk', 2).onsuccess = mdb => {
         const tx = mdb.target.result.transaction('cache', 'readonly')
@@ -193,9 +194,9 @@ export class LocalPlayer {
           if (e.target.result) {
             e.target.result.data.arrayBuffer()
               .then(buf => {
+                console.log('[MAIN] Loaded track ', item.id)
                 playerContext.decodeAudioData(buf, function (buffer) {
-                  item.data = buffer
-                  resolve()
+                  resolve(buffer)
                 })    
               })
               .catch(e => reject(new Error('Cache invalid')))
@@ -236,24 +237,30 @@ export class LocalPlayer {
   }
 
   switchToWebAudio () {
-    this.webAudioInit(0)
-    this.sources[0].buffer = this.queue[this.queuePos].data
-    console.log('Switching to Web Audio API')
-    const curTime = this.html5Audio.currentTime
-    this.playMode = PLAY_MODE_WEBAUDIO
-    if (this.state === STATE_PLAY) {
-      this.html5Audio.pause()
-      this.html5Audio.src = ''
-      this.sources[0].start(0, curTime)
-    }
+    this.loadTrack(this.queuePos, true)
+      .then(ab => {
+        this.webAudioInit(0)
+        this.sources[0].buffer = ab
+        console.log('Switching to Web Audio API')
+        const curTime = this.html5Audio.currentTime
+        this.playMode = PLAY_MODE_WEBAUDIO
+        if (this.state === STATE_PLAY) {
+          this.html5Audio.pause()
+          this.html5Audio.src = ''
+          this.sources[0].start(0, curTime)
+        }
+      })
   }
 
   prepareWebAudio () {
-    this.webAudioInit(1)
-    this.sources[1].buffer = this.queue[this.queuePos + 1].data
-    const scheduleTime = this.startTime + this.timeLeft
-    this.sources[1].start(scheduleTime)
-    console.log('Next song scheduled')
+    this.loadTrack(this.queuePos + 1, true)
+      .then(ab => {
+        this.webAudioInit(1)
+        this.sources[1].buffer = ab
+        const scheduleTime = this.startTime + this.timeLeft
+        this.sources[1].start(scheduleTime)
+        console.log('[MAIN] Next song scheduled')
+      })
   }
 
   _handlers () {
@@ -314,35 +321,30 @@ export class LocalPlayer {
     const item = this.queue[index]
 
     // check to see if the song is in the cache before we start playing the html5audio element
-    if (item.cached || item.data) {
-      const playWebAudio = () => {
-        this.webAudioInit(0)
-        this.sources[0].buffer = item.data
-        const start = ((this.state === STATE_PAUSE) ? this.sources[0].buffer.duration - this.timeLeft : 0)
-        this.sources[0].start(0, start)
+    if (item.cached) {
+      this.loadTrack(index, true)
+        .then(ab => {
+          this.webAudioInit(0)
+          this.sources[0].buffer = ab
+          const start = ((this.state === STATE_PAUSE) ? this.sources[0].buffer.duration - this.timeLeft : 0)
+          this.sources[0].start(0, start)
 
-        this.startTime = playerContext.currentTime
-        if (this.state !== STATE_PAUSE) {
-          this.timeLeft = this.sources[0].buffer.duration
-        }
+          this.startTime = playerContext.currentTime
+          if (this.state !== STATE_PAUSE) {
+            this.timeLeft = this.sources[0].buffer.duration
+          }
 
-        // console.log('Playing Web Audio API from queue data')
-        this.dispatchEvent('play', new window.Event('play'))
-
-        this.playMode = PLAY_MODE_WEBAUDIO
-
-        if (this.queue[index + 1] && this.queue[index + 1].data) {
-          // queue up next song if we already have the data loaded
-          this.prepareWebAudio()
-        }
-      }
-      if (!item.data) {
-        this.loadTrack(index)
-          .then(playWebAudio)
-      } else {
-        playWebAudio()
-      }
-
+          // console.log('Playing Web Audio API from queue data')
+          this.dispatchEvent('play', new window.Event('play'))
+  
+          this.playMode = PLAY_MODE_WEBAUDIO
+  
+          if (this.queue[index + 1] && this.queue[index + 1].cached) {
+            // queue up next song if we already have the data in cache (if not, it will be loaded after it's cached)
+            this.prepareWebAudio()
+          }
+  
+        })
     } else {
       this.html5Audio.src = item.url
       this.playMode = PLAY_MODE_HTML5
@@ -454,14 +456,11 @@ export class LocalPlayer {
     this.reset()
   }
 
-  clearQueueData () {
-    const tracks = this.queue.filter((tr, i) => { return (i < this.queuePos || i > this.queuePos + 2) })
-  }
-
   cacheQueue() {
     // get a list of songs in the queue, loading only the next five songs
     const items = this.queue.slice(this.queuePos).filter(e => e.cached === false).slice(0, 5)
     this.cacheWorker.postMessage({ items: items })
+    // need to clear data from old songs
   }
 
   reset () {

@@ -3,7 +3,6 @@ let dlRunning = false
 
 self.onmessage = function (msg) {
   const data = msg.data
-  console.log('[WORKER] Message:', data)
   if (data.clear) {
     dlQ = []
   }
@@ -97,6 +96,7 @@ async function download() {
   const item = dlQ.shift()
   await fetchTrack(item)
     .then(() => {
+      console.log('[WORKER] Cached track', item.id)
       self.postMessage({
         cached: true,
         id: item.id
