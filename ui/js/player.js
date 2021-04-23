@@ -34,18 +34,6 @@ export class LocalPlayer {
             } else if (i === this.queuePos + 1) {
               this.prepareWebAudio()
             }
-/*
-            if (i < this.queuePos + 3) {
-              this.loadTrack(i)
-                .then(ab => {
-                  if (i === this.queuePos) {
-                    this.switchToWebAudio()
-                  } else if (i === this.queuePos + 1) {
-                    this.prepareWebAudio()
-                  }
-                })
-            }
-*/
           }
         }
       }
@@ -139,7 +127,11 @@ export class LocalPlayer {
         // this is our "next song" trigger, since web audio has no "play" event
         // if there's another now playing...
         if (this.sources.length) {
+          /*
           this.startTime = playerContext.currentTime
+          this.timeLeft = this.sources[0].buffer.duration
+          */
+          this.startTime += this.timeLeft
           this.timeLeft = this.sources[0].buffer.duration
         } else {
           this.startTime = -1
@@ -472,6 +464,7 @@ export class LocalPlayer {
 
     this.startTime = -1
     this.timeLeft = -1
+    this.endTime = -1
 
     this.queue = []
     this.queuePos = 0
