@@ -31,7 +31,7 @@ export class LocalPlayer {
             el.cached = true
             if (i === this.queuePos) {
               this.switchToWebAudio()
-            } else if (i === this.queuePos + 1) {
+            } else if (i === this.queuePos + 1 && this.sources.length === 1) {
               this.prepareWebAudio()
             }
           }
@@ -119,10 +119,20 @@ export class LocalPlayer {
   //   provides seeking, skipping and gapless playback
   //
   */
-  webAudioInit (index) {
-    this.sources[index] = playerContext.createBufferSource()
-    this.sources[index].connect(this.gainNode)
-    this.sources[index].addEventListener('ended', (evt) => {
+  webAudioInit (buffer) {
+    const _source = playerContext.createBufferSource()
+    _source.buffer = buffer
+    _source.connect(this.gainNode)
+    _source.onended = evt => {
+      console.log('ENDED', evt)
+      // tidy up this mess...
+      evt.target.onended = null
+      evt.target.disconnect(0)
+      if (evt.target.buffer) {
+        evt.target.buffer = null
+      }
+      this.sources.shift()
+
       if (this.state === STATE_PLAY) {
         // this is our "next song" trigger, since web audio has no "play" event
         // if there's another now playing...
@@ -142,13 +152,6 @@ export class LocalPlayer {
         this.queuePos++
         // increment this song's timesPlayed in the localdb and backend <---------------------------------------------------------
 
-        // tidy up this mess...
-        evt.target.disconnect(0)
-        if (evt.target.buffer) {
-          evt.target.buffer = null
-        }
-        this.sources.shift()
-
         // if we're not at the end of the queue
         if (this.queue[this.queuePos + 1]) {
           this.dispatchEvent('next', new window.Event('next'))
@@ -159,13 +162,20 @@ export class LocalPlayer {
           this.dispatchEvent('stop', new window.Event('stop'))
         }
       }
-    })
+    }
+    return _source
   }
 
   stopAllWebAudio () {
-    for (let i = this.sources.length - 1; i >= 0; i--) {
-      this.sources[i].disconnect(0)
-      this.sources.pop()
+    // for (let i = this.sources.length - 1; i >= 0; i--) {
+    //   this.sources[i].disconnect(0)
+    //  this.sources.pop()
+    //  }
+    while (this.sources.length) {
+      const source = this.sources.pop()
+      source.onended = null
+      source.stop(0)
+      source.disconnect(0)
     }
   }
 
@@ -231,15 +241,16 @@ export class LocalPlayer {
   switchToWebAudio () {
     this.loadTrack(this.queuePos, true)
       .then(ab => {
-        this.webAudioInit(0)
-        this.sources[0].buffer = ab
-        console.log('Switching to Web Audio API')
-        const curTime = this.html5Audio.currentTime
-        this.playMode = PLAY_MODE_WEBAUDIO
         if (this.state === STATE_PLAY) {
+          const _source = this.webAudioInit(ab)
+          console.log('Switching to Web Audio API')
+          const curTime = this.html5Audio.currentTime
+          this.playMode = PLAY_MODE_WEBAUDIO
           this.html5Audio.pause()
           this.html5Audio.src = ''
-          this.sources[0].start(0, curTime)
+          _source.start(0, curTime)
+          this.sources.push(_source)
+          console.log(this.sources)
         }
       })
   }
@@ -247,11 +258,14 @@ export class LocalPlayer {
   prepareWebAudio () {
     this.loadTrack(this.queuePos + 1, true)
       .then(ab => {
-        this.webAudioInit(1)
-        this.sources[1].buffer = ab
-        const scheduleTime = this.startTime + this.timeLeft
-        this.sources[1].start(scheduleTime)
-        console.log('[MAIN] Next song scheduled')
+        if (this.state === STATE_PLAY) {
+          const _source = this.webAudioInit(ab)
+          const scheduleTime = this.startTime + this.timeLeft
+          _source.start(scheduleTime)
+          console.log('[MAIN] Next song scheduled')
+          this.sources.push(_source)
+          console.log(this.sources)
+        }
       })
   }
 
@@ -279,7 +293,9 @@ export class LocalPlayer {
   play (index = -1) {
     // resume, in case user left / returned
     playerContext.resume()
-
+    // remove any web audio clients that might be hanging around
+    this.stopAllWebAudio()
+  
     // first, check if we're paused and we haven't loaded the web audio - just start playing
     if (this.state === STATE_PAUSE && this.playMode === PLAY_MODE_HTML5) {
       this.html5Audio.play()
@@ -316,33 +332,41 @@ export class LocalPlayer {
     if (item.cached) {
       this.loadTrack(index, true)
         .then(ab => {
-          this.webAudioInit(0)
-          this.sources[0].buffer = ab
-          const start = ((this.state === STATE_PAUSE) ? this.sources[0].buffer.duration - this.timeLeft : 0)
-          this.sources[0].start(0, start)
-
+          const _source = this.webAudioInit(ab)
+          console.log("STATE ::", this.state)
+          if (this.state === STATE_PAUSE) {
+            const offset = ((this.state === STATE_PAUSE) ? _source.buffer.duration - this.timeLeft : 0)
+            _source.start(0, offset)
+            console.log("OFFSET ::", offset)
+          } else {
+            _source.start()
+            this.timeLeft = _source.buffer.duration
+          }
           this.startTime = playerContext.currentTime
           if (this.state !== STATE_PAUSE) {
-            this.timeLeft = this.sources[0].buffer.duration
           }
+          this.sources.push(_source)
+          console.log(this.sources)
 
-          // console.log('Playing Web Audio API from queue data')
-          this.dispatchEvent('play', new window.Event('play'))
-  
           this.playMode = PLAY_MODE_WEBAUDIO
+          this.state = STATE_PLAY
+          this.progress()
+
+          this.dispatchEvent('play', new window.Event('play'))
   
           if (this.queue[index + 1] && this.queue[index + 1].cached) {
             // queue up next song if we already have the data in cache (if not, it will be loaded after it's cached)
             this.prepareWebAudio()
           }
+          this.cacheQueue()
   
         })
     } else {
       this.html5Audio.src = item.url
       this.playMode = PLAY_MODE_HTML5
+      this.state = STATE_PLAY
+      this.progress()
     }
-    this.state = STATE_PLAY
-    this.progress()
   }
 
   /* == pauses playback
@@ -356,11 +380,10 @@ export class LocalPlayer {
     }
     this.state = STATE_PAUSE
     this.dispatchEvent('pause', new window.Event('pause'))
+    this.timeLeft = this.timeLeft - (playerContext.currentTime - this.startTime)
     if (this.playMode === PLAY_MODE_HTML5) {
-      this.timeLeft = this.timeLeft - (playerContext.currentTime - this.startTime)
       this.html5Audio.pause()
     } else if (this.playMode === PLAY_MODE_WEBAUDIO) {
-      this.timeLeft = this.timeLeft - (playerContext.currentTime - this.startTime)
       this.stopAllWebAudio()
     }
   }
@@ -434,14 +457,6 @@ export class LocalPlayer {
     // need to clear audio buffers for songs no longer in the immediate queue
     this.play()
     this.clearQueueData()
-  }
-
-  populateQueue() {
-    if (this.queue.length > 0) {
-      for (let i = this.queuePos; i < this.queue.length && i <= this.queuePos + 3; i++) {
-        console.log(this.queue[i])
-      }
-    }
   }
 
   clearQueue () {
