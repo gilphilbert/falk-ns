@@ -96,10 +96,12 @@ class DatabaseHandler {
   }
 
   async getArtists () {
-    const artists = this.music.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
-    return artists
+    let artists = this.music.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
+    artists = artists
       .filter((tag, index, array) => array.findIndex(t => t.info.albumartist === tag.info.albumartist) === index)
       .map(a => { return { title: a.info.albumartist, art: '/art/' + ((a.info.art.artist !== '') ? a.info.art.artist : 'placeholder.png'), url: `/artist/${encodeURIComponent(a.info.albumartist)}`, subtitle: '', surl: '' } })
+    console.log("Processed")
+    return artists
   }
 
   async getArtist (artist) {
