@@ -34,18 +34,6 @@ export class LocalPlayer {
             } else if (i === this.queuePos + 1) {
               this.prepareWebAudio()
             }
-/*
-            if (i < this.queuePos + 3) {
-              this.loadTrack(i)
-                .then(ab => {
-                  if (i === this.queuePos) {
-                    this.switchToWebAudio()
-                  } else if (i === this.queuePos + 1) {
-                    this.prepareWebAudio()
-                  }
-                })
-            }
-*/
           }
         }
       }
@@ -373,6 +361,14 @@ export class LocalPlayer {
     }
   }
 
+  toggle () {
+    if (this.state === STATE_PLAY) {
+      this.pause()
+    } else {
+      this.play()
+    }
+  }
+
   stop () {
     if (this.playMode === PLAY_MODE_HTML5) {
       this.html5Audio.pause()
@@ -395,6 +391,14 @@ export class LocalPlayer {
     // check how long we've been playing for, if it's less than three seconds
     // then skip back, otherwise just start at the beginning of the song
     this.changePos(this.queuePos - 1)
+  }
+
+  random () {
+
+  }
+
+  repeat () {
+    
   }
 
   async enqueueOne ({ id, url }) {
@@ -441,7 +445,6 @@ export class LocalPlayer {
     }
     // need to clear audio buffers for songs no longer in the immediate queue
     this.play()
-    this.clearQueueData()
   }
 
   populateQueue() {
