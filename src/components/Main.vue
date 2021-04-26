@@ -1,9 +1,7 @@
 <template>
 <div>
   <div id="content-container">
-    <Artists />
-    <Artist :artist="'Seal'" />
-    <Album :artist="'Seal'" :album="'Seal'" />
+    <router-view></router-view>
   </div>
   <Menu :isActive="showMenu" />
   <ControlBar :isActive="showControls" :playback="playback" :toggleQueue="toggleQueue" />
@@ -16,6 +14,7 @@ import ControlBar from './ControlBar.vue'
 import Queue from './Queue.vue'
 
 import Artists from './Artists.vue'
+import Albums from './Albums.vue'
 import Artist from './Artist.vue'
 import Album from './Album.vue'
 
@@ -26,8 +25,11 @@ export default {
     ControlBar,
     Queue,
     Artists,
+    Albums,
     Artist,
     Album
+  },
+  created () {
   },
   data () {
     return {

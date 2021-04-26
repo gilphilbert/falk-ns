@@ -7,7 +7,7 @@
       </figure>
     </div>
     <div class="col-xs-12 col-md-6">
-      <h1>{{ artist }}</h1>
+      <h1>{{ this.$route.params.artist }}</h1>
     </div>
   </div>
   <Tiles :tiles="albums" />
@@ -15,13 +15,14 @@
 </template>
 <script>
 import Tiles from './Tiles.vue'
+
 export default {
   name: 'Artist',
   components: {
     Tiles
   },
   created() {
-    this.$database.getArtist(this.artist)
+    this.$database.getArtist(this.$route.params.artist)
       .then(data => {
         this.albums = data.albums
       })
@@ -30,7 +31,6 @@ export default {
     return {
       albums: []
     }
-  },
-  props: [ 'artist' ]
+  }
 }
 </script>

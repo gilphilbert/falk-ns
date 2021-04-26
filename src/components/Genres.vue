@@ -1,26 +1,26 @@
 <template>
 <div class="container-fluid">
-  <h1 class="is-capitalized">Artists</h1>
-  <Tiles :tiles="artists" />
+  <h1 class="is-capitalized">Genres</h1>
+  <Tiles :tiles="genres" />
 </div>
 </template>
 </template>
 <script>
 import Tiles from './Tiles.vue'
 export default {
-  name: 'Artists',
+  name: 'Genres',
   components: {
     Tiles
   },
   created() {
-    this.$database.getArtists()
+    this.$database.getGenres()
       .then(data => {
-        this.artists = data
+        this.genres = data
       })
   },
   data () {
     return {
-      artists: []
+      genres: []
     }
   }
 }

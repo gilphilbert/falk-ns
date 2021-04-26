@@ -8,9 +8,9 @@
           </div>
           <div class="col-md-8 col-md-offset-2 col-xs-8">
             <h1 class="album-title">{{ this.title }}</h1>
-            <p class="subtitle is-1"><a :href="'/artist/' + encodeURIComponent(this.artist)">{{ artist }}</a></p>
+            <p class="subtitle is-1"><router-link :to="'/artist/' + encodeURIComponent(this.$route.params.artist)">{{ this.$route.params.artist }}</router-link></p>
             <p class="is-4 detail">{{ this.year }}</p>
-            <p class="is-4"><a :href="'/genre/' + encodeURIComponent(this.genre)">{{ this.genre }}</a></p>
+            <p class="is-4"><router-link :to="'/genre/' + encodeURIComponent(this.genre)">{{ this.genre }}</router-link></p>
             <p class="is-6 tag is-rounded detail">{{ shortformat }}</p>
           </div>
         </div>
@@ -52,7 +52,7 @@ export default {
     Tiles
   },
   created() {
-    this.$database.getAlbum(this.artist, this.album)
+    this.$database.getAlbum(this.$route.params.artist, this.$route.params.album)
       .then(data => {
         this.art = data.art
         this.genre = data.genre
@@ -71,7 +71,6 @@ export default {
       tracks: [],
       year: ''
     }
-  },
-  props: [ 'artist', 'album' ]
+  }
 }
 </script>
