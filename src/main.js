@@ -39,15 +39,19 @@ import Artists from './components/Artists.vue'
 import Artist from './components/Artist.vue'
 import Album from './components/Album.vue'
 import Genres from './components/Genres.vue'
+import Genre from './components/Genre.vue'
+import Settings from './components/Settings.vue'
 const router = new VueRouter({
   mode: 'hash',
   scrollBehavior,
   routes: [
     { path: '/albums', component: Albums, meta: { scrollToTop: true }},
     { path: '/artists', component: Artists, meta: { scrollToTop: true }},
-    { path: '/genres', component: Genres, meta: { scrollToTop: true }},
     { path: '/artist/:artist', component: Artist, meta: { scrollToTop: true }},
-    { path: '/album/:artist/:album', component: Album, meta: { scrollToTop: true }}
+    { path: '/album/:artist/:album', component: Album, meta: { scrollToTop: true }},
+    { path: '/genres', component: Genres, meta: { scrollToTop: true }},
+    { path: '/genre/:genre', component: Genre, meta: { scrollToTop: true }},
+    { path: '/settings', component: Settings, meta: { scrollToTop: true }}
   ]
 })
 
