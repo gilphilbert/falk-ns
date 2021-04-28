@@ -11,7 +11,7 @@
           </div>
           <div class="col-xs">
             <p class="is-5">{{ playback.queue[playback.queuePos].title }}</p>
-            <p class="subtitle is-5">{{ playback.queue[playback.queuePos].artist }}</p>
+            <p class="subtitle is-5"><router-link class="subtitle is-5" :to="'/artist/' + playback.queue[playback.queuePos].artist">{{ playback.queue[playback.queuePos].artist }}</router-link></p>
           </div>
         </div>
       </div>
@@ -41,6 +41,11 @@
 <script>
 export default {
   name: 'ControlBar',
-  props: [ 'isActive', 'player', 'playback', 'toggleQueue' ]
+  props: [ 'isActive', 'player', 'playback' ],
+  methods: {
+    toggleQueue () {
+      this.$emit('toggleQueue')
+    }
+  }
 }
 </script>

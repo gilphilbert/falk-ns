@@ -25,11 +25,9 @@
       </noscript>
     </div>
 
-    <!--'../../
-    <template id="t-app">
+    <!--
       <div id="content-container" data-bind="template: pageContainer, swiperight: menuShow, swipeleft: menuHide"></div>
 
-      <div id="modal-container"></div>
       <div id="burger" class="hidden--for-desktop" data-bind="click: showMenu">
         <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
       </div>
@@ -46,61 +44,6 @@
           <p class="is-3">Reconnecting</p>
         </div>
       </div>
-    </template>
-
-    <template id="t-welcome">
-
-    </template>
-
-    <template id="t-home">
-      <div class="container-fluid max" data-bind="swipeup: showQueue">
-        <div class="row">
-          <div class="col-xs-10 col-md-3 has-margin-auto art">
-            <figure id="home-albumart" class="image is-1by1"><img data-bind="attr: { src: playing.art }" style="z-index: 1;"></figure>
-            <figure id="home-albumart" class="image is-1by1" data-bind="if: playing.discart() !== null" style="margin-top: -65%; background-color: transparent;"><img data-bind="css: { 'rotate': playing.state() === true }, attr: { src: playing.discart }"></figure>
-            <div id="mobile-toolbar" class="has-text-centered" data-bind="if: playing.album() !== ''">
-              <div>
-                <svg class="feather"><use xlink:href="/img/feather-sprite.svg#heart"></use></svg>
-              </div>
-              <div>
-                <svg class="feather"><use xlink:href="/img/feather-sprite.svg#plus"></use></svg>
-              </div>
-            </div>
-          </div>
-          <div class="col-xs-10 col-xs-offset-1">
-            <h1 id="home-title" class="has-text-centered has-no-overflow" data-bind="text: playing.title"></h1>
-            <p class="has-text-centered subtitle is-3 has-no-overflow hidden--to-desktop">
-              <a id="home-album" href="" data-navigo data-bind="attr: { href: '/album/' + encodeURIComponent(playing.artist()) + '/' + encodeURIComponent(playing.album()) }, text: playing.album"></a>
-            </p>
-            <p class="has-text-centered subtitle is-3 has-no-overflow">
-              <a id="home-artist" data-navigo data-bind="attr: { href: '/artist/' + playing.artist() }, text: playing.artist"></a>
-            </p>
-            <p class="has-text-centered" data-bind="if: playing.quality() !== ''">
-              <span id="home-quality" class="tag is-small" data-bind="text: playing.quality"></span>
-            </p>
-          </div>
-          <div id="mobile-controls" class="col-xs-12 mobile-controls hidden--for-desktop">
-            <span><svg class="feather random is-small"><use xlink:href="/img/feather-sprite.svg#shuffle"></use></svg></span>
-            <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-back"></use></svg></span>
-            <button class="button is-primary is-rounded has-no-margin" data-bind="click: player.toggle">
-              <svg class="feather" data-bind="css: { 'is-hidden': playing.state() == true }"><use href="/img/feather-sprite.svg#play"></use></svg>
-              <svg class="feather" data-bind="css: { 'is-hidden': playing.state() != true }"><use href="/img/feather-sprite.svg#pause"></use></svg>
-            </button>
-            <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-forward"></use></svg></span>
-            <span><svg class="feather repeat is-small"><use xlink:href="/img/feather-sprite.svg#repeat"></use></svg></span>
-          </div>
-          <div class="col-xs-10 col-xs-offset-1 hidden--for-desktop">
-            <div id="mobile-progress-bar">
-              <div style="width: 0px;"></div>
-            </div>
-          </div>
-        </div>
-        <div class="hidden--for-desktop" id="swipe-up-queue" data-bind="tap: showQueue"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#chevron-up"></use></svg></div>
-      </div>
-    </template>
-
-    <template id="t-settings">
-    </template>
     -->
   </body>
 </html>

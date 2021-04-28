@@ -13,6 +13,8 @@ export class LocalPlayer {
     this.html5Init()
     this.reset()
 
+    this.createDatabase()
+
     this.gainNode = playerContext.createGain()
     this.gainNode.connect(playerContext.destination)
 
@@ -136,6 +138,7 @@ export class LocalPlayer {
 
         // shift the queue on
         this.queuePos++
+        this.dispatchEvent('queue')
         // increment this song's timesPlayed in the localdb and backend <---------------------------------------------------------
 
         // tidy up this mess...
@@ -172,7 +175,7 @@ export class LocalPlayer {
   */
   loadTrack (index) {
     return new Promise((resolve, reject) => {
-      const mdb = window.indexedDB.open('falk', 2).onsuccess = mdb => {
+      const mdb = window.indexedDB.open('falk', 3).onsuccess = mdb => {
         const tx = mdb.target.result.transaction('cache', 'readonly')
         const store = tx.objectStore('cache')
 
@@ -206,7 +209,7 @@ export class LocalPlayer {
   */
   isCached (id) {
     return new Promise((resolve, reject) => {
-      const mdb = window.indexedDB.open('falk', 2).onsuccess = mdb => {
+      const mdb = window.indexedDB.open('falk', 3).onsuccess = mdb => {
         const tx = mdb.target.result.transaction('cache', 'readonly')
         const store = tx.objectStore('cache')
 
@@ -401,7 +404,7 @@ export class LocalPlayer {
     
   }
 
-  async enqueueOne ({ id, url }) {
+  async addTrack ({ id, url }) {
     id = parseInt(id) || false
     url = url || false
     // check to make sure we have valid results
@@ -412,6 +415,7 @@ export class LocalPlayer {
       } catch(e) {
         console.log(e)
       }
+      console.log(id, url)
       // define the item
       const item = { id: id, url: url, data: null, cached: cacheState }
       // add to the array
@@ -419,12 +423,18 @@ export class LocalPlayer {
     }
   }
 
+  async enqueueOne ({ id, url }) {
+    this.addTrack(id, url)
+    this.dispatchEvent('queue')
+  }
+
   async enqueue (tracks) {
     if (Array.isArray(tracks)) {
       for (let i = 0; i < tracks.length; i++) {
-        await this.enqueueOne(tracks[i])
+        await this.addTrack(tracks[i])
       }
     }
+    this.dispatchEvent('queue')
   }
 
   async setTracks (tracks, playPosition = 0, playOnLoad = false) {
@@ -478,5 +488,13 @@ export class LocalPlayer {
 
     this.queue = []
     this.queuePos = 0
+  }
+
+  createDatabase () {
+    indexedDB.open('falk', 3).onupgradeneeded = function (e) {
+      console.log('test')
+      const store = e.target.result.createObjectStore('cache', { keyPath: 'id' })
+      store.createIndex('date', 'added')
+    }
   }
 }

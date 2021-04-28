@@ -1,8 +1,18 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Swipes from './swipes.js'
 import { LocalPlayer } from './player.js'
 import { DatabaseHandler } from './database.js'
+
 import App from './App.vue'
+import Home from './components/Home.vue'
+import Albums from './components/Albums.vue'
+import Artists from './components/Artists.vue'
+import Artist from './components/Artist.vue'
+import Album from './components/Album.vue'
+import Genres from './components/Genres.vue'
+import Genre from './components/Genre.vue'
+import Settings from './components/Settings.vue'
 
 Vue.use(VueRouter)
 const scrollBehavior = (to, from, savedPosition) => {
@@ -34,17 +44,12 @@ const scrollBehavior = (to, from, savedPosition) => {
     return position
   }
 }
-import Albums from './components/Albums.vue'
-import Artists from './components/Artists.vue'
-import Artist from './components/Artist.vue'
-import Album from './components/Album.vue'
-import Genres from './components/Genres.vue'
-import Genre from './components/Genre.vue'
-import Settings from './components/Settings.vue'
+
 const router = new VueRouter({
   mode: 'hash',
   scrollBehavior,
   routes: [
+    { path: '/', component: Home, props: true, meta: { scrollToTop: true }},
     { path: '/albums', component: Albums, meta: { scrollToTop: true }},
     { path: '/artists', component: Artists, meta: { scrollToTop: true }},
     { path: '/artist/:artist', component: Artist, meta: { scrollToTop: true }},
@@ -58,6 +63,8 @@ const router = new VueRouter({
 Vue.prototype.$innerWidth = window.innerWidth
 
 Vue.prototype.$player = new LocalPlayer()
+
+Vue.use(Swipes)
 
 Vue.prototype.$database = new DatabaseHandler(() => {
   new Vue({

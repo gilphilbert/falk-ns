@@ -1,6 +1,6 @@
 <template>
-  <div id="queue-list"  :class="{ 'is-active': isActive }">
-    <div id="queue-header" @click="toggleQueue">
+  <div id="queue-list" :class="{ 'is-active': isActive }">
+    <div id="queue-header" @click="hideQueue">
       <h1>Play Queue</h1>
     </div>
     <div id="queue-items">
@@ -17,7 +17,11 @@
 <script>
 export default {
   name: 'Queue',
-  props: [ 'isActive', 'toggleQueue', 'playback' ]
+  props: [ 'isActive', 'playback' ],
+  methods: {
+    hideQueue () {
+      this.$emit('hideQueue')
+    }
+  }
 }
 </script>
-<style scoped></style>

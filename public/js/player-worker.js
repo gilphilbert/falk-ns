@@ -35,7 +35,7 @@ function cacheTrack (id, blob, permanent) {
   // whether we need to delete the oldest track(s) first. This could
   // consume a lot of space, especially for lossless / hires libraries
   return new Promise((resolve, reject) => {
-    indexedDB.open('falk', 2).onsuccess = function (e) {
+    indexedDB.open('falk', 3).onsuccess = function (e) {
       const db = e.target.result
       const tx = db.transaction('cache', 'readwrite')
       const store = tx.objectStore('cache')

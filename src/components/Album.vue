@@ -21,8 +21,8 @@
             <h1 class="hidden--to-tablet">Album Tracks</h1>
             <table class="table songs">
               <tbody>
-                <tr v-for="track in this.tracks" v-bind:data-id="track._id">
-                  <td class="pointer" data-bind="click: $parents[1].playAlbumSong"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
+                <tr v-for="(track, index) in this.tracks" v-bind:data-id="track._id">
+                  <td class="pointer" @click="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortformat }}</span></td>
                   <td class="is-narrow">
                     <div class="dropdown is-right">
@@ -70,6 +70,12 @@ export default {
       title: '',
       tracks: [],
       year: ''
+    }
+  },
+  methods: {
+    playAll(index) {
+      const tr = this.tracks.map(e => { return { id: e._id, url: '/song/' + e._id + e.location.substr(e.location.lastIndexOf('.')) } } )
+      this.$player.setTracks(tr, index, true)
     }
   }
 }
