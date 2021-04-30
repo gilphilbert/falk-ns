@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Swipes from './swipes.js'
-import { LocalPlayer } from './player.js'
+import * as player from './player-mod'
 import { DatabaseHandler } from './database.js'
 
 import App from './App.vue'
@@ -49,22 +48,20 @@ const router = new VueRouter({
   mode: 'hash',
   scrollBehavior,
   routes: [
-    { path: '/', component: Home, props: true, meta: { scrollToTop: true }},
-    { path: '/albums', component: Albums, meta: { scrollToTop: true }},
-    { path: '/artists', component: Artists, meta: { scrollToTop: true }},
-    { path: '/artist/:artist', component: Artist, meta: { scrollToTop: true }},
-    { path: '/album/:artist/:album', component: Album, meta: { scrollToTop: true }},
-    { path: '/genres', component: Genres, meta: { scrollToTop: true }},
-    { path: '/genre/:genre', component: Genre, meta: { scrollToTop: true }},
-    { path: '/settings', component: Settings, meta: { scrollToTop: true }}
+    { path: '/', component: Home, props: true, meta: { scrollToTop: true } },
+    { path: '/albums', component: Albums, meta: { scrollToTop: true } },
+    { path: '/artists', component: Artists, meta: { scrollToTop: true } },
+    { path: '/artist/:artist', component: Artist, meta: { scrollToTop: true } },
+    { path: '/album/:artist/:album', component: Album, meta: { scrollToTop: true } },
+    { path: '/genres', component: Genres, meta: { scrollToTop: true } },
+    { path: '/genre/:genre', component: Genre, meta: { scrollToTop: true } },
+    { path: '/settings', component: Settings, meta: { scrollToTop: true } }
   ]
 })
 
 Vue.prototype.$innerWidth = window.innerWidth
 
-Vue.prototype.$player = new LocalPlayer()
-
-Vue.use(Swipes)
+Vue.prototype.$player = player
 
 Vue.prototype.$database = new DatabaseHandler(() => {
   new Vue({

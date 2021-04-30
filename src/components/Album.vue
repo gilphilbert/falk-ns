@@ -4,7 +4,7 @@
       <div class="col-xs-12 col-md-5 has-text-centered-desktop">
         <div class="row album-detail">
           <div class="col-md-8 col-md-offset-2 col-xs-4 art">
-            <figure class="image"><img :src="this.art"></figure>
+            <figure class="image"><img :src="this.art + '?size=800'"></figure>
           </div>
           <div class="col-md-8 col-md-offset-2 col-xs-8">
             <h1 class="album-title">{{ this.title }}</h1>
@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     playAll(index) {
-      const tr = this.tracks.map(e => { return { id: e._id, url: '/song/' + e._id + e.location.substr(e.location.lastIndexOf('.')) } } )
+      const tr = this.tracks.map(e => { return { id: e._id, url: '/song/' + e._id + e.location.substr(e.location.lastIndexOf('.')), meta: e } } )
       this.$player.setTracks(tr, index, true)
     }
   }

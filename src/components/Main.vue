@@ -22,6 +22,9 @@ export default {
   },
   created () {
     this.$player.on('play', () => { this.playback.isPlaying = true })
+    this.$player.on('pause', () => { this.playback.isPlaying = false })
+    this.$player.on('queue', (q) => { console.log(q.queue[0]); this.playback.queue = q.queue; this.playback.queuePos = q.pos })
+    this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
   },
   data () {
     return {
@@ -31,28 +34,9 @@ export default {
       noControls: false,
       playback: {
         isPlaying: false,
-        queuePos: 1,
-        elapsed: '53',
-        queue: [
-          {
-            title: 'The Only Night',
-            artist: 'James Morrison',
-            duration: '217',
-            album: 'Songs for You, Truths for Me',
-            shortformat: '44.1kHz 16bit',
-            cover: '/art/4be59c8690054a786e401f40177c41a76b8caee0-cover.jpg',
-            discart: '/art/4be59c8690054a786e401f40177c41a76b8caee0-disc.png'
-          },
-          {
-            title: 'Precious Love',
-            artist: 'James Morrison',
-            duration: '218',
-            album: 'Songs for You, Truths for Me',
-            shortformat: '44.1kHz 16bit',
-            cover: '/art/4be59c8690054a786e401f40177c41a76b8caee0-cover.jpg',
-            discart: '/art/4be59c8690054a786e401f40177c41a76b8caee0-disc.png'
-          }
-        ]
+        queuePos: 0,
+        elapsed: 0,
+        queue: []
       },
     }
   },

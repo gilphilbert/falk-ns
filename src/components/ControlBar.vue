@@ -6,7 +6,7 @@
         <div class="row now-playing">
           <div class="col-xs is-narrow">
             <figure class="image is-70x70">
-              <img v-bind:src="playback.queue[playback.queuePos].cover">
+              <img v-bind:src="'/art/' + playback.queue[playback.queuePos].art.cover">
             </figure>
           </div>
           <div class="col-xs">
@@ -28,7 +28,7 @@
       <div class="col-md has-text-right hidden--to-desktop">
         <div class="row end-md">
           <div class="col-md no-grow play-progress">
-            <span>{{ Math.floor(playback.elapsed / 60) + ':' + ('0' + (playback.elapsed % 60)).slice(-2, 3) }}</span>/<span>{{ Math.floor(playback.queue[playback.queuePos].duration / 60) + ':' + ('0' + (playback.queue[playback.queuePos].duration % 60)).slice(-2, 3) }}</span>
+            <span>{{ Math.floor(playback.elapsed / 60) + ':' + ('0' + (Math.round(playback.elapsed) % 60)).slice(-2, 3) }}</span>/<span>{{ Math.floor(playback.queue[playback.queuePos].duration / 60) + ':' + ('0' + (playback.queue[playback.queuePos].duration % 60)).slice(-2, 3) }}</span>
           </div>
           <div class="col-md no-grow">
             <svg class="queue feather hidden--to-desktop" @click="toggleQueue"><use href="/img/feather-sprite.svg#queue-alt"></use></svg>
