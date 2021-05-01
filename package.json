@@ -7,7 +7,8 @@
     "test": "",
     "start": "node api.js",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "build-dev": "vue-cli-service build --mode development"
   },
   "author": "gilphilbert",
   "license": "ISC",

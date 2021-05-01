@@ -1,7 +1,7 @@
 <template>
 <div :class="{ 'no-controls': this.$route.path==='/' }">
   <div id="content-container">
-    <router-view v-bind:playback="playback" @showQueue="toggleQueue" ></router-view>
+    <router-view :playback="playback" @showQueue="toggleQueue" ></router-view>
   </div>
   <Menu :isActive="showMenu" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" />
@@ -23,7 +23,7 @@ export default {
   created () {
     this.$player.on('play', () => { this.playback.isPlaying = true })
     this.$player.on('pause', () => { this.playback.isPlaying = false })
-    this.$player.on('queue', (q) => { console.log(q.queue[0]); this.playback.queue = q.queue; this.playback.queuePos = q.pos })
+    this.$player.on('queue', (q) => { this.playback.queue = q.queue; this.playback.queuePos = q.pos })
     this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
   },
   data () {

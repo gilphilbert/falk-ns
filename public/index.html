@@ -13,8 +13,6 @@
     <base href="/">
     <title></title>
     <link rel="stylesheet" href="/css/falk.css">
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/navigo/8.9.1/navigo.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lokijs/1.5.11/lokijs.min.js"></script>
   </head>
   <body>
@@ -24,26 +22,10 @@
         <p>This site requires JavaScript. You'll need to make sure you enable it to enjoy your music!</p> 
       </noscript>
     </div>
-
-    <!--
-      <div id="content-container" data-bind="template: pageContainer, swiperight: menuShow, swipeleft: menuHide"></div>
-
-      <div id="burger" class="hidden--for-desktop" data-bind="click: showMenu">
-        <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
-      </div>
-      <div id="disconnect-message">
-        <div class="has-text-centered">
-          <div class="animation-container">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <p class="is-1">Connection to player lost</p>
-          <p class="is-3">Reconnecting</p>
-        </div>
-      </div>
-    -->
   </body>
+  <script>
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.register('serviceworker.js')
+}
+  </script>
 </html>

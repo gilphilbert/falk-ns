@@ -8,26 +8,32 @@ const IMAGE_CACHE = 'imageV1'
 
 // these are the routes we are going to cache for offline support
 const cacheFiles = [
-  '/',
+  '/android-chrome-192x192.png',
+  '/android-chrome-512x512.png',
+  '/apple-touch-icon.png',
+  '/browserconfig.xml',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/favicon.ico',
+  '/index.html',
+  '/maskable_icon.png',
+  '/mstile-150x150.png',
+  '/safari-pinned-tab.svg',
+  '/site.webmanifest',
+
   '/css/falk.css',
+  '/css/falk.min.css',
+  '/css/falk.min.css.map',
 
   '/img/falk-blue-white-square.svg',
   '/img/falk-blue-white.svg',
   '/img/feather-sprite.svg',
 
-  '/android-chrome-192x192.png',
-  '/android-chrome-512x512.png',
-  '/apple-touch-icon.png',
-  '/favicon-16x16.png',
-  '/favicon-32x32.png',
-  '/favicon.ico',
-  '/maskable_icon.png',
-  '/mstile-150x150.png',
-  '/safari-pinned-tab.svg',
-  '/browserconfig.xml',
-
-  '/main.js',
-  '/site.webmanifest'
+  'js/app.15f90f26.js',
+  'js/app.15f90f26.js.map',
+  'js/chunk-vendors.28992539.js',
+  'js/chunk-vendors.28992539.js.map',
+  'js/player-worker.js'
 ]
 
 // create the database

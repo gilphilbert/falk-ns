@@ -2,9 +2,9 @@
   <div class="container-fluid max">
     <div class="row">
       <div class="col-xs-10 col-md-3 has-margin-auto art">
-        <figure id="home-albumart" class="image is-1by1"><img :src=" '/art/' + this.track.art.cover + '?size=600'" style="z-index: 1;"></figure>
-        <figure id="home-albumart" class="image is-1by1" v-if="this.track.art.disc !== ''" style="margin-top: -65%; background-color: transparent;"><img :class="{ 'rotate': this.playback.isPlaying }" :src="'/art/' + this.track.art.disc + '?size=600'"></figure>
-        <div id="mobile-toolbar" class="has-text-centered" v-if="this.track.album !== ''">
+        <figure id="home-albumart" class="image is-1by1"><img :src=" '/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : 'placeholder.png') + '?size=600'" style="z-index: 1;"></figure>
+        <figure id="home-albumart" class="image is-1by1" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.disc !== ''" style="margin-top: -65%; background-color: transparent;"><img :class="{ 'rotate': this.playback.isPlaying }" :src="'/art/' + this.playback.queue[this.playback.queuePos].art.disc + '?size=600'"></figure>
+        <div id="mobile-toolbar" class="has-text-centered" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].album !== ''">
           <div>
             <svg class="feather"><use xlink:href="/img/feather-sprite.svg#heart"></use></svg>
           </div>
@@ -14,15 +14,15 @@
         </div>
       </div>
       <div class="col-xs-10 col-xs-offset-1">
-        <h1 id="home-title" class="has-text-centered has-no-overflow">{{ this.track.title }}</h1>
-        <p class="has-text-centered subtitle is-3 has-no-overflow hidden--to-desktop">
-          <router-link id="home-album" :to="'/album/' + this.track.artist + '/' + this.track.album">{{ this.track.album }}</router-link>
+        <h1 id="home-title" class="has-text-centered has-no-overflow">{{ ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].title : 'Nothing playing') }}</h1>
+        <p class="has-text-centered subtitle is-3 has-no-overflow hidden--to-desktop" v-if="this.playback.queue[this.playback.queuePos]">
+          <router-link id="home-album" :to="'/album/' + this.playback.queue[this.playback.queuePos].artist + '/' + this.playback.queue[this.playback.queuePos].album">{{ this.playback.queue[this.playback.queuePos].album }}</router-link>
         </p>
-        <p class="has-text-centered subtitle is-3 has-no-overflow">
-          <router-link id="home-artist" :to="'/artist/' + this.track.artist">{{ this.track.artist }}</router-link>
+        <p class="has-text-centered subtitle is-3 has-no-overflow" v-if="this.playback.queue[this.playback.queuePos]">
+          <router-link id="home-artist" :to="'/artist/' + this.playback.queue[this.playback.queuePos].artist">{{ this.playback.queue[this.playback.queuePos].artist }}</router-link>
         </p>
-        <p class="has-text-centered" v-if="this.track.shortformat !== ''">
-          <span id="home-quality" class="tag is-small">{{ this.track.shortformat }}</span>
+        <p class="has-text-centered" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].shortformat !== ''">
+          <span id="home-quality" class="tag is-small">{{ this.playback.queue[this.playback.queuePos].shortformat }}</span>
         </p>
       </div>
       <div id="mobile-controls" class="col-xs-12 mobile-controls hidden--for-desktop">
@@ -48,19 +48,6 @@
 export default {
   name: 'Home',
   props: [ 'playback' ],
-  created () {
-    if (this.playback.queue.length > 0) {
-      this.track = this.playback.queue[this.playback.queuePos]
-      console.log(this.track)
-    } else {
-      //placeholders
-    }
-  },
-  data () {
-    return {
-      track: {}
-    }
-  },
   methods: {
     showQueue () {
       this.$emit('showQueue', true)

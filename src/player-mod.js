@@ -1,5 +1,4 @@
 const playerContext = new (window.AudioContext || window.webkitAudioContext)()
-
 const PLAY_MODE_HTML5 = 0
 const PLAY_MODE_WEBAUDIO = 1
 
@@ -387,6 +386,7 @@ function stop () {
 
 function skip () {
   changePos(queuePos + 1)
+  dispatchEvent('next', new window.Event('next'))
 }
 
 function prev () {

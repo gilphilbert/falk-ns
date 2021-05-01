@@ -1,17 +1,17 @@
 <template>
   <div id="control-bar" class="is-active" data-bind="swipeup: showQueue">
-    <div class="progress-topper" :style="{ width: (playback.elapsed / playback.queue[playback.queuePos].duration * $innerWidth) + 'px' }"></div>
+    <div class="progress-topper" v-if="this.playback.queue[this.playback.queuePos]" :style="{ width: (playback.elapsed / playback.queue[playback.queuePos].duration * $innerWidth) + 'px' }"></div>
     <div class="row is-marginless">
       <div class="col-xs col-md">
         <div class="row now-playing">
           <div class="col-xs is-narrow">
             <figure class="image is-70x70">
-              <img v-bind:src="'/art/' + playback.queue[playback.queuePos].art.cover">
+              <img v-bind:src="'/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : 'placeholder.png')">
             </figure>
           </div>
           <div class="col-xs">
-            <p class="is-5">{{ playback.queue[playback.queuePos].title }}</p>
-            <p class="subtitle is-5"><router-link class="subtitle is-5" :to="'/artist/' + playback.queue[playback.queuePos].artist">{{ playback.queue[playback.queuePos].artist }}</router-link></p>
+            <p class="is-5">{{ ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].title : 'Not playing') }}</p>
+            <p class="subtitle is-5" v-if="this.playback.queue[this.playback.queuePos]"><router-link class="subtitle is-5" :to="'/artist/' + this.playback.queue[this.playback.queuePos].artist">{{ this.playback.queue[this.playback.queuePos].artist }}</router-link></p>
           </div>
         </div>
       </div>
@@ -28,7 +28,7 @@
       <div class="col-md has-text-right hidden--to-desktop">
         <div class="row end-md">
           <div class="col-md no-grow play-progress">
-            <span>{{ Math.floor(playback.elapsed / 60) + ':' + ('0' + (Math.round(playback.elapsed) % 60)).slice(-2, 3) }}</span>/<span>{{ Math.floor(playback.queue[playback.queuePos].duration / 60) + ':' + ('0' + (playback.queue[playback.queuePos].duration % 60)).slice(-2, 3) }}</span>
+            <span>{{ Math.floor(playback.elapsed / 60) + ':' + ('0' + (Math.round(playback.elapsed) % 60)).slice(-2, 3) }}</span>/<span>{{ ((this.playback.queue[this.playback.queuePos]) ? Math.floor(this.playback.queue[this.playback.queuePos].duration / 60) + ':' + ('0' + (this.playback.queue[this.playback.queuePos].duration % 60)).slice(-2, 3) : '0:00') }}</span>
           </div>
           <div class="col-md no-grow">
             <svg class="queue feather hidden--to-desktop" @click="toggleQueue"><use href="/img/feather-sprite.svg#queue-alt"></use></svg>
@@ -41,7 +41,7 @@
 <script>
 export default {
   name: 'ControlBar',
-  props: [ 'isActive', 'player', 'playback' ],
+  props: [ 'isActive', 'playback' ],
   methods: {
     toggleQueue () {
       this.$emit('toggleQueue')

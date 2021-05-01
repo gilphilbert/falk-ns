@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import * as player from './player-mod'
+import * as player from './player-mod.js'
 import { DatabaseHandler } from './database.js'
 
 import App from './App.vue'
