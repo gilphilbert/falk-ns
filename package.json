@@ -2,7 +2,7 @@
   "name": "falk-ns",
   "version": "0.0.1",
   "description": "Web Music Streamer",
-  "main": "app.js",
+  "main": "api.js",
   "scripts": {
     "test": "",
     "start": "node api.js",
