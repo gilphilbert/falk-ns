@@ -2,10 +2,10 @@
   "name": "falk-ns",
   "version": "0.0.1",
   "description": "Web Music Streamer",
-  "main": "api.js",
+  "main": "app.js",
   "scripts": {
     "test": "",
-    "start": "node api.js",
+    "start": "node app.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build-dev": "vue-cli-service build --mode development"
