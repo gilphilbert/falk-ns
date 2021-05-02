@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Vue3TouchEvents from 'vue3-touch-events'
 import * as player from './player-mod.js'
 import { DatabaseHandler } from './database.js'
 
@@ -12,6 +13,8 @@ import Album from './components/Album.vue'
 import Genres from './components/Genres.vue'
 import Genre from './components/Genre.vue'
 import Settings from './components/Settings.vue'
+
+Vue.use(Vue3TouchEvents)
 
 Vue.use(VueRouter)
 const scrollBehavior = (to, from, savedPosition) => {
