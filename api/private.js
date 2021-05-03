@@ -19,11 +19,11 @@ module.exports = app => {
       const publicKey = fs.readFileSync('data/jwtRS256.key.pub', 'utf8')
       jwt.verify(token, publicKey, (err, user) => {
         if (err) {
-          if (req.url.startsWith('/api')) {
+          //if (req.url.startsWith('/api')) {
             res.status(403).json({ error: 'unauthorized' })
-          } else {
-            res.redirect('/')
-          }
+          //} else {
+          //  res.redirect('/')
+          //}
         } else {
           res.locals.uuid = user.uuid
           next()
@@ -36,6 +36,10 @@ module.exports = app => {
         res.redirect('/')
       }
     }
+  })
+
+  app.get('/api/check', function (req, res) {
+    res.json({ message: 'logged in' })
   })
 
   // track connected clients
@@ -118,7 +122,7 @@ module.exports = app => {
       case 'oga':
         val = 'audio/ogg'
         break
-      case 'opus':
+      case 'opus':json
         val = 'audio/opus'
         break
       case 'wav':

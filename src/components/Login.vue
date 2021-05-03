@@ -23,7 +23,7 @@
 <script>
 export default {
   name: 'Login',
-  props: [ 'isLoggedInParent' ],
+  props: [ 'isLoggedIn' ],
   data() {
     return {
       user: '',
@@ -41,7 +41,7 @@ export default {
             // show a message that login failed
             this.error = 'Invalid username and/or password'
           } else {
-            this.isLoggedInParent()
+            this.isLoggedIn(true)
           }
         })
         .catch(err => {

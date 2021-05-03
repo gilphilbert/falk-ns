@@ -3,9 +3,12 @@
   <div id="content-container" v-touch:swipe.left="() => { showMenu = true }" v-touch:swipe.right="() => { showMenu = false }">
     <router-view :playback="playback" @showQueue="toggleQueue" ></router-view>
   </div>
-  <Menu :isActive="showMenu" />
+  <Menu :isActive="showMenu" @hide="doHideMenu" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
+  <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
+    <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
+  </div>
 </div>
 </template>
 <script>
@@ -40,10 +43,16 @@ export default {
       },
     }
   },
-  props: [ 'isLoggedInParent' ],
+  props: [ 'isLoggedIn' ],
   methods: {
     toggleQueue (fixed = null) {
       this.showQueue = !this.showQueue
+    },
+    doShowMenu () {true
+      this.showMenu = true
+    },
+    doHideMenu () {
+      this.showMenu = false
     }
   }
 }
