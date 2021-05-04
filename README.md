@@ -18,6 +18,16 @@ The container will not support SSL, it runs purely over HTTP on port 3000. If yo
 * VIRTUAL_PORT = 80
 * VIRTUAL_HOST = your.personal.url
 
+### Development
+To run the development environment, simply use npm:
+```bash
+npm run serve
+```
+When you've made your changes:
+```bash
+npm run build
+```
+
 ### Running
 ```bash
 npm start

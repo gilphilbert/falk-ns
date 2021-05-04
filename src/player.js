@@ -13,6 +13,8 @@ export class LocalPlayer {
     this.html5Init()
     this.reset()
 
+    this.createDatabase()
+
     this.gainNode = playerContext.createGain()
     this.gainNode.connect(playerContext.destination)
 
@@ -20,13 +22,13 @@ export class LocalPlayer {
 
     this._handlers()
 
-    this.cacheWorker = new Worker('/js/player-worker.js')
+    this.cacheWorker = new window.Worker('/js/player-worker.js')
     const handleMessageFromWorker = (msg) => {
       const data = msg.data
       console.log('[MAIN]', data)
       if (data.cached) {
         for (let i = this.queuePos; i < this.queue.length; i++) {
-          let el = this.queue[i]
+          const el = this.queue[i]
           if (el.id === data.id) {
             el.cached = true
             if (i === this.queuePos) {
@@ -150,6 +152,7 @@ export class LocalPlayer {
 
         // shift the queue on
         this.queuePos++
+        this.dispatchEvent('queue')
         // increment this song's timesPlayed in the localdb and backend <---------------------------------------------------------
 
         // if we're not at the end of the queue
@@ -186,7 +189,7 @@ export class LocalPlayer {
   */
   loadTrack (index) {
     return new Promise((resolve, reject) => {
-      const mdb = window.indexedDB.open('falk', 2).onsuccess = mdb => {
+      const mdb = window.indexedDB.open('falk', 3).onsuccess = mdb => {
         const tx = mdb.target.result.transaction('cache', 'readonly')
         const store = tx.objectStore('cache')
 
@@ -199,7 +202,7 @@ export class LocalPlayer {
                 console.log('[MAIN] Loaded track ', item.id)
                 playerContext.decodeAudioData(buf, function (buffer) {
                   resolve(buffer)
-                })    
+                })
               })
               .catch(e => reject(new Error('Cache invalid')))
           } else {
@@ -207,7 +210,7 @@ export class LocalPlayer {
             console.log(item)
           }
         }
-        tx.onerror = (e) => reject(e) // the store doesn't existself.path + 
+        tx.onerror = (e) => reject(e) // the store doesn't existself.path
       }
       mdb.onerror = (e) => reject(e) // couldn't open the database
     })
@@ -220,7 +223,7 @@ export class LocalPlayer {
   */
   isCached (id) {
     return new Promise((resolve, reject) => {
-      const mdb = window.indexedDB.open('falk', 2).onsuccess = mdb => {
+      const mdb = window.indexedDB.open('falk', 3).onsuccess = mdb => {
         const tx = mdb.target.result.transaction('cache', 'readonly')
         const store = tx.objectStore('cache')
 
@@ -348,18 +351,15 @@ export class LocalPlayer {
           this.sources.push(_source)
           console.log(this.sources)
 
-          this.playMode = PLAY_MODE_WEBAUDIO
-          this.state = STATE_PLAY
-          this.progress()
-
+          // console.log('Playing Web Audio API from queue data')
           this.dispatchEvent('play', new window.Event('play'))
-  
+
+          this.playMode = PLAY_MODE_WEBAUDIO
+
           if (this.queue[index + 1] && this.queue[index + 1].cached) {
             // queue up next song if we already have the data in cache (if not, it will be loaded after it's cached)
             this.prepareWebAudio()
           }
-          this.cacheQueue()
-  
         })
     } else {
       this.html5Audio.src = item.url
@@ -388,6 +388,14 @@ export class LocalPlayer {
     }
   }
 
+  toggle () {
+    if (this.state === STATE_PLAY) {
+      this.pause()
+    } else {
+      this.play()
+    }
+  }
+
   stop () {
     if (this.playMode === PLAY_MODE_HTML5) {
       this.html5Audio.pause()
@@ -412,7 +420,15 @@ export class LocalPlayer {
     this.changePos(this.queuePos - 1)
   }
 
-  async enqueueOne ({ id, url }) {
+  random () {
+
+  }
+
+  repeat () {
+
+  }
+
+  async addTrack ({ id, url }) {
     id = parseInt(id) || false
     url = url || false
     // check to make sure we have valid results
@@ -420,22 +436,29 @@ export class LocalPlayer {
       let cacheState = false
       try {
         cacheState = await this.isCached(id)
-      } catch(e) {
+      } catch (e) {
         console.log(e)
       }
+      console.log(id, url)
       // define the item
       const item = { id: id, url: url, data: null, cached: cacheState }
       // add to the array
-      const len = this.queue.push(item)
+      this.queue.push(item)
     }
+  }
+
+  async enqueueOne ({ id, url }) {
+    this.addTrack(id, url)
+    this.dispatchEvent('queue')
   }
 
   async enqueue (tracks) {
     if (Array.isArray(tracks)) {
       for (let i = 0; i < tracks.length; i++) {
-        await this.enqueueOne(tracks[i])
+        await this.addTrack(tracks[i])
       }
     }
+    this.dispatchEvent('queue')
   }
 
   async setTracks (tracks, playPosition = 0, playOnLoad = false) {
@@ -456,14 +479,21 @@ export class LocalPlayer {
     }
     // need to clear audio buffers for songs no longer in the immediate queue
     this.play()
-    this.clearQueueData()
+  }
+
+  populateQueue () {
+    if (this.queue.length > 0) {
+      for (let i = this.queuePos; i < this.queue.length && i <= this.queuePos + 3; i++) {
+        console.log(this.queue[i])
+      }
+    }
   }
 
   clearQueue () {
     this.reset()
   }
 
-  cacheQueue() {
+  cacheQueue () {
     // get a list of songs in the queue, loading only the next five songs
     const items = this.queue.slice(this.queuePos).filter(e => e.cached === false).slice(0, 5)
     this.cacheWorker.postMessage({ items: items })
@@ -483,5 +513,13 @@ export class LocalPlayer {
 
     this.queue = []
     this.queuePos = 0
+  }
+
+  createDatabase () {
+    window.indexedDB.open('falk', 3).onupgradeneeded = function (e) {
+      console.log('test')
+      const store = e.target.result.createObjectStore('cache', { keyPath: 'id' })
+      store.createIndex('date', 'added')
+    }
   }
 }
