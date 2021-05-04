@@ -1,6 +1,6 @@
 <template>
 <div :class="{ 'no-controls': this.$route.path==='/' }">
-  <div id="content-container" v-touch:swipe.left="() => { showMenu = true }" v-touch:swipe.right="() => { showMenu = false }">
+  <div id="content-container" v-touch:swipe.left="doHideMenu" v-touch:swipe.right="doShowMenu">
     <router-view :playback="playback" @showQueue="toggleQueue" ></router-view>
   </div>
   <Menu :isActive="showMenu" @hide="doHideMenu" />
