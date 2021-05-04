@@ -29,10 +29,10 @@ const cacheFiles = [
   '/img/falk-blue-white.svg',
   '/img/feather-sprite.svg',
 
-  'js/app.15f90f26.js',
-  'js/app.15f90f26.js.map',
-  'js/chunk-vendors.28992539.js',
-  'js/chunk-vendors.28992539.js.map',
+  'js/app.ee261fc8.js',
+  'js/app.ee261fc8.js.map',
+  'js/chunk-vendors.284855de.js',
+  'js/chunk-vendors.284855de.js.map',
   'js/player-worker.js'
 ]
 
@@ -40,20 +40,6 @@ const cacheFiles = [
 indexedDB.open('falk', 2).onupgradeneeded = function (e) {
   const store = e.target.result.createObjectStore('cache', { keyPath: 'id' })
   store.createIndex('date', 'added')
-}
-
-function cacheSong (url, response) {
-  const id = parseInt(url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.')))
-  response.blob().then(blob => {
-    indexedDB.open('falk', 2).onsuccess = function (e) {
-      const db = e.target.result
-      const tx = db.transaction('cache', 'readwrite')
-      const store = tx.objectStore('cache')
-
-      store.add({ id: id, added: Date.now(), played: Date.now(), data: blob })
-      tx.oncomplete = () => db.close()
-    }
-  })
 }
 
 // on activation we clean up the previously registered service workers
@@ -135,6 +121,9 @@ const update = request => {
 // general strategy when making a request (eg if online try to fetch it
 // from the network with a timeout, if something fails serve from cache)
 self.addEventListener('fetch', evt => {
+  if (evt.request.method === 'POST') {
+    return
+  }
   const ignoredURLs = ['/api/login', '/api/check', '/api/songs/', '/api/update', '/events', '/song/']
   for (let i = 0; i < ignoredURLs.length; i++) {
     if (evt.request.url.indexOf(ignoredURLs[i]) >= 0) {

@@ -459,6 +459,7 @@ function changePos (index) {
 function cacheQueue () {
   // get a list of songs in the queue, loading only the next five songs
   const items = queue.slice(queuePos).filter(e => e.cached === false).slice(0, 5)
+  items.forEach(el => { delete el.meta })
   cacheWorker.postMessage({ items: items })
   // need to clear data from old songs
 }

@@ -7,7 +7,7 @@
         <p class="subtitle is-4">Please login to access your music!</p>
         <br/>
         <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">
-          <input v-model="user" class="input" type="text" placeholder="Username" autofocus="true" />
+          <input v-model="user" class="input" type="text" placeholder="Username" />
         </fieldset>
         <br/>
         <fieldset style="margin: 5px 0; max-width: 300px; margin: 0 auto">

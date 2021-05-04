@@ -12,7 +12,7 @@
       <tr><th>Library Locations</th><th></th></tr>
     </thead>
     <tbody>
-      <tr v-for="location in locations">
+      <tr v-for="location in locations" v-bind:key="location">
         <td><p class="is-6">{{ location }}</p></td>
         <td class="is-narrow pointer" @click="removeLocation(location)"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
       </tr>
@@ -30,7 +30,7 @@
         <tr><th colspan="2">Registered users</th></tr>
       </thead>
       <tbody>
-        <tr v-for="user in this.users">
+        <tr v-for="user in this.users" v-bind:key="user.user">
           <td><p class="is-6">{{ user.user }}</p></td>
           <td class="is-narrow pointer" v-if="user.user !== 'admin'"><span class="delete" @click="removeUser(user.uuid)"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
         </tr>
@@ -49,7 +49,7 @@
         </div>
         <div style="padding: 2px 0; max-height: 70vh; overflow-y: auto">
           <table>
-            <tr class="pointer" v-for="dir in this.directories.list" @click="getDirectories(dir.name)"><td class="is-narrow"><svg class="feather"><use href="/img/feather-sprite.svg#folder"></use></svg>&nbsp</td><td>{{ dir.name }}</td></tr>
+            <tr class="pointer" v-for="dir in this.directories.list" @click="getDirectories(dir.name)" :key="dir.name"><td class="is-narrow"><svg class="feather"><use href="/img/feather-sprite.svg#folder"></use></svg>&nbsp;</td><td>{{ dir.name }}</td></tr>
           </table>
         </div>
         <p></p>
@@ -63,13 +63,13 @@
       <div class="box">
         <h1>Add user</h1>
         <fieldset>
-          <input class="input" type="text" value="" placeholder="Username" v-model="newUser.user" />
+          <input class="input" type="text" placeholder="Username" v-model="newUser.user" />
         </fieldset>
         <fieldset>
-          <input class="input" type="password" value="" placeholder="Password" v-model="newUser.pass" />
+          <input class="input" type="password" placeholder="Password" v-model="newUser.pass" />
         </fieldset>
         <fieldset>
-          <input class="input" type="password" value="" placeholder="Verify password" v-model="newUser.passVerify" />
+          <input class="input" type="password" placeholder="Verify password" v-model="newUser.passVerify" />
         </fieldset>
         <fieldset style="display: flex; align-items: center;">
           <label class="switch"><input type="checkbox" v-model="newUser.inherit"><span class="slider round"></span></label><span style="margin-left: 5px">Inherit my library</span>

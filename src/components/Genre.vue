@@ -4,7 +4,6 @@
   <Tiles :tiles="albums" />
 </div>
 </template>
-</template>
 <script>
 import Tiles from './Tiles.vue'
 export default {

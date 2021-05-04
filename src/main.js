@@ -1,11 +1,12 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createApp } from 'vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import Vue3TouchEvents from 'vue3-touch-events'
 import * as player from './player-mod.js'
 import { DatabaseHandler } from './database.js'
 
 import App from './App.vue'
 import Home from './components/Home.vue'
+import Playlists from './components/Playlists.vue'
 import Albums from './components/Albums.vue'
 import Artists from './components/Artists.vue'
 import Artist from './components/Artist.vue'
@@ -14,9 +15,7 @@ import Genres from './components/Genres.vue'
 import Genre from './components/Genre.vue'
 import Settings from './components/Settings.vue'
 
-Vue.use(Vue3TouchEvents)
-
-Vue.use(VueRouter)
+// Vue.use(VueRouter)
 const scrollBehavior = (to, from, savedPosition) => {
   if (savedPosition) {
     // savedPosition is only available for popstate navigations.
@@ -47,11 +46,12 @@ const scrollBehavior = (to, from, savedPosition) => {
   }
 }
 
-const router = new VueRouter({
-  mode: 'hash',
+const router = new createRouter({
+  history: createWebHashHistory(),
   scrollBehavior,
   routes: [
     { path: '/', component: Home, props: true, meta: { scrollToTop: true } },
+    { path: '/playlists', component: Playlists, meta: { scrollToTop: true } },
     { path: '/albums', component: Albums, meta: { scrollToTop: true } },
     { path: '/artists', component: Artists, meta: { scrollToTop: true } },
     { path: '/artist/:artist', component: Artist, meta: { scrollToTop: true } },
@@ -62,13 +62,11 @@ const router = new VueRouter({
   ]
 })
 
-Vue.prototype.$innerWidth = window.innerWidth
-
-Vue.prototype.$player = player
-
-Vue.prototype.$database = new DatabaseHandler(() => {
-  new Vue({
-    router,
-    render: h => h(App)
-  }).$mount('#app')
+const app = createApp(App)
+app.use(router)
+app.use(Vue3TouchEvents)
+app.config.globalProperties.$player = player
+app.config.globalProperties.$innerWidth = window.innerWidth
+app.config.globalProperties.$database = new DatabaseHandler(() => {
+  app.mount('#app')
 })

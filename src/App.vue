@@ -2,7 +2,7 @@
   <div id="app">
     <Login v-if="loginScreen" :isLoggedIn="isLoggedIn" />
     <Welcome v-if="welcomeScreen" @complete="welcomeComplete" />
-    <Main v-if="showApp" :isLoggedIn="isLoggedIn" />
+    <Main v-if="showApp" :isLoggedIn="isLoggedIn" @loggedOut="loggedOut" />
   </div>
 </template>
 <script>
@@ -20,17 +20,14 @@ export default {
     window.fetch('/api/check')
       .then(r => {
         if (r.status === 200) {
-          console.log('App')
           this.loginScreen = false
           this.welcomeScreen = false
           this.showApp = true
         } else if (r.status === 400) {
-          console.log('Welcome')
           this.loginScreen = false
           this.welcomeScreen = true
           this.showApp = false
         } else {
-          console.log('Login')
           this.loginScreen = true
           this.welcomeScreen = false
           this.showApp = false
@@ -48,11 +45,16 @@ export default {
     isLoggedIn(state) {
       this.loginScreen = !state
       this.showApp = state
-      this.$database.update()
+      if (state) {
+        this.$database.update()
+      }
     },
     welcomeComplete () {
       this.welcomeScreen = false
       this.loginScreen = true
+    },
+    loggedOut () {
+      this.isLoggedIn(false)
     }
   }
 }

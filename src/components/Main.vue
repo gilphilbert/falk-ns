@@ -3,7 +3,7 @@
   <div id="content-container" v-touch:swipe.left="doHideMenu" v-touch:swipe.right="doShowMenu">
     <router-view :playback="playback" @showQueue="toggleQueue" ></router-view>
   </div>
-  <Menu :isActive="showMenu" @hide="doHideMenu" />
+  <Menu :isActive="showMenu" @hide="doHideMenu" @doLogout="doLogout" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
@@ -53,6 +53,12 @@ export default {
     },
     doHideMenu () {
       this.showMenu = false
+    },
+    doLogout () {
+      fetch('/api/logout')
+        .then(() => {
+          this.$emit('loggedOut')
+        })
     }
   }
 }

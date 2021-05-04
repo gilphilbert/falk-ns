@@ -2,16 +2,15 @@
   "name": "falk-ns",
   "version": "0.0.1",
   "description": "Web Music Streamer",
-  "main": "app.js",
+  "author": "gilphilbert",
   "scripts": {
-    "test": "",
-    "start": "node app.js",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "build-dev": "vue-cli-service build --mode development"
+    "build-dev": "vue-cli-service build --mode development",
+    "start": "node app.js",
+    "test": ""
   },
-  "author": "gilphilbert",
-  "license": "ISC",
+  "main": "app.js",
   "dependencies": {
     "@root/walk": "^1.1.0",
     "compression": "^1.7.4",
@@ -26,12 +25,13 @@
     "npm": "^7.8.0",
     "serve-static": "^1.14.1",
     "sharp": "^0.28.1",
-    "vue": "^2.6.12",
-    "vue-router": "^3.5.1",
+    "vue": "^3.0.11",
+    "vue-router": "^4.0.6",
     "vue3-touch-events": "^3.1.1"
   },
   "devDependencies": {
-    "@vue/cli-service": "^4.5.12",
-    "vue-template-compiler": "^2.6.12"
-  }
+    "@vue/cli-service": "4.5.12",
+    "@vue/compiler-sfc": "^3.0.11"
+  },
+  "license": "ISC"
 }

@@ -1,25 +1,21 @@
 <template>
 <div class="container-fluid">
-  <h1 class="is-capitalized">Albums</h1>
-  <Tiles :tiles="albums" />
+  <h1 class="is-capitalized">Playlists</h1>
+  <Tiles :tiles="playlists" />
 </div>
 </template>
 <script>
 import Tiles from './Tiles.vue'
 export default {
-  name: 'Albums',
+  name: 'Playlists',
   components: {
     Tiles
   },
   created() {
-    this.$database.getAlbums()
-      .then(data => {
-        this.albums = data
-      })
   },
   data () {
     return {
-      albums: []
+      playlists: []
     }
   }
 }
