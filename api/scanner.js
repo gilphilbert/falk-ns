@@ -89,6 +89,8 @@ async function walkFunc (err, pathname, dirent) {
       })
     }
 
+    console.log(`ADD :: ${song.title} [${path.dirname(pathname) + '/' + dirent.name}]`)
+
     database.addMusic.song(song, uuid)
       .then(() => {
         return Promise.resolve()
@@ -125,23 +127,27 @@ async function getDirs (dir) {
 }
 
 async function scan (newuuid) {
+  console.log('Starting scan')
   uuid = newuuid
   // const promise = new Promise(function (resolve, reject) {
   const allSongs = database.raw.songs()
   allSongs.forEach(song => {
     if (!fs.existsSync(song.info.location)) {
+      console.log('DELETE ::', song.info.location)
       database.raw.removeSong(song)
     }
   })
 
   const dirs = database.settings.locations(uuid)
   for (let i = 0; i < dirs.length; i++) {
+    console.log('Scanning', dirs[i])
     try {
       await Walk.walk(dirs[i], walkFunc)
     } catch (e) {
       console.log(e)
     }
   }
+  console.log('Scan complete')
 }
 
 module.exports = {

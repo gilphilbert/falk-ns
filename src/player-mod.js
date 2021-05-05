@@ -26,8 +26,6 @@ const html5Audio = new window.Audio()
 html5Audio.controls = false
 html5Audio.addEventListener('canplaythrough', () => {
   html5Audio.play()
-  // if we're playing HTMLAudio5 then we don't have the track cached. Let's fetch it now
-  cacheQueue()
 })
 html5Audio.addEventListener('play', () => {
   dispatchEvent('play', new window.Event('play'))
@@ -125,45 +123,50 @@ function currentQueue () {
 function webAudioInit (index) {
   sources[index] = playerContext.createBufferSource()
   sources[index].connect(gainNode)
-  sources[index].addEventListener('ended', (evt) => {
-    if (state === STATE_PLAY) {
-      // this is our "next song" trigger, since web audio has no "play" event
-      // if there's another now playing...
-      if (sources.length) {
-        startTime = playerContext.currentTime
-        timeLeft = sources[0].buffer.duration
-      } else {
-        startTime = -1
-        timeLeft = -1
-      }
+  sources[index].addEventListener('ended', webAudioEnded)
+}
 
+function webAudioEnded (evt) {
+  if (state === STATE_PLAY) {
+    // first of all, let's remove ourselves from sources
+    sources.shift()
+    // this is our "next song" trigger, since web audio has no "play" event
+    // if there's another now playing...
+    if (sources.length) {
+      startTime = playerContext.currentTime
+      timeLeft = sources[0].buffer.duration
       // shift the queue on
       queuePos++
-      dispatchEvent('queue', currentQueue())
-      // increment this song's timesPlayed in the localdb and backend <---------------------------------------------------------
-
-      // tidy up this mess...
-      evt.target.disconnect(0)
-      if (evt.target.buffer) {
-        evt.target.buffer = null
-      }
-      sources.shift()
-
-      // if we're not at the end of the queue
-      if (queue[queuePos + 1]) {
-        dispatchEvent('next', new window.Event('next'))
-        prepareWebAudio()
-        cacheQueue()
-      } else {
-        queuePos = 0
-        dispatchEvent('stop', new window.Event('stop'))
-      }
+    } else {
+      startTime = -1
+      timeLeft = -1
+      queuePos = 0
+      state = STATE_STOP
     }
-  })
+
+    dispatchEvent('queue', currentQueue())
+    // increment this song's timesPlayed in the localdb and backend <---------------------------------------------------------
+
+    // tidy up this mess...
+    evt.target.disconnect(0)
+    if (evt.target.buffer) {
+      evt.target.buffer = null
+    }
+
+    // if we're not at the end of the queue
+    if (queue[queuePos + 1]) {
+      dispatchEvent('next', new window.Event('next'))
+      prepareWebAudio()
+      cacheQueue()
+    } else {
+      dispatchEvent('stop', new window.Event('stop'))
+    }
+  }
 }
 
 function stopAllWebAudio () {
   for (let i = sources.length - 1; i >= 0; i--) {
+    sources[i].
     sources[i].disconnect(0)
     sources.pop()
   }
@@ -335,6 +338,9 @@ function play (index = -1) {
         }
       })
   } else {
+    // if we're playing HTMLAudio5 then we don't have the track cached. Let's fetch it now
+    cacheQueue()
+    // set the url. canplaythrough (event above) will start playback when the song can play without stuttering. This is bad on slow links though (slow start...)
     html5Audio.src = item.url
     playMode = PLAY_MODE_HTML5
   }
@@ -385,7 +391,12 @@ function stop () {
 }
 
 function skip () {
-  changePos(queuePos + 1)
+  sources[0].stop()
+  if (sources[1]) {
+    sources[1].start()
+  } else {
+    changePos(queuePos + 1)
+  }
   dispatchEvent('next', new window.Event('next'))
 }
 
@@ -393,6 +404,7 @@ function prev () {
   // check how long we've been playing for, if it's less than three seconds
   // then skip back, otherwise just start at the beginning of the song
   changePos(queuePos - 1)
+  dispatchEvent('prev', new window.Event('prev'))
 }
 
 function random () {
@@ -458,7 +470,7 @@ function changePos (index) {
 
 function cacheQueue () {
   // get a list of songs in the queue, loading only the next five songs
-  const items = queue.slice(queuePos).filter(e => e.cached === false).slice(0, 5)
+  const items = queue.slice(queuePos).slice(0, 5).filter(e => e.cached === false)
   items.forEach(el => { delete el.meta })
   cacheWorker.postMessage({ items: items })
   // need to clear data from old songs

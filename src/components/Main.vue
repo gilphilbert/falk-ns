@@ -26,7 +26,7 @@ export default {
   created () {
     this.$player.on('play', () => { this.playback.isPlaying = true })
     this.$player.on('pause', () => { this.playback.isPlaying = false })
-    this.$player.on('queue', (q) => { this.playback.queue = q.queue; this.playback.queuePos = q.pos })
+    this.$player.on('queue', q => { console.log(q); this.playback.queue = q.queue; this.playback.queuePos = q.pos })
     this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
   },
   data () {

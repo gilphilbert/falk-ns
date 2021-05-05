@@ -42,6 +42,7 @@ export default {
             this.error = 'Invalid username and/or password'
           } else {
             this.isLoggedIn(true)
+            window.localStorage.setItem('loggedIn', true)
           }
         })
         .catch(err => {

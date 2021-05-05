@@ -33,6 +33,18 @@ export default {
           this.showApp = false
         }
       })
+      .catch(e => {
+        // we're not connected to the internet (fetch failed)
+        const lis = window.localStorage.getItem('loggedIn')
+        console.log(lis)
+        if (lis && lis === 'true') {
+          this.loginScreen = false
+          this.welcomeScreen = false
+          this.showApp = true
+        } else {
+          console.log('offline and not logged in')
+        }
+      })
   },
   data () {
     return {
