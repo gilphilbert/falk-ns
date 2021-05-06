@@ -4,16 +4,29 @@ const crypto = require('crypto')
 let musicDB = null
 let usersDB = null
 
-const db = new Loki('data/local.db', {
-  autoload: true,
-  autosave: true,
-  autoloadCallback: () => {
-    musicDB = db.getCollection('music')
-    if (musicDB === null) { musicDB = db.addCollection('music', { unique: ['info.location'], indices: ['albumartist', 'album'] }) }
-    usersDB = db.getCollection('users')
-    if (usersDB === null) { usersDB = db.addCollection('users', { unique: ['user'] }) }
-  }
-})
+let db = false
+
+function init (callBack = null) {
+  db = new Loki('data/local.db', {
+    autoload: true,
+    autosave: true,
+    autoloadCallback: () => {
+      musicDB = db.getCollection('music')
+      if (musicDB === null) {
+        musicDB = db.addCollection('music', { unique: ['info.location'], indices: ['albumartist', 'album'] })
+      }
+      usersDB = db.getCollection('users')
+      if (usersDB === null) {
+        usersDB = db.addCollection('users', { unique: ['user'] })
+      }
+
+      // scanner.watch.start()
+      if (callBack != null) {
+        callBack()
+      }
+    }
+  })
+}
 
 const raw = {
   songs: () => {
@@ -21,6 +34,13 @@ const raw = {
   },
   removeSong: (song) => {
     musicDB.remove(song)
+  },
+  removeSongByLocation: (path) => {
+    musicDB.findAndRemove({ 'info.location': path })
+  },
+  allLocations: () => {
+    const allLocs = [].concat(...usersDB.find().map(e => e.locations)).filter((el, i, ar) => ar.indexOf(el) === i)
+    return allLocs
   }
 }
 
@@ -105,7 +125,7 @@ const get = {
 }
 
 const add = {
-  song: (info, uuid) => {
+  song: (info) => {
     return new Promise(function (resolve, reject) {
       const song = musicDB.findOne({ 'info.location': info.location, uuid: uuid })
       if (song === null) {
@@ -227,6 +247,7 @@ const users = {
 }
 
 module.exports = {
+  init,
   getMusic: get,
   addMusic: add,
   settings: settings,

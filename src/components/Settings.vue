@@ -92,11 +92,6 @@
 export default {
   name: 'Settings',
   created() {
-    let admin = false
-    this.$database.getStats()
-      .then(data => {
-        this.stats = data
-      })
     window.fetch('/api/locations')
       .then(response => response.json())
       .then(data => {
@@ -114,7 +109,7 @@ export default {
   },
   data () {
     return {
-      stats: {},
+      // stats: {},
       locations: [],
       isAdmin: false,
       users: [],
@@ -134,6 +129,7 @@ export default {
       }
     }
   },
+  props: [ 'stats' ],
   methods: {
     addLocation () {
       const body = JSON.stringify({ location: this.directories.current })

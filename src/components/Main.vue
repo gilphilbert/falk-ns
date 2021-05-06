@@ -1,7 +1,7 @@
 <template>
 <div :class="{ 'no-controls': this.$route.path==='/' }">
   <div id="content-container" v-touch:swipe.left="doHideMenu" v-touch:swipe.right="doShowMenu">
-    <router-view :playback="playback" @showQueue="toggleQueue" ></router-view>
+    <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" ></router-view>
   </div>
   <Menu :isActive="showMenu" @hide="doHideMenu" @doLogout="doLogout" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" />
@@ -28,6 +28,18 @@ export default {
     this.$player.on('pause', () => { this.playback.isPlaying = false })
     this.$player.on('queue', q => { console.log(q); this.playback.queue = q.queue; this.playback.queuePos = q.pos })
     this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
+
+    this.stats = this.$database.getStats()
+
+    //set up the event listener
+    const events = new window.EventSource('/events')
+    events.addEventListener('update', (evt) => {
+      const data = JSON.parse(evt.data)
+      if (data.status === 'complete') {
+        console.log('[SERVER] update complete')
+        this.$database.update(() => { this.stats = this.$database.getStats() })
+      }
+    })
   },
   data () {
     return {
@@ -41,6 +53,7 @@ export default {
         elapsed: 0,
         queue: []
       },
+      stats: {}
     }
   },
   props: [ 'isLoggedIn' ],

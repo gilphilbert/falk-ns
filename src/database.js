@@ -9,13 +9,14 @@ export class DatabaseHandler {
             this.music = this.db.addCollection('songs', { unique: ['id'] })
           }
           //  if there's at least some music, call the callback
-          if (this.music.count() > 0 && typeof callback === 'function') {
-            callback()
-            this.update()
-          } else {
-            // otherwise we might as well load the database before we begin
-            this.update(callback)
-          }
+          //if (this.music.count() > 0 && typeof callback === 'function') {
+          //  callback()
+          //  this.update()
+          //} else {
+          //  // otherwise we might as well load the database before we begin
+          //  this.update(callback)
+          //}
+          callback()
         },
         autosave: true,
         autosaveInterval: 4000
@@ -82,7 +83,7 @@ export class DatabaseHandler {
       }
     }
   
-    async getStats () {
+    getStats () {
       const ret = { songs: 0, albums: 0, artists: 0 }
       const allSongs = this.music.find()
       ret.songs = allSongs.length

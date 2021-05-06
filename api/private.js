@@ -8,10 +8,31 @@ const path = require('path')
 const jwt = require('jsonwebtoken')
 
 // other modules (self explanatory)
-const database = require('./database')
 const scanner = require('./scanner')
+const database = require('./database')
+
+// track connected clients
+let eventClients = []
+// simple function to provide sendEvent(...) function for SSE
+sendEvent = (data, { event } = {}) => {
+  event = event || null
+  const packedData = ((event !== null) ? `event: ${event}\n` : '') + `data: ${JSON.stringify(data)}\n\n`
+  let clients = eventClients
+  clients.forEach(c => c.res.write(packedData))
+}
+/*
+OK, so this is a little complex.
+  In order to send an event from the scanner (which detects file changes), the sendEvent method needs to be accessible from the scanner.
+  However, we can't start the scanner until after the database is loaded (since the scanner needs the locations from the database)
+  We don't want to keep adding the database as a dependency, so we init the database, passing a callback to start the scanner. This makes sure
+  that the database is loaded and accesible *before* the scanner loads. The scanner needs access to sendEvent, so we'll send that as a callback
+  to the scanner start
+Told you it was complicated!
+*/
+database.init(() => scanner.watch.start(database, sendEvent))
 
 module.exports = app => {
+
   app.use(function (req, res, next) {
     const token = req.cookies.jwt
 
@@ -19,11 +40,7 @@ module.exports = app => {
       const publicKey = fs.readFileSync('data/jwtRS256.key.pub', 'utf8')
       jwt.verify(token, publicKey, (err, user) => {
         if (err) {
-          //if (req.url.startsWith('/api')) {
-            res.status(403).json({ error: 'unauthorized' })
-          //} else {
-          //  res.redirect('/')
-          //}
+          res.status(403).json({ error: 'unauthorized' })
         } else {
           res.locals.uuid = user.uuid
           next()
@@ -40,23 +57,6 @@ module.exports = app => {
 
   app.get('/api/check', function (req, res) {
     res.json({ message: 'logged in' })
-  })
-
-  // track connected clients
-  let eventClients = []
-  // simple SSE middleware to provide a res.sendEvent(...) function
-  app.use(function (req, res, next) {
-    res.sendEvent = (data, { event, uuid } = {}) => {
-      uuid = uuid || null
-      event = event || null
-      const packedData = ((event !== null) ? `event: ${event}\n` : '') + `data: ${JSON.stringify(data)}\n\n`
-      let clients = eventClients
-      if (uuid !== null) {
-        clients = clients.filter(c => c.uuid === res.locals.uuid)
-      }
-      clients.forEach(c => c.res.write(packedData))
-    }
-    next()
   })
 
   app.get('/api/logout', function (req, res) {
@@ -211,7 +211,7 @@ module.exports = app => {
     const uuid = res.locals.uuid
     res.send({ status: 'started' })
     await scanner.scan(uuid)
-    res.sendEvent({ status: 'complete' }, { event: 'update' })
+    sendEvent({ status: 'complete' }, { event: 'update' })
     // this needs to be non-blocking...
   })
 

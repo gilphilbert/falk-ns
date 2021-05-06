@@ -19,10 +19,12 @@ export default {
   created () {
     window.fetch('/api/check')
       .then(r => {
+        console.log(r.status)
         if (r.status === 200) {
-          this.loginScreen = false
-          this.welcomeScreen = false
-          this.showApp = true
+          //this.loginScreen = false
+          //this.welcomeScreen = false
+          //this.showApp = true
+          this.isLoggedIn(true)
         } else if (r.status === 400) {
           this.loginScreen = false
           this.welcomeScreen = true
@@ -58,7 +60,11 @@ export default {
       this.loginScreen = !state
       this.showApp = state
       if (state) {
-        this.$database.update()
+        this.$database.update(() => {
+          this.loginScreen = false
+          this.welcomeScreen = false
+          this.showApp = true
+        })
       }
     },
     welcomeComplete () {

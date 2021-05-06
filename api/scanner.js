@@ -7,6 +7,88 @@ const crypto = require('crypto')
 const database = require('./database')
 
 let uuid = ''
+
+async function processFile(ffname) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const meta = await mm.parseFile(ffname)
+      const song = {
+        location: ffname,
+        type: ffname.substr(ffname.lastIndexOf('.') + 1),
+        title: meta.common.title,
+        album: meta.common.album,
+        albumartist: (('albumartist' in meta.common) ? meta.common.albumartist : meta.common.artist),
+        artists: meta.common.artists,
+        duration: Math.round(meta.format.duration),
+        genre: (('genre' in meta.common) ? meta.common.genre[0] : ''),
+        year: meta.common.year,
+        track: meta.common.track.no,
+        disc: meta.common.disk.no || 1,
+        format: {
+          lossless: meta.format.lossless,
+          samplerate: meta.format.sampleRate,
+          channels: meta.format.numberOfChannels,
+          bits: meta.format.bitsPerSample,
+          codec: meta.format.codec
+        },
+        art: {
+          artist: '',
+          cover: '',
+          disc: ''
+        }
+      }
+  
+      if (meta.common.picture !== undefined) {
+        meta.common.picture.forEach(pic => {
+          let fn = null
+          let ext = null
+  
+          if (pic.format === 'image/jpeg') {
+            ext = 'jpg'
+          } else if (pic.format === 'image/png') {
+            ext = 'png'
+          }
+  
+          switch (pic.type) {
+            case 'Cover (front)':
+              fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-cover.' + ext
+              song.art.cover = fn
+              break
+            case 'Media (e.g. label side of CD)':
+              fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-disc.' + ext
+              song.art.disc = fn
+              break
+            case 'Artist/performer':
+              fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '.' + ext
+              song.art.artist = fn
+              break
+          }
+          fn = path.resolve(__dirname, '../art/' + fn)
+          if (ext !== null && fn !== null && !fs.existsSync(fn)) {
+            fs.writeFile(fn, pic.data, (err) => {
+              if (err) return console.error(err)
+            })
+          }
+          if (ext === null) {
+            console.log('[PIC] Unsupported filetype: "' + pic.filetype + '"')
+          }
+        })
+      }
+  
+  
+      database.addMusic.song(song)
+        .then(() => {
+          console.log(`ADD :: ${song.title} [${ffname}]`)
+          resolve()
+        })
+    } catch (e) {
+      console.log('Metadata lookup failed for: ' + ffname)
+      console.log(e)
+      resolve()
+    }
+  })
+}
+
 async function walkFunc (err, pathname, dirent) {
   if (err) {
     console.warn('fs stat error for %s: %s', pathname, err.message)
@@ -24,81 +106,7 @@ async function walkFunc (err, pathname, dirent) {
     return Promise.resolve()
   }
 
-  try {
-    const meta = await mm.parseFile(path.dirname(pathname) + '/' + dirent.name)
-    const song = {
-      location: path.dirname(pathname) + '/' + dirent.name,
-      type: dirent.name.substr(dirent.name.lastIndexOf('.') + 1),
-      title: meta.common.title,
-      album: meta.common.album,
-      albumartist: (('albumartist' in meta.common) ? meta.common.albumartist : meta.common.artist),
-      artists: meta.common.artists,
-      duration: Math.round(meta.format.duration),
-      genre: (('genre' in meta.common) ? meta.common.genre[0] : ''),
-      year: meta.common.year,
-      track: meta.common.track.no,
-      disc: meta.common.disk.no || 1,
-      format: {
-        lossless: meta.format.lossless,
-        samplerate: meta.format.sampleRate,
-        channels: meta.format.numberOfChannels,
-        bits: meta.format.bitsPerSample,
-        codec: meta.format.codec
-      },
-      art: {
-        artist: '',
-        cover: '',
-        disc: ''
-      }
-    }
-
-    if (meta.common.picture !== undefined) {
-      meta.common.picture.forEach(pic => {
-        let fn = null
-        let ext = null
-
-        if (pic.format === 'image/jpeg') {
-          ext = 'jpg'
-        } else if (pic.format === 'image/png') {
-          ext = 'png'
-        }
-
-        switch (pic.type) {
-          case 'Cover (front)':
-            fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-cover.' + ext
-            song.art.cover = fn
-            break
-          case 'Media (e.g. label side of CD)':
-            fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-disc.' + ext
-            song.art.disc = fn
-            break
-          case 'Artist/performer':
-            fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '.' + ext
-            song.art.artist = fn
-            break
-        }
-        fn = path.resolve(__dirname, '../art/' + fn)
-        if (ext !== null && fn !== null && !fs.existsSync(fn)) {
-          fs.writeFile(fn, pic.data, (err) => {
-            if (err) return console.error(err)
-          })
-        }
-        if (ext === null) {
-          console.log('[PIC] Unsupported filetype: "' + pic.filetype + '"')
-        }
-      })
-    }
-
-    console.log(`ADD :: ${song.title} [${path.dirname(pathname) + '/' + dirent.name}]`)
-
-    database.addMusic.song(song, uuid)
-      .then(() => {
-        return Promise.resolve()
-      })
-  } catch (e) {
-    console.log('Metadata lookup failed for: ' + path.dirname(pathname) + '/' + dirent.name)
-    console.log(e)
-  }
+  await processFile(path.dirname(pathname) + '/' + dirent.name)
 }
 
 function getHome () {
@@ -129,7 +137,7 @@ async function getDirs (dir) {
 async function scan (newuuid) {
   console.log('Starting scan')
   uuid = newuuid
-  // const promise = new Promise(function (resolve, reject) {
+
   const allSongs = database.raw.songs()
   allSongs.forEach(song => {
     if (!fs.existsSync(song.info.location)) {
@@ -150,7 +158,55 @@ async function scan (newuuid) {
   console.log('Scan complete')
 }
 
+let newFiles = false
+function sendMessage(sendEvent) {
+  if (newFiles) {
+    newFiles = false
+    sendEvent({ status: 'complete' }, { event: 'update' })
+    setTimeout(() => { sendMessage(sendEvent) }, 2000)
+  }
+}
+
+const chokidar = require('chokidar')
+const wOptions = { ignoreInitial: true, awaitWriteFinish: true }
+let watcher = false
+function watch(database, sendEvent) {
+  const dirs = database.raw.allLocations()
+  let watcher = false
+  console.log('WATCH ::', dirs)
+  watcher = chokidar.watch(dirs, wOptions)
+  watcher.on('add', async (path, stats) => {
+    await processFile(path)
+    newFiles = true
+    setTimeout(() => { sendMessage(sendEvent) }, 2000)
+  })
+  watcher.on('change', (path) => {
+    //console.log('file changed', path)
+    processFile(path)
+    newFiles = true
+    setTimeout(() => { sendMessage(sendEvent) }, 2000)
+  })
+  watcher.on('unlink', (path, stats) => {
+    // console.log('file removed', path)
+    // processFile(path)
+    database.raw.removeSongByLocation(path)
+    newFiles = true
+    setTimeout(() => { sendMessage(sendEvent) }, 2000)
+  })
+}
+function addToWatcher(dir) {
+  watcher.add(dir)
+}
+function delFromWatcher(dir) {
+  watcher.unwatch(dir)
+}
+
 module.exports = {
   scan: scan,
-  getDirs: getDirs
+  getDirs: getDirs,
+  watch: {
+    start: watch,
+    add: addToWatcher,
+    remove: delFromWatcher
+  }
 }
