@@ -6,14 +6,12 @@ const crypto = require('crypto')
 
 const database = require('./database')
 
-let uuid = ''
-
 async function processFile(ffname) {
   return new Promise(async (resolve, reject) => {
     try {
       const meta = await mm.parseFile(ffname)
       const song = {
-        location: ffname,
+        path: ffname,
         type: ffname.substr(ffname.lastIndexOf('.') + 1),
         title: meta.common.title,
         album: meta.common.album,
@@ -76,11 +74,9 @@ async function processFile(ffname) {
       }
   
   
-      database.addMusic.song(song)
-        .then(() => {
-          console.log(`ADD :: ${song.title} [${ffname}]`)
-          resolve()
-        })
+      database.tracks.add(song)
+      console.log(`ADD :: ${song.title} [${ffname}]`)
+      resolve()
     } catch (e) {
       console.log('Metadata lookup failed for: ' + ffname)
       console.log(e)
@@ -134,19 +130,18 @@ async function getDirs (dir) {
   return promise
 }
 
-async function scan (newuuid) {
+async function scan () {
   console.log('Starting scan')
-  uuid = newuuid
 
-  const allSongs = database.raw.songs()
-  allSongs.forEach(song => {
-    if (!fs.existsSync(song.info.location)) {
-      console.log('DELETE ::', song.info.location)
-      database.raw.removeSong(song)
+  const allSongs = database.tracks.getAllPaths()
+  allSongs.forEach(track => {
+    if (!fs.existsSync(track.path)) {
+      console.log('DELETE ::', track.path)
+      database.tracks.removeByPath(track.path)
     }
   })
 
-  const dirs = database.settings.locations(uuid)
+  const dirs = database.locations.paths()
   for (let i = 0; i < dirs.length; i++) {
     console.log('Scanning', dirs[i])
     try {
@@ -171,7 +166,7 @@ const chokidar = require('chokidar')
 const wOptions = { ignoreInitial: true, awaitWriteFinish: true }
 let watcher = false
 function watch(database, sendEvent) {
-  const dirs = database.raw.allLocations()
+  const dirs = database.locations.paths()
   let watcher = false
   console.log('WATCH ::', dirs)
   watcher = chokidar.watch(dirs, wOptions)
@@ -189,7 +184,7 @@ function watch(database, sendEvent) {
   watcher.on('unlink', (path, stats) => {
     // console.log('file removed', path)
     // processFile(path)
-    database.raw.removeSongByLocation(path)
+    // database.raw.removeSongByLocation(path)
     newFiles = true
     setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })

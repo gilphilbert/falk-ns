@@ -74,7 +74,7 @@ export default {
   },
   methods: {
     playAll(index) {
-      const tr = this.tracks.map(e => { return { id: e._id, url: '/song/' + e._id + e.location.substr(e.location.lastIndexOf('.')), meta: e } } )
+      const tr = this.tracks.map(e => { console.log(e); return { id: e._id, url: '/song/' + e._id + '.' + e.type, meta: e } } )
       this.$player.setTracks(tr, index, true)
     }
   }

@@ -67,35 +67,61 @@ module.exports = app => {
   app.get('/api/songs/all/:offset?/:qty?', function (req, res) {
     const offset = req.params.offset || 0
     const limit = req.params.qty || 4000
-    const songs = database.getMusic.all(res.locals.uuid, offset, limit)
+    const songs = database.tracks.getAll(res.locals.uuid, offset, limit)
     res.json(songs)
   })
 
   app.get('/api/locations', function (req, res) {
-    const locations = database.settings.locations(res.locals.uuid)
-    const admin = database.users.getAdmin(res.locals.uuid)
-    res.json({ admin: admin, locations: locations })
+    const locations = database.locations.mappings(res.locals.uuid)
+    if (locations !== null) {
+      res.json(locations)
+    } else {
+      res.status(403).send()
+    }
+  })
+  app.put('/api/locations', function (req, res) {
+    const dir = req.body.location || ''
+    const users = req.body.users || ''
+    if (dir !== '' && Array.isArray(users)) {
+      const data = database.locations.add(res.locals.uuid, dir, users)
+      if (data) {
+        res.send(data)
+        scanner.scan()
+        scanner.watch.add(dir)
+      } else {
+        res.status(403).send()
+      }
+    } else {
+      res.status(400).send({ message: 'data missing' })
+    }
   })
   app.post('/api/locations', function (req, res) {
     const dir = req.body.location || ''
-    if (dir !== '') {
-      database.settings.addLocation(res.locals.uuid, dir)
-        .then(data => {
-          res.send(data)
-        }).catch(e => {
-          res.send([])
-        })
+    const users = req.body.users || ''
+    if (dir !== '' && Array.isArray(users)) {
+      const data = database.locations.setUsers(res.locals.uuid, dir)
+      if (data) {
+        res.send(data)
+      } else {
+        res.status(403).send()
+      }
+    } else {
+      res.status(400).send({ message: 'data missing' })
     }
   })
   app.delete('/api/locations', function (req, res) {
     const dir = req.body.location || ''
     if (dir !== '') {
-      database.settings.removeLocation(res.locals.uuid, dir)
-        .then(data => {
-          res.send(data)
-        }).catch(e => {
-          res.send([])
-        })
+      const data = database.locations.remove(res.locals.uuid, dir)
+      if (data) {
+        res.send(data)
+        scanner.scan()
+        scanner.watch.remove(dir)
+      } else {
+        res.status(403).send()
+      }
+    } else {
+      res.status(400).send({ message: 'data missing' })
     }
   })
 
@@ -156,12 +182,12 @@ module.exports = app => {
       // remove the extension
       id = id.substr(0, id.lastIndexOf('.'))
       // now go find the file
-      database.getMusic.url(res.locals.uuid, id)
-        .then(data => {
-          res.sendFile(data.info.location)
-        }).catch(e => {
-          res.send()
-        })
+      const path = database.tracks.getPath(res.locals.uuid, id)
+      if (path !== null) {
+        res.sendFile(path)
+      } else {
+        res.status(404).send()
+      }
     }
   })
 
@@ -194,11 +220,65 @@ module.exports = app => {
 
   app.get('/api/users', function (req, res) {
     const users = database.users.getAll(res.locals.uuid)
-    res.send(users)
+    if (users) {
+      res.send(users)
+    } else {
+      res.status(403).send()
+    }
+  })
+  app.put('/api/users', function (req, res) {
+    const user = req.body.user || null
+    const pass = req.body.pass || null
+    const admin = req.body.admin
+    const locations = req.body.locations || null
+
+    const missing = []
+    if (!user || user === '') {
+      missing.push('user')
+    }
+    if (!pass || pass === '') {
+      missing.push('password')
+    }
+    if (['true', 'false', true, false].includes(admin) === false) {
+      missing.push('admin')
+    }
+    if (!Array.isArray(locations)) {
+      missing.push('locations')
+    }
+    if (missing.length > 0) {
+      res.status(400).send({ message: 'missing data', missing: missing })
+    } else {
+      const users = database.users.add(res.locals.uuid, req.body)
+      res.json(users)
+    }
+    sendEvent({ status: 'complete' }, { event: 'update' })
   })
   app.post('/api/users', function (req, res) {
-    const users = database.users.add(res.locals.uuid, req.body)
-    res.json(users)
+    const user = req.body.user || null
+    const admin = req.body.admin
+    const locations = req.body.locations || null
+    const id = req.body.id || null
+
+    const missing = []
+    if (!id || !Number.isInteger(id)) {
+      missing.push('id')
+    }
+    if (!user || user === '') {
+      missing.push('user')
+    }
+    if (['true', 'false', true, false].includes(admin) === false) {
+      missing.push('admin')
+    }
+    if (!Array.isArray(locations)) {
+      missing.push('locations')
+    }
+    if (missing.length > 0) {
+      res.status(400).send({ message: 'missing data', missing: missing })
+    } else {
+      const users = database.users.modify(res.locals.uuid, req.body)
+      res.json(users)
+    }
+    sendEvent({ status: 'complete' }, { event: 'update' })
   })
   app.delete('/api/users', function (req, res) {
     const delUUID = req.body.uuid

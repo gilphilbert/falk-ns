@@ -3,170 +3,171 @@ const crypto = require('crypto')
 
 let musicDB = null
 let usersDB = null
+let locDB = null
 
 let db = false
 
 function init (callBack = null) {
-  db = new Loki('data/local.db', {
+  db = new Loki('data/sandbox.db', {
     autoload: true,
     autosave: true,
     autoloadCallback: () => {
       musicDB = db.getCollection('music')
       if (musicDB === null) {
-        musicDB = db.addCollection('music', { unique: ['info.location'], indices: ['albumartist', 'album'] })
+        musicDB = db.addCollection('music', { unique: 'path', indices: ['location'] })
       }
+      musicDB.on('insert', (doc) => {
+        doc.id = doc.$loki
+      })
       usersDB = db.getCollection('users')
       if (usersDB === null) {
         usersDB = db.addCollection('users', { unique: ['user'] })
       }
+      locDB = db.getCollection('locations')
+      if (locDB === null) {
+        locDB = db.addCollection('locations', { unique: 'path' })
+      }
 
-      // scanner.watch.start()
       if (callBack != null) {
         callBack()
       }
+
+      users.welcome('admin', 'password')
+      //locations.add(1, '/home/phill/Music', [1])
+
+      // console.log(tracks.getPath(1, 13))
+      // users.add(1, { user: 'phill', pass: 'password', admin: true })
+      // locations.setUsers(1, '/home/phill/Music', [1, 2])
+      // locations.remove(1, '/home/phill/Music')
+      // tracks.add({ path: '/home/phill/Music/test1.flac', artist:'Bob', title:'This' })
+      // tracks.add({ path: '/home/phill/Music/test2.flac', artist:'Bob', title:'That' })
+      // console.log(tracks.getAll(1, 0, 4000))
+      // console.log(tracks.getAllPaths())
     }
   })
 }
 
-const raw = {
-  songs: () => {
-    return musicDB.find()
-  },
-  removeSong: (song) => {
-    musicDB.remove(song)
-  },
-  removeSongByLocation: (path) => {
-    musicDB.findAndRemove({ 'info.location': path })
-  },
-  allLocations: () => {
-    const allLocs = [].concat(...usersDB.find().map(e => e.locations)).filter((el, i, ar) => ar.indexOf(el) === i)
-    return allLocs
-  }
-}
-
-const get = {
-  /*
-  stats: (uuid) => {
-    return new Promise(function (resolve, reject) {
-      const ret = { songs: 0, albums: 0, artists: 0 }
-      const allSongs = musicDB.find({ uuids: { $contains: [uuid] } })
-      ret.songs = allSongs.length
-      ret.artists = [...new Set(allSongs.map(song => song.info.albumartist))].length
-      ret.albums = [...new Set(allSongs.map(song => song.info.album))].length
-      resolve(ret)
-    })
-  },
-  */
-  all: (uuid, offset, limit) => {
-    const allSongs = musicDB.chain().find({ uuid: uuid }).offset(offset).limit(limit).data()
-    return { data: allSongs }
-  },
-  url: (uuid, id) => {
-    return new Promise(function (resolve, reject) {
-      const data = musicDB.get(id)
-      // check this song is in your library
-      if (data.uuid === uuid) {
-        // yep, let's send it
-        resolve(data)
-      }
-      // otherwise this ID isn't in your database (how did you get here?!)
-      resolve({})
-    })
-  } // ,
-  /*
-  artists: (uuid) => {
-    return new Promise(function (resolve, reject) {
-      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).map(e => { return { artist: e.info.albumartist } }).simplesort('artist').data()
-      const artists = [...new Set(songs.map(song => song.artist))]
-      resolve(artists)
-    })
-  },
-  artistAlbums: (uuid, artist) => {
-    const promise = new Promise(function (resolve, reject) {
-      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] }, 'info.albumartist': artist }).map(e => { return { album: e.info.album, albumartist: e.info.albumartist, year: e.info.year, art: e.info.art } }).simplesort('album').data()
-      const albums = songs.filter((tag, index, array) => array.findIndex(t => t.album === tag.album) === index).sort((a, b) => { return a.year - b.year })
-      albums.forEach(e => { delete (e.meta); delete (e.$loki) })
-      resolve(albums)
-    })
-    return promise
-  },
-  album: (uuid, artist, album) => {
-    return new Promise(function (resolve, reject) {
-      const data = musicDB.find({ uuids: { $contains: [uuid] }, 'info.albumartist': artist, 'info.album': album })
-      const info = data.map(s => { s.info._id = s.$loki; return s.info }).sort((a, b) => { return a.track - b.track }).sort((a, b) => { return a.disc - b.disc })
-      resolve(info)
-    })
-  },
-  albums: (uuid) => {
-    return new Promise(function (resolve, reject) {
-      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).map(e => { return { album: e.info.album, albumartist: e.info.albumartist, artistart: e.info.art.artist } }).simplesort('album').data()
-      const albums = songs.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
-      albums.forEach(e => { delete (e.meta); delete (e.$loki) })
-      resolve(albums)
-    })
-  },
-  genres: (uuid) => {
-    return new Promise(function (resolve, reject) {
-      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] } }).map(e => { return { genre: e.info.genre } }).simplesort('genre').data()
-      const genres = [...new Set(songs.map(song => song.genre))]
-      genres.forEach(e => { delete (e.meta); delete (e.$loki) })
-      resolve(genres)
-    })
-  },
-  genre: (uuid, genre) => {
-    return new Promise(function (resolve, reject) {
-      const songs = musicDB.chain().find({ uuids: { $contains: [uuid] }, 'info.info': genre }).map(e => { return { album: e.info.album, albumartist: e.info.albumartist } }).simplesort('album').data()
-      const albums = songs.filter((tag, index, array) => array.findIndex(t => t.album === tag.album && t.albumartist === tag.albumartist) === index)
-      albums.forEach(e => { delete (e.meta); delete (e.$loki) })
-      resolve(albums)
-    })
-  }
-  */
-}
-
-const add = {
-  song: (info) => {
-    return new Promise(function (resolve, reject) {
-      const song = musicDB.findOne({ 'info.location': info.location, uuid: uuid })
-      if (song === null) {
-        // add the song with our UUID attached
-        const newSong = { uuid: uuid, info: info, favorite: false, playCount: false }
-        musicDB.insert(newSong)
-      } else {
-        // song exists, let's update the metadata and add ourselves to the list of uuids
-        song.info = info
-        musicDB.update(song)
-      }
-      resolve()
-      const songs = musicDB.find({ 'info.location': info.location, uuid: { $ne: uuid } })
-      songs.forEach(s => {
-        s.info = info
-        musicDB.update(s)
+const tracks = {
+  add: (info) => {
+    const loc = locDB.where(l => {
+      return info.path.startsWith(l.path)
+    })[0]
+    try {
+      musicDB.insert({
+        info: info,
+        path: info.path,
+        users: loc.users.map(e => { return { id: e, meta: { playCount: 0, favorite: false, lastPlayed: false } } }),
+        added: Date.now(),
+        location: loc.$loki
       })
-    })
-  }
+    } catch {
+      tracks.update(info)
+    }
+  },
+  update: (info) => {
+    musicDB.chain()
+      .find({ path: info.path })
+      .update((doc) => doc.info = info)
+  },
+  removeByPath: (path) => {
+    musicDB.chain()
+      .find({ path: path })
+      .remove()
+  },
+  getAll: (uuid, offset = 0, limit = 0) => {
+    const allSongs = musicDB.chain()
+      .find({ 'users.id': uuid })
+      .offset(offset)
+      .limit(limit)
+      .map(doc => { return {
+        info: doc.info,
+        added: doc.added,
+        id: doc.id,
+        md: doc.users.filter(d => d.id === uuid)[0].meta
+      } })
+      .data({ removeMeta: true })
+    return allSongs
+  },
+  getPath: (uuid, id) => {
+    const track = musicDB.findOne({ id: parseInt(id), 'users.id': uuid })
+    if (track) {
+      return track.path
+    } else {
+      return null
+    }
+  },
+  getAllPaths: () => {
+    return musicDB.chain()
+      .find()
+      .map(e => { return { path: e.path } })
+      .data({ removeMeta: true })
+  },
 }
 
-const settings = {
-  locations: function (uuid) {
-    const user = usersDB.findOne({ $loki: uuid })
-    return user.locations
+const locations = {
+  mappings: function (uuid) {
+    if (users.isAdmin(uuid)) {
+      return locDB.chain()
+        .find()
+        .data({ removeMeta: true })
+    }
   },
-  addLocation: function (uuid, location) {
-    return new Promise(function (resolve, reject) {
-      const user = usersDB.findOne({ $loki: uuid })
-      user.locations.push(location)
-      usersDB.update(user)
-      resolve(user.locations)
-    })
+  setUsers: function (uuid, path, uuids) {
+    if (users.isAdmin(uuid)) {
+      locDB.chain()
+        .find({ path: path })
+        .update((res) => { res.users = uuids })
+      return locations.mappings(uuid)
+    }
+    return false
   },
-  removeLocation: function (uuid, location) {
-    return new Promise(function (resolve, reject) {
-      const user = usersDB.findOne({ $loki: uuid })
-      user.locations = user.locations.filter(function (v, i, arr) { return v !== location })
-      usersDB.update(user)
-      resolve(user.locations)
-    })
+  addUser: function (uuid, path, newUser) {
+    if (users.isAdmin(uuid)) {
+      locDB.chain().find({ path: path }).update(doc => {
+        if (doc.users.includes(newUser) === false) {
+          doc.users.push(newUser)
+          musicDB.chain().find({ location: doc.$loki }).update(tr => {
+            tr.users.push({ id: newUser, meta: { playCount: 0, favorite: false, lastPlayed: false } })
+          })
+        }
+      })
+    }
+    return false
+  },
+  removeUser: function (uuid, path, oldUser) {
+    if (users.isAdmin(uuid)) {
+      locDB.chain().find({ path: path }).update(doc => {
+        if (doc.users.includes(oldUser)) {
+          doc.users.splice(doc.users.indexOf(oldUser), 1)
+          musicDB.chain().find({ location: doc.$loki }).update(tr => {
+            const indx = tr.users.find(usr => {
+              usr.id === oldUser
+            })
+            tr.users.splice(indx, 1)
+          })
+        }
+      })
+    }
+    return false
+  },
+  add: function (uuid, path, uuids) {
+    if (users.isAdmin(uuid)) {
+      locDB.insert({ path: path, users: uuids })
+      return locations.mappings(uuid)
+    }
+    return false
+  },
+  remove: function (uuid, path) {
+    if (users.isAdmin(uuid)) {
+      const loc = locDB.by('path', path)
+      locDB.remove(loc)
+      musicDB.findAndRemove({ location: loc.path })
+      return locations.mappings(uuid)
+    }
+    return false
+  },
+  paths: function () {
+    return locDB.find().map(e => e.path)
   }
 }
 
@@ -182,11 +183,10 @@ const users = {
       const account = {
         user: username,
         pass: crypto.createHash('sha256').update(password).digest('hex'),
-        admin: true,
-        locations: []
+        admin: true
       }
       usersDB.insert(account)
-      resolve({ status: true })
+      resolve()
     })
   },
   getUUID: function (username, password) {
@@ -202,7 +202,7 @@ const users = {
       reject(new Error('not found'))
     })
   },
-  getAdmin: function (uuid) {
+  isAdmin: function (uuid) {
     const user = usersDB.get(uuid)
     return user.admin
   },
@@ -212,8 +212,9 @@ const users = {
     if (user.admin === true) {
       users = usersDB.find()
       users = users.map(e => { return { user: e.user, uuid: e.$loki, admin: e.admin } })
+      return users
     }
-    return users
+    return null
   },
   add: function (uuid, newUser) {
     const user = usersDB.get(uuid)
@@ -221,18 +222,35 @@ const users = {
       const account = {
         user: newUser.user,
         pass: crypto.createHash('sha256').update(newUser.pass).digest('hex'),
-        admin: newUser.admin,
-        locations: ((newUser.inherit === true) ? user.locations : [])
+        admin: newUser.admin
       }
-      const acc = usersDB.insert(account)
-      if (newUser.inherit === true) {
-        // here we need to find all files that are associated with uuid and add the new user
-        musicDB.chain().find({ uuids: { $contains: [uuid] } }).update(function (obj) {
-          obj.uuids.push(acc.$loki)
-        })
-      }
+      const accID = usersDB.insert(account).$loki
+      newUser.locations.forEach(l => {
+        if (l.enabled) {
+          locations.addUser(uuid, l.path, accID)
+        } else {
+          locations.removeUser(uuid, l.path, accID)
+        }
+      })
     }
-    return users.getAll(uuid)
+    return { locations: locations.mappings(uuid), users: users.getAll(uuid) }
+  },
+  modify: function (uuid, editUser) {
+    const user = usersDB.get(uuid)
+    if (user.admin === true) {
+      const uDoc = usersDB.get(editUser.id)
+      uDoc.user = editUser.user
+      uDoc.pass = ((editUser.pass && editUser.pass !== '') ? crypto.createHash('sha256').update(editUser.pass).digest('hex') : uDoc.pass)
+      uDoc.admin = editUser.admin
+      editUser.locations.forEach(l => {
+        if (l.enabled) {
+          locations.addUser(uuid, l.path, editUser.id)
+        } else {
+          locations.removeUser(uuid, l.path, editUser.id)
+        }
+      })
+    }
+    return { locations: locations.mappings(uuid), users: users.getAll(uuid) }
   },
   remove: function (uuid, userUUID) {
     const user = usersDB.get(uuid)
@@ -248,9 +266,7 @@ const users = {
 
 module.exports = {
   init,
-  getMusic: get,
-  addMusic: add,
-  settings: settings,
-  users: users,
-  raw: raw
+  tracks,
+  locations,
+  users
 }

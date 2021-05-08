@@ -34,14 +34,12 @@ module.exports = app => {
     const pass = req.body.password || null
     if (user !== null && pass !== null) {
       database.users.welcome(user, pass)
-      .then(data => {
-        if (data.status === true) {
-          res.json({ state: true })
-        } else {
-          res.json({ state: false })
-        }
+      .then(() => {
+        res.json({ state: true })
+      })
+      .catch(() => {
+        res.json({ state: false })
       })
     }
   })
-
 }

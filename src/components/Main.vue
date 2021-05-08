@@ -28,6 +28,7 @@ export default {
     this.$player.on('pause', () => { this.playback.isPlaying = false })
     this.$player.on('queue', q => { console.log(q); this.playback.queue = q.queue; this.playback.queuePos = q.pos })
     this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
+    this.$player.on('stop', () => this.playback.elapsed = 0)
 
     this.stats = this.$database.getStats()
 

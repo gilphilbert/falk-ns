@@ -34,18 +34,18 @@ export class DatabaseHandler {
   
         let response = await window.fetch('/api/songs/all')
         let res = await response.json()
-        const limit = res.data.length
+        const limit = res.length
         let offset = limit
         // pull the remaining songs from the API, using the limit provided by the API
         do {
-          res.data.forEach(s => {
+          res.forEach(s => {
             this.addSong(s)
           })
   
           response = await window.fetch('/api/songs/all/' + offset + '/' + limit)
           res = await response.json()
-          offset = offset + res.data.length
-        } while (res.data.length > 0)
+          offset = offset + res.length
+        } while (res.length > 0)
   
         // remove anything we haven't seen
         this.music.chain().find({ present: false }).remove()
@@ -64,19 +64,17 @@ export class DatabaseHandler {
         // if the song isn't in the database
         if (dbSong === null) {
           // simply insert it, then correct the ID and metadata as sent by the server
-          const s = this.music.insert({ _id: song.$loki, info: song.info, favorite: song.favorite, playCount: song.playCount, cached: false, present: true })
-          s.meta = song.meta
-          this.music.update(s)
+          this.music.insert({ _id: song.id, info: song.info, md: song.md, present: true })
         } else {
           // the song already exists, let's check if the metadata has changed
           if (JSON.stringify(dbSong.info) !== JSON.stringify(song.info)) {
             // info has changed, update
             dbSong.info = song.info
-            // mark the song as in the database
             // now we need to check to see if the other data has changed... <----------------------------------------------------------
+            this.music.update(dbSong)
           }
+          // mark the song as in the database
           dbSong.present = true
-          this.music.update(dbSong)
         }
       } catch (e) {
         console.error('Could not add song to database', e)

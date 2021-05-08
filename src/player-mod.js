@@ -133,7 +133,7 @@ function webAudioEnded (evt) {
     // this is our "next song" trigger, since web audio has no "play" event
     // if there's another now playing...
     if (sources.length) {
-      startTime = playerContext.currentTime
+      startTime += timeLeft
       timeLeft = sources[0].buffer.duration
       // shift the queue on
       queuePos++
@@ -142,6 +142,7 @@ function webAudioEnded (evt) {
       timeLeft = -1
       queuePos = 0
       state = STATE_STOP
+      dispatchEvent('stop', new window.Event('stop'))
     }
 
     dispatchEvent('queue', currentQueue())
@@ -158,15 +159,13 @@ function webAudioEnded (evt) {
       dispatchEvent('next', new window.Event('next'))
       prepareWebAudio()
       cacheQueue()
-    } else {
-      dispatchEvent('stop', new window.Event('stop'))
     }
   }
 }
 
 function stopAllWebAudio () {
   for (let i = sources.length - 1; i >= 0; i--) {
-    sources[i].
+    sources[i].stop()
     sources[i].disconnect(0)
     sources.pop()
   }
@@ -315,15 +314,16 @@ function play (index = -1) {
 
   // check to see if the song is in the cache before we start playing the html5audio element
   if (item.cached) {
+    const curState = state
     loadTrack(index, true)
       .then(ab => {
         webAudioInit(0)
         sources[0].buffer = ab
-        const start = ((state === STATE_PAUSE) ? sources[0].buffer.duration - timeLeft : 0)
+        const start = ((curState === STATE_PAUSE) ? sources[0].buffer.duration - timeLeft : 0)
         sources[0].start(0, start)
 
         startTime = playerContext.currentTime
-        if (state !== STATE_PAUSE) {
+        if (curState !== STATE_PAUSE) {
           timeLeft = sources[0].buffer.duration
         }
 
