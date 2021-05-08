@@ -8,7 +8,7 @@ let locDB = null
 let db = false
 
 function init (callBack = null) {
-  db = new Loki('data/sandbox.db', {
+  db = new Loki('data/falkv1.db', {
     autoload: true,
     autosave: true,
     autoloadCallback: () => {
@@ -32,7 +32,7 @@ function init (callBack = null) {
         callBack()
       }
 
-      users.welcome('admin', 'password')
+      //users.welcome('admin', 'password')
       //locations.add(1, '/home/phill/Music', [1])
 
       // console.log(tracks.getPath(1, 13))
@@ -43,6 +43,7 @@ function init (callBack = null) {
       // tracks.add({ path: '/home/phill/Music/test2.flac', artist:'Bob', title:'That' })
       // console.log(tracks.getAll(1, 0, 4000))
       // console.log(tracks.getAllPaths())
+      console.log(musicDB.find())
     }
   })
 }
@@ -128,6 +129,7 @@ const locations = {
           doc.users.push(newUser)
           musicDB.chain().find({ location: doc.$loki }).update(tr => {
             tr.users.push({ id: newUser, meta: { playCount: 0, favorite: false, lastPlayed: false } })
+            console.log(tr.path, tr.users)
           })
         }
       })
@@ -160,8 +162,9 @@ const locations = {
   remove: function (uuid, path) {
     if (users.isAdmin(uuid)) {
       const loc = locDB.by('path', path)
+      const locID = loc.$loki
+      musicDB.findAndRemove({ location: locID })
       locDB.remove(loc)
-      musicDB.findAndRemove({ location: loc.path })
       return locations.mappings(uuid)
     }
     return false

@@ -86,7 +86,7 @@ module.exports = app => {
       const data = database.locations.add(res.locals.uuid, dir, users)
       if (data) {
         res.send(data)
-        scanner.scan()
+        scanner.scan([dir])
         scanner.watch.add(dir)
       } else {
         res.status(403).send()
@@ -115,7 +115,6 @@ module.exports = app => {
       const data = database.locations.remove(res.locals.uuid, dir)
       if (data) {
         res.send(data)
-        scanner.scan()
         scanner.watch.remove(dir)
       } else {
         res.status(403).send()

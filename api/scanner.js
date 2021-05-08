@@ -130,7 +130,7 @@ async function getDirs (dir) {
   return promise
 }
 
-async function scan () {
+async function scan (dir) {
   console.log('Starting scan')
 
   const allSongs = database.tracks.getAllPaths()
@@ -141,7 +141,7 @@ async function scan () {
     }
   })
 
-  const dirs = database.locations.paths()
+  const dirs = dir || database.locations.paths()
   for (let i = 0; i < dirs.length; i++) {
     console.log('Scanning', dirs[i])
     try {
@@ -167,8 +167,7 @@ const wOptions = { ignoreInitial: true, awaitWriteFinish: true }
 let watcher = false
 function watch(database, sendEvent) {
   const dirs = database.locations.paths()
-  let watcher = false
-  console.log('WATCH ::', dirs)
+  console.log('WATCH :: WATCHING', dirs)
   watcher = chokidar.watch(dirs, wOptions)
   watcher.on('add', async (path, stats) => {
     await processFile(path)
@@ -176,23 +175,22 @@ function watch(database, sendEvent) {
     setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })
   watcher.on('change', (path) => {
-    //console.log('file changed', path)
     processFile(path)
     newFiles = true
     setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })
-  watcher.on('unlink', (path, stats) => {
-    // console.log('file removed', path)
-    // processFile(path)
-    // database.raw.removeSongByLocation(path)
+  watcher.on('unlink', (path) => {
+    database.tracks.removeByPath(path)
     newFiles = true
     setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })
 }
 function addToWatcher(dir) {
+  console.log('WATCH :: ADDED', dir)
   watcher.add(dir)
 }
 function delFromWatcher(dir) {
+  console.log('WATCH :: REMOVED', dir)
   watcher.unwatch(dir)
 }
 
