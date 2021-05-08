@@ -43,7 +43,6 @@ function init (callBack = null) {
       // tracks.add({ path: '/home/phill/Music/test2.flac', artist:'Bob', title:'That' })
       // console.log(tracks.getAll(1, 0, 4000))
       // console.log(tracks.getAllPaths())
-      console.log(musicDB.find())
     }
   })
 }
@@ -129,7 +128,6 @@ const locations = {
           doc.users.push(newUser)
           musicDB.chain().find({ location: doc.$loki }).update(tr => {
             tr.users.push({ id: newUser, meta: { playCount: 0, favorite: false, lastPlayed: false } })
-            console.log(tr.path, tr.users)
           })
         }
       })
