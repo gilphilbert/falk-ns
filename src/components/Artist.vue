@@ -1,16 +1,21 @@
 <template>
-<div class="container-fluid">
-  <div class="row center">
-    <div class="col-md-1 hidden--to-tablet">
-      <figure class="image is-rounded has-no-overflow">
-        <img v-bind:src="((this.albums.length) ? this.albums[0].artistart : '')" />
-      </figure>
+<div>
+  <figure class="image hidden--for-desktop">
+    <img :src="((this.albums.length) ? this.albums[0].background : '')" style="object-fit: cover;height: 30vh;object-position: center;width: 100%">
+  </figure>
+  <div class="container-fluid">
+    <div class="row center">
+      <div class="col-md-1 hidden--to-tablet">
+        <figure class="image is-rounded has-no-overflow">
+          <img v-bind:src="((this.albums.length) ? this.albums[0].artistart : '')" />
+        </figure>
+      </div>
+      <div class="col-xs-12 col-md-6">
+        <h1>{{ this.$route.params.artist }}</h1>
+      </div>
     </div>
-    <div class="col-xs-12 col-md-6">
-      <h1>{{ this.$route.params.artist }}</h1>
-    </div>
+    <Tiles :tiles="albums" />
   </div>
-  <Tiles :tiles="albums" />
 </div>
 </template>
 <script>
@@ -29,7 +34,8 @@ export default {
   },
   data () {
     return {
-      albums: []
+      albums: [],
+      background: ''
     }
   }
 }

@@ -105,6 +105,7 @@ export class DatabaseHandler {
         return {
           art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
           artistart: '/art/' + ((artistArt !== '') ? artistArt : 'placeholder.png'),
+          background: ((e.info.art.background !== '') ? '/art/' + e.info.art.background : ''),
           title: e.info.album,
           url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
           subtitle: e.info.year,

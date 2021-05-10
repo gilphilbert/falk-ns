@@ -4,7 +4,7 @@
     <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" ></router-view>
   </div>
   <Menu :isActive="showMenu" @hide="doHideMenu" @doLogout="doLogout" />
-  <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" />
+  <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" :online="online" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
     <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
@@ -26,7 +26,7 @@ export default {
   created () {
     this.$player.on('play', () => { this.playback.isPlaying = true })
     this.$player.on('pause', () => { this.playback.isPlaying = false })
-    this.$player.on('queue', q => { console.log(q); this.playback.queue = q.queue; this.playback.queuePos = q.pos })
+    this.$player.on('queue', q => { this.playback.queue = q.queue; this.playback.queuePos = q.pos })
     this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
     this.$player.on('stop', () => this.playback.elapsed = 0)
 
@@ -34,6 +34,12 @@ export default {
 
     //set up the event listener
     const events = new window.EventSource('/events')
+    events.addEventListener('open', () => {
+      this.online = true
+    })
+    events.addEventListener('error', (evt) => {
+      this.online = false
+    })
     events.addEventListener('update', (evt) => {
       const data = JSON.parse(evt.data)
       if (data.status === 'complete') {
@@ -54,7 +60,8 @@ export default {
         elapsed: 0,
         queue: []
       },
-      stats: {}
+      stats: {},
+      online: false
     }
   },
   props: [ 'isLoggedIn' ],

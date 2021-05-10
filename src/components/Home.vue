@@ -1,5 +1,8 @@
 <template>
   <div class="container-fluid max" v-touch:swipe.up="showQueue">
+    <div class="background-container hidden--to-desktop" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.background !== ''" >
+      <figure class="image"><img :src=" '/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.background + '?size=full' : '')"></figure>
+    </div>
     <div class="row">
       <div class="col-xs-10 col-md-3 has-margin-auto art">
         <figure id="home-albumart" class="image is-1by1"><img :src=" '/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : 'placeholder.png') + '?size=600'" style="z-index: 1;"></figure>

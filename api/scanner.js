@@ -60,6 +60,10 @@ async function processFile(ffname) {
               fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '.' + ext
               song.art.artist = fn
               break
+            case 'Illustration':
+              fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '-bg.' + ext
+              song.art.background = fn
+              break
           }
           fn = path.resolve(__dirname, '../art/' + fn)
           if (ext !== null && fn !== null && !fs.existsSync(fn)) {

@@ -201,12 +201,18 @@ module.exports = app => {
           .metadata()
           .then(m => {
             res.type(m.format)
-            if (size === '800') {
-              sharp(fn).resize(800).pipe(res)
-            } else if (size === '600') {
-              sharp(fn).resize(600).pipe(res)
-            } else {
-              sharp(fn).resize(350).pipe(res)
+            switch(size) {
+              case 'full':
+                sharp(fn).resize(1920).pipe(res)
+                break
+              case '800':
+                sharp(fn).resize(800).pipe(res)
+                break
+              case '600':
+                sharp(fn).resize(600).pipe(res)
+                break
+              default:
+                sharp(fn).resize(350).pipe(res)
             }
           })
       } else {
@@ -289,7 +295,7 @@ module.exports = app => {
   app.get('/api/update', async function (req, res) {
     const uuid = res.locals.uuid
     res.send({ status: 'started' })
-    await scanner.scan(uuid)
+    await scanner.scan()
     sendEvent({ status: 'complete' }, { event: 'update' })
     // this needs to be non-blocking...
   })

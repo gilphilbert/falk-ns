@@ -49,16 +49,13 @@ function init (callBack = null) {
 
 const tracks = {
   add: (info) => {
-    const loc = locDB.where(l => {
-      return info.path.startsWith(l.path)
-    })[0]
     try {
+      const users = locDB.where(l => info.path.startsWith(l.path))[0].users
       musicDB.insert({
         info: info,
         path: info.path,
-        users: loc.users.map(e => { return { id: e, meta: { playCount: 0, favorite: false, lastPlayed: false } } }),
+        users: users.map(e => { return { id: e, meta: { playCount: 0, favorite: false, lastPlayed: false } } }),
         added: Date.now(),
-        location: loc.$loki
       })
     } catch {
       tracks.update(info)
@@ -126,7 +123,7 @@ const locations = {
       locDB.chain().find({ path: path }).update(doc => {
         if (doc.users.includes(newUser) === false) {
           doc.users.push(newUser)
-          musicDB.chain().find({ location: doc.$loki }).update(tr => {
+          musicDB.chain().where(tr => tr.path.startsWith(doc.path)).update(tr => {
             tr.users.push({ id: newUser, meta: { playCount: 0, favorite: false, lastPlayed: false } })
           })
         }
@@ -139,7 +136,7 @@ const locations = {
       locDB.chain().find({ path: path }).update(doc => {
         if (doc.users.includes(oldUser)) {
           doc.users.splice(doc.users.indexOf(oldUser), 1)
-          musicDB.chain().find({ location: doc.$loki }).update(tr => {
+          musicDB.chain().where(tr => tr.path.startsWith(doc.path)).update(tr => {
             const indx = tr.users.find(usr => {
               usr.id === oldUser
             })
@@ -159,10 +156,13 @@ const locations = {
   },
   remove: function (uuid, path) {
     if (users.isAdmin(uuid)) {
-      const loc = locDB.by('path', path)
-      const locID = loc.$loki
-      musicDB.findAndRemove({ location: locID })
-      locDB.remove(loc)
+      // find and remove the location
+      locDB.remove(locDB.by('path', path))
+
+      // remove any associated tracks
+      musicDB.chain().where(doc => doc.path.startsWith(path)).remove()
+
+      // return the new mappings
       return locations.mappings(uuid)
     }
     return false
