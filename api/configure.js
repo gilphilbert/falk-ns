@@ -14,12 +14,4 @@ module.exports = app => {
   // parse JSON body
   const bodyParser = require('body-parser')
   app.use(bodyParser.json())
-
-  // parse cookies
-  const cookieParser = require('cookie-parser')
-  app.use(cookieParser())
-
-  // let's check we have keys
-  const keygen = require('./keygen')
-  keygen.start()
 }

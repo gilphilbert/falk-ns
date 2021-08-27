@@ -21,7 +21,7 @@
             <h1 class="hidden--to-tablet">Album Tracks</h1>
             <table class="table songs">
               <tbody>
-                <tr v-for="(track, index) in this.tracks" v-bind:data-id="track._id">
+                <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track._id">
                   <td class="pointer" @click="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortformat }}</span></td>
                   <td class="is-narrow">
@@ -52,7 +52,9 @@ export default {
     Tiles
   },
   created() {
-    this.$database.getAlbum(this.$route.params.artist, this.$route.params.album)
+    //this.$database.getAlbum(this.$route.params.artist, this.$route.params.album)
+    fetch(`/api/album/${this.$route.params.artist}/${this.$route.params.album}`)
+      .then(data => data.json())
       .then(data => {
         this.art = data.art
         this.genre = data.genre
@@ -74,8 +76,14 @@ export default {
   },
   methods: {
     playAll(index) {
-      const tr = this.tracks.map(e => { console.log(e); return { id: e._id, url: '/song/' + e._id + '.' + e.type, meta: e } } )
-      this.$player.setTracks(tr, index, true)
+      const tr = this.tracks.map( e => { return e.path })
+      console.log(tr)
+      let body = { tracks: tr }
+      fetch('/api/enqueue', {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: { 'Content-type': 'application/json; charset=UTF-8' }
+      })
     }
   }
 }

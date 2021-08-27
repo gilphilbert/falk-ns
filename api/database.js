@@ -1,5 +1,6 @@
 const Loki = require('lokijs')
 const crypto = require('crypto')
+const { resolve } = require('path')
 
 let musicDB = null
 let usersDB = null
@@ -50,11 +51,10 @@ function init (callBack = null) {
 const tracks = {
   add: (info) => {
     try {
-      const users = locDB.where(l => info.path.startsWith(l.path))[0].users
       musicDB.insert({
         info: info,
         path: info.path,
-        users: users.map(e => { return { id: e, meta: { playCount: 0, favorite: false, lastPlayed: false } } }),
+        meta: { playCount: 0, favorite: false, lastPlayed: false },
         added: Date.now(),
       })
     } catch {
@@ -71,22 +71,26 @@ const tracks = {
       .find({ path: path })
       .remove()
   },
-  getAll: (uuid, offset = 0, limit = 0) => {
+  trackByPath: (path) => {
+    const track = musicDB.findOne({ path: path })
+    return track
+  },
+  getAll: (offset = 0, limit = 0) => {
     const allSongs = musicDB.chain()
-      .find({ 'users.id': uuid })
+      .find()
       .offset(offset)
       .limit(limit)
       .map(doc => { return {
         info: doc.info,
         added: doc.added,
         id: doc.id,
-        md: doc.users.filter(d => d.id === uuid)[0].meta
+        md: doc.meta
       } })
       .data({ removeMeta: true })
     return allSongs
   },
-  getPath: (uuid, id) => {
-    const track = musicDB.findOne({ id: parseInt(id), 'users.id': uuid })
+  getPath: (id) => {
+    const track = musicDB.findOne({ id: parseInt(id) })
     if (track) {
       return track.path
     } else {
@@ -101,167 +105,134 @@ const tracks = {
   },
 }
 
-const locations = {
-  mappings: function (uuid) {
-    if (users.isAdmin(uuid)) {
-      return locDB.chain()
-        .find()
-        .data({ removeMeta: true })
-    }
+const library = {
+  stats: function () {
+    return new Promise((resolve, reject) => {
+      const ret = { songs: 0, albums: 0, artists: 0 }
+      const allSongs = musicDB.find()
+      ret.songs = allSongs.length
+      ret.artists = [...new Set(allSongs.map(song => song.info.albumartist))].length
+      ret.albums = [...new Set(allSongs.map(song => song.info.album))].length
+      resolve(ret)
+    })
   },
-  setUsers: function (uuid, path, uuids) {
-    if (users.isAdmin(uuid)) {
-      locDB.chain()
-        .find({ path: path })
-        .update((res) => { res.users = uuids })
-      return locations.mappings(uuid)
-    }
-    return false
+  artists: function () {
+    return new Promise((resolve, reject) => {
+      const artists = musicDB.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
+      resolve(artists
+        .filter((tag, index, array) => array.findIndex(t => t.info.albumartist === tag.info.albumartist) === index)
+        .map(a => { return { title: a.info.albumartist, art: '/art/' + ((a.info.art.artist !== '') ? a.info.art.artist : 'placeholder.png'), url: `/artist/${encodeURIComponent(a.info.albumartist)}`, subtitle: '', surl: '' } })
+      )
+    })
   },
-  addUser: function (uuid, path, newUser) {
-    if (users.isAdmin(uuid)) {
-      locDB.chain().find({ path: path }).update(doc => {
-        if (doc.users.includes(newUser) === false) {
-          doc.users.push(newUser)
-          musicDB.chain().where(tr => tr.path.startsWith(doc.path)).update(tr => {
-            tr.users.push({ id: newUser, meta: { playCount: 0, favorite: false, lastPlayed: false } })
-          })
+  artist: function (artist) {
+    return new Promise((resolve, reject) => {
+      const artistArt = musicDB.chain().find({ 'info.albumartist': artist }).compoundsort([['info.artist.art', true], 'info.albumartist']).limit(1).data()[0].info.art.artist
+      const songs = musicDB.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
+      const albums = songs.map(e => {
+        return {
+          art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
+          artistart: '/art/' + ((artistArt !== '') ? artistArt : 'placeholder.png'),
+          background: ((e.info.art.background !== '') ? '/art/' + e.info.art.background : ''),
+          title: e.info.album,
+          url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
+          subtitle: e.info.year,
+          surl: ''
         }
-      })
-    }
-    return false
+      }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
+      resolve({ albums: albums })
+    })
   },
-  removeUser: function (uuid, path, oldUser) {
-    if (users.isAdmin(uuid)) {
-      locDB.chain().find({ path: path }).update(doc => {
-        if (doc.users.includes(oldUser)) {
-          doc.users.splice(doc.users.indexOf(oldUser), 1)
-          musicDB.chain().where(tr => tr.path.startsWith(doc.path)).update(tr => {
-            const indx = tr.users.find(usr => {
-              usr.id === oldUser
-            })
-            tr.users.splice(indx, 1)
-          })
+  albums: function () {
+    return new Promise((resolve, reject) => {
+      const songs = musicDB.chain().find().simplesort('info.album').data()
+      const albums = songs.map(e => {
+        return {
+          art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
+          title: e.info.album,
+          url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
+          subtitle: e.info.albumartist,
+          surl: `/artist/${encodeURIComponent(e.info.albumartist)}`
         }
+      }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
+      resolve(albums)
+    })
+  },
+  album: function (artist, album) {
+    return new Promise((resolve, reject) => {
+      const data = musicDB.chain().find({ 'info.albumartist': artist, 'info.album': album }).compoundsort(['info.disc', 'info.track']).data()
+      const info = data.map(s => {
+        s.info._id = s._id
+        s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
+        s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
+        s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')
+        return s.info
       })
-    }
-    return false
+      resolve({
+        title: info[0].album,
+        art: '/art/' + info[0].art.cover,
+        artist: info[0].albumartist,
+        year: info[0].year,
+        genre: info[0].genre,
+        shortformat: info[0].shortformat,
+        tracks: info
+      })
+    })
   },
-  add: function (uuid, path, uuids) {
-    if (users.isAdmin(uuid)) {
-      locDB.insert({ path: path, users: uuids })
-      return locations.mappings(uuid)
-    }
-    return false
+  genres: function () {
+    return new Promise((resolve, reject) => {
+      const songs = musicDB.chain().find().simplesort('info.genre').data()
+      const genres = songs.map(e => {
+        return {
+          art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : 'placeholder.png'),
+          title: e.info.genre,
+          url: `/genre/${encodeURIComponent(e.info.genre)}`,
+          subtitle: '',
+          surl: ''
+        }
+      }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.title !== '') === index)
+      resolve(genres)
+    })
   },
-  remove: function (uuid, path) {
-    if (users.isAdmin(uuid)) {
-      // find and remove the location
-      locDB.remove(locDB.by('path', path))
-
-      // remove any associated tracks
-      musicDB.chain().where(doc => doc.path.startsWith(path)).remove()
-
-      // return the new mappings
-      return locations.mappings(uuid)
-    }
-    return false
-  },
-  paths: function () {
-    return locDB.find().map(e => e.path)
+  genre: function (genre) {
+    return new Promise((resolve, reject) => {
+      const songs = musicDB.chain().find({ 'info.genre': genre }).simplesort('info.album').data()
+      const albums = songs.map(e => {
+        return {
+          art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : 'placeholder.png'),
+          title: e.info.album,
+          url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
+          subtitle: e.info.albumartist,
+          surl: `/artist/${encodeURIComponent(e.info.albumartist)}`
+        }
+      }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
+      resolve(albums)
+    })
   }
 }
 
-const users = {
-  check: function () {
-    return usersDB.count()
+const locations = {
+  mappings: function () {
+    return locDB.chain()
+      .find()
+      .data({ removeMeta: true })
   },
-  welcome: function (username, password) {
-    return new Promise(function (resolve, reject) {
-      if (usersDB.count({ user: 'admin' }) > 0) {
-        reject(new Error('already set'))
-      }
-      const account = {
-        user: username,
-        pass: crypto.createHash('sha256').update(password).digest('hex'),
-        admin: true
-      }
-      usersDB.insert(account)
-      resolve()
-    })
+  add: function (path) {
+    locDB.insert({ path: path })
+    return locations.mappings()
   },
-  getUUID: function (username, password) {
-    return new Promise(function (resolve, reject) {
-      const user = usersDB.findOne({ user: username })
-      if (user !== null) {
-        const hash = crypto.createHash('sha256').update(password).digest('hex')
-        if (user.pass === hash) {
-          resolve({ uuid: user.$loki, admin: user.admin })
-        }
-        reject(new Error('incorrect password'))
-      }
-      reject(new Error('not found'))
-    })
+  remove: function (path) {
+    // find and remove the location
+    locDB.remove(locDB.by('path', path))
+
+    // remove any associated tracks
+    musicDB.chain().where(doc => doc.path.startsWith(path)).remove()
+
+    // return the new mappings
+    return locations.mappings()
   },
-  isAdmin: function (uuid) {
-    const user = usersDB.get(uuid)
-    return user.admin
-  },
-  getAll: function (uuid) {
-    const user = usersDB.get(uuid)
-    let users = []
-    if (user.admin === true) {
-      users = usersDB.find()
-      users = users.map(e => { return { user: e.user, uuid: e.$loki, admin: e.admin } })
-      return users
-    }
-    return null
-  },
-  add: function (uuid, newUser) {
-    const user = usersDB.get(uuid)
-    if (user.admin === true) {
-      const account = {
-        user: newUser.user,
-        pass: crypto.createHash('sha256').update(newUser.pass).digest('hex'),
-        admin: newUser.admin
-      }
-      const accID = usersDB.insert(account).$loki
-      newUser.locations.forEach(l => {
-        if (l.enabled) {
-          locations.addUser(uuid, l.path, accID)
-        } else {
-          locations.removeUser(uuid, l.path, accID)
-        }
-      })
-    }
-    return { locations: locations.mappings(uuid), users: users.getAll(uuid) }
-  },
-  modify: function (uuid, editUser) {
-    const user = usersDB.get(uuid)
-    if (user.admin === true) {
-      const uDoc = usersDB.get(editUser.id)
-      uDoc.user = editUser.user
-      uDoc.pass = ((editUser.pass && editUser.pass !== '') ? crypto.createHash('sha256').update(editUser.pass).digest('hex') : uDoc.pass)
-      uDoc.admin = editUser.admin
-      editUser.locations.forEach(l => {
-        if (l.enabled) {
-          locations.addUser(uuid, l.path, editUser.id)
-        } else {
-          locations.removeUser(uuid, l.path, editUser.id)
-        }
-      })
-    }
-    return { locations: locations.mappings(uuid), users: users.getAll(uuid) }
-  },
-  remove: function (uuid, userUUID) {
-    const user = usersDB.get(uuid)
-    if (user.admin === true) {
-      const userDel = usersDB.get(userUUID)
-      if (userDel.user !== 'admin') {
-        usersDB.remove(userDel)
-      }
-    }
-    return users.getAll(uuid)
+  paths: function () {
+    return locDB.find().map(e => e.path)
   }
 }
 
@@ -269,5 +240,5 @@ module.exports = {
   init,
   tracks,
   locations,
-  users
+  library
 }

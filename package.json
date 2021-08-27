@@ -29,7 +29,8 @@
     "sharp": "^0.28.1",
     "vue": "^3.0.11",
     "vue-router": "^4.0.6",
-    "vue3-touch-events": "^3.1.1"
+    "vue3-touch-events": "^3.1.1",
+    "ws": "^8.2.0"
   },
   "devDependencies": {
     "@vue/cli-service": "4.5.12",

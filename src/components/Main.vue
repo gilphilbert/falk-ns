@@ -24,27 +24,52 @@ export default {
     Queue
   },
   created () {
-    this.$player.on('play', () => { this.playback.isPlaying = true })
-    this.$player.on('pause', () => { this.playback.isPlaying = false })
-    this.$player.on('queue', q => { this.playback.queue = q.queue; this.playback.queuePos = q.pos })
-    this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
-    this.$player.on('stop', () => this.playback.elapsed = 0)
+    //this.$player.on('play', () => { this.playback.isPlaying = true })
+    //this.$player.on('pause', () => { this.playback.isPlaying = false })
+    //this.$player.on('queue', q => { this.playback.queue = q.queue; this.playback.queuePos = q.pos })
+    //this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
+    //this.$player.on('stop', () => this.playback.elapsed = 0)
 
-    this.stats = this.$database.getStats()
+    //this.stats = this.$database.getStats()
+    fetch('/api/stats').then(data => data.json()).then(data => { this.stats = data })
 
     //set up the event listener
-    const events = new window.EventSource('/events')
-    events.addEventListener('open', () => {
+    const events = new EventSource('/events')
+    events.onmessage = function(e) {
+      console.log(e)
+    }
+    events.addEventListener('open', evt => {
       this.online = true
+      console.log("connected")
     })
-    events.addEventListener('error', (evt) => {
+    events.addEventListener('error', evt => {
       this.online = false
     })
-    events.addEventListener('update', (evt) => {
+    events.addEventListener('play', evt => {
+      console.log('play')
+      this.playback.isPlaying = true
+    })
+    events.addEventListener('stop', evt => {
+      console.log('stop')
+      this.playback.isPlaying = false
+      this.playback.elapsed = 0
+    })
+    events.addEventListener('pos', evt => {
+      const data = JSON.parse(evt.data)
+      console.log(data)
+      this.playback.queuePos = data.pos
+    })
+    events.addEventListener('playlist', evt => {
+      const data = JSON.parse(evt.data)
+      console.log(data)
+      this.playback.queue = data
+      //this.playback.queuePos = data.pos
+    })
+    events.addEventListener('update', evt => {
       const data = JSON.parse(evt.data)
       if (data.status === 'complete') {
         console.log('[SERVER] update complete')
-        this.$database.update(() => { this.stats = this.$database.getStats() })
+        fetch('/api/stats').then(data => data.json()).then(data => { this.stats = data })
       }
     })
   },

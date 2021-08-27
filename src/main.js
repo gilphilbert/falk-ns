@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Vue3TouchEvents from 'vue3-touch-events'
 import * as player from './player-mod.js'
-import { DatabaseHandler } from './database.js'
 
 import App from './App.vue'
 import Home from './components/Home.vue'
@@ -67,6 +66,4 @@ app.use(router)
 app.use(Vue3TouchEvents)
 app.config.globalProperties.$player = player
 app.config.globalProperties.$innerWidth = window.innerWidth
-app.config.globalProperties.$database = new DatabaseHandler(() => {
-  app.mount('#app')
-})
+app.mount('#app')
