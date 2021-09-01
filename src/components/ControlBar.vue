@@ -20,8 +20,7 @@
       <div class="col-xs no-grow col-md playing-controls misc-controls">
         <svg class="random feather hidden--to-desktop" @click="this.$player.random"><use href="/img/feather-sprite.svg#shuffle"></use></svg>
         <svg class="feather prev" @click="this.$player.prev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
-        <!--<span class="play-button pointer" @click="this.$player.toggle">-->
-        <span class="play-button pointer" @click="play">
+        <span class="play-button pointer" @click="this.$player.toggle">
           <svg class="feather" :class="{ 'is-hidden': playback.isPlaying }"><use href="/img/feather-sprite.svg#play"></use></svg>
           <svg class="feather" :class="{ 'is-hidden': !playback.isPlaying }"><use href="/img/feather-sprite.svg#pause"></use></svg>
         </span>
@@ -48,9 +47,6 @@ export default {
   methods: {
     toggleQueue () {
       this.$emit('toggleQueue')
-    },
-    play () {
-      fetch('/api/play')
     }
   }
 }

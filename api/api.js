@@ -36,16 +36,49 @@ database.init(() => scanner.watch.start(database, sendEvent))
 mpv.init(sendEvent)
 
 module.exports = app => {
-  app.get('/api/play', function( req, res ) {
-    mpv.player.play()
-    res.json({})
+  app.get('/api/play', async function( req, res ) {
+    await mpv.player.play()
+    res.status(200).send()
   })
-  app.get('/api/stop', function( req, res ) {
-    mpv.player.stop()
-    res.json({})
+  app.get('/api/pause', async function( req, res ) {
+    await mpv.player.pause()
+    res.status(200).send()
   })
-  app.post('/api/enqueue', function( req, res ) {
-    mpv.player.enqueue(req.body.tracks)
+  app.get('/api/toggle', async function( req, res ) {
+    await mpv.player.toggle()
+    res.status(200).send()
+  })
+  app.get('/api/prev', async function( req, res ) {
+    await mpv.player.prev()
+    res.status(200).send()
+  })
+  app.get('/api/next', async function( req, res ) {
+    await mpv.player.next()
+    res.status(200).send()
+  })
+  app.get('/api/stop', async function( req, res ) {
+    await mpv.player.stop()
+    res.status(200).send()
+  })
+  app.get('/api/jump/:position', async function( req, res ) {
+    await mpv.player.jump(req.params.position)
+    res.status(200).send()
+  })
+  app.get('/api/clear', async function( req, res ) {
+    await mpv.player.clear()
+    res.status(200).send()
+  })
+  app.post('/api/enqueue', async function( req, res ) {
+    await mpv.player.enqueue(req.body.tracks)
+    res.status(200).send()
+  })
+  app.post('/api/playNext', async function( req, res ) {
+    await mpv.player.playnext(req.body.tracks)
+    res.status(200).send()
+  })
+  app.post('/api/replaceAndPlay', async function( req, res ) {
+    await mpv.player.replaceAndPlay(req.body.tracks, req.body.index)
+    res.status(200).send()
   })
 
   app.get('/api/stats', async function( req, res ) {
@@ -225,5 +258,7 @@ module.exports = app => {
     req.on('close', () => {
       eventClients = eventClients.filter(c => c.id !== clientID)
     })
+
+    mpv.player.sendState()
   })
 }

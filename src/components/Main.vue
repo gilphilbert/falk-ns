@@ -30,8 +30,8 @@ export default {
     //this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
     //this.$player.on('stop', () => this.playback.elapsed = 0)
 
-    //this.stats = this.$database.getStats()
-    fetch('/api/stats').then(data => data.json()).then(data => { this.stats = data })
+    this.$database.getStats()
+      .then(data => this.stats = data)
 
     //set up the event listener
     const events = new EventSource('/events')
@@ -40,30 +40,47 @@ export default {
     }
     events.addEventListener('open', evt => {
       this.online = true
-      console.log("connected")
+      console.log("SSE Connected")
     })
     events.addEventListener('error', evt => {
       this.online = false
     })
+    events.addEventListener('state', evt => {
+      const data = JSON.parse(evt.data)
+      this.playback.queuePos = data.position
+      this.playback.queue = data.queue
+      this.playback.elapsed = data.elapsed_seconds
+      if (data.state === "play") {
+        this.playback.isPlaying = true
+      }
+    })
     events.addEventListener('play', evt => {
-      console.log('play')
+      const data = JSON.parse(evt.data)
+      this.playback.elapsed = data.elapsed_seconds
       this.playback.isPlaying = true
     })
+    events.addEventListener('pause', evt => {
+      const data = JSON.parse(evt.data)
+      this.playback.elapsed = data.elapsed_seconds
+      if (data.state === true) {
+        this.playback.isPlaying = false
+      } else {
+        this.playback.isPlaying = true
+      }
+    })
     events.addEventListener('stop', evt => {
-      console.log('stop')
+      const data = JSON.parse(evt.data)
+      this.playback.elapsed = data.elapsed_seconds
       this.playback.isPlaying = false
       this.playback.elapsed = 0
     })
     events.addEventListener('pos', evt => {
       const data = JSON.parse(evt.data)
-      console.log(data)
-      this.playback.queuePos = data.pos
+      this.playback.queuePos = data.position
     })
     events.addEventListener('playlist', evt => {
       const data = JSON.parse(evt.data)
-      console.log(data)
       this.playback.queue = data
-      //this.playback.queuePos = data.pos
     })
     events.addEventListener('update', evt => {
       const data = JSON.parse(evt.data)
@@ -105,6 +122,19 @@ export default {
         .then(() => {
           this.$emit('loggedOut')
         })
+    },
+    tick () {
+      setTimeout(() => {
+        if (this.playback.isPlaying)
+          this.playback.elapsed++
+          this.tick()
+      }, 1000)
+    }
+  },
+  watch: {
+    'playback.isPlaying': function () {
+      if (this.playback.isPlaying)
+        this.tick()
     }
   }
 }

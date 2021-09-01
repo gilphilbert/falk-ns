@@ -27,9 +27,7 @@ export default {
     Tiles
   },
   created() {
-    //this.$database.getArtist(this.$route.params.artist)
-    fetch(`/api/artist/${this.$route.params.artist}`)
-      .then(data => data.json())
+    this.$database.getArtist(this.$route.params.artist)
       .then(data => {
         this.albums = data.albums
       })

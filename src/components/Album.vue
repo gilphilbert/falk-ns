@@ -52,9 +52,7 @@ export default {
     Tiles
   },
   created() {
-    //this.$database.getAlbum(this.$route.params.artist, this.$route.params.album)
-    fetch(`/api/album/${this.$route.params.artist}/${this.$route.params.album}`)
-      .then(data => data.json())
+    this.$database.getAlbum(this.$route.params.artist, this.$route.params.album)
       .then(data => {
         this.art = data.art
         this.genre = data.genre
@@ -76,14 +74,8 @@ export default {
   },
   methods: {
     playAll(index) {
-      const tr = this.tracks.map( e => { return e.path })
-      console.log(tr)
-      let body = { tracks: tr }
-      fetch('/api/enqueue', {
-        method: 'post',
-        body: JSON.stringify(body),
-        headers: { 'Content-type': 'application/json; charset=UTF-8' }
-      })
+      const tr = this.tracks.map(e => { return { id: e._id, path: e.path, meta: e } } )
+      this.$player.replaceAndPlay(tr, index)
     }
   }
 }

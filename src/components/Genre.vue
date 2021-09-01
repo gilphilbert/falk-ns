@@ -12,9 +12,7 @@ export default {
     Tiles
   },
   created() {
-    //this.$database.getGenre(this.$route.params.genre)
-    fetch(`/api/genre/${this.$route.params.genre}`)
-      .then(data => data.json())
+    this.$database.getGenre(this.$route.params.genre)
       .then(data => {
         this.albums = data
       })

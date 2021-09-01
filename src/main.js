@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Vue3TouchEvents from 'vue3-touch-events'
-import * as player from './player-mod.js'
 
 import App from './App.vue'
 import Home from './components/Home.vue'
@@ -13,6 +12,9 @@ import Album from './components/Album.vue'
 import Genres from './components/Genres.vue'
 import Genre from './components/Genre.vue'
 import Settings from './components/Settings.vue'
+
+import { DatabaseHandler } from './database_remote.js'
+import * as player from './player_remote.js'
 
 // Vue.use(VueRouter)
 const scrollBehavior = (to, from, savedPosition) => {
@@ -66,4 +68,5 @@ app.use(router)
 app.use(Vue3TouchEvents)
 app.config.globalProperties.$player = player
 app.config.globalProperties.$innerWidth = window.innerWidth
+app.config.globalProperties.$database = new DatabaseHandler()
 app.mount('#app')

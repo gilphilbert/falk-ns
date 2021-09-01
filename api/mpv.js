@@ -6,15 +6,16 @@ const database = require('./database')
 
 async function init (sendEvent) {
   await mpv.start()
-  mpv.on('started', function() {
-    sendEvent({ status: 'play' }, { event: 'play' })
+  mpv.on('started', async function() {
+    const curTime = await mpv.getTimePosition()
+    sendEvent({ status: 'play', elapsed_seconds: curTime }, { event: 'play' })
   })
-  mpv.on('stopped', function() {
-    sendEvent({ status: 'play' }, { event: 'stop' })
+  mpv.on('stopped', async function() {
+    const curTime = await mpv.getTimePosition()
+    sendEvent({ status: 'play', elapsed_seconds: curTime }, { event: 'stop' })
   })
 
   mpv.on('status', async (data) => {
-    console.log(data)
     switch(data.property) {
       case 'playlist-pos':
         const pos = await mpv.getPlaylistPosition()
@@ -25,9 +26,32 @@ async function init (sendEvent) {
         //console.log(pl)
         //sendEvent(pl, { event: 'playlist' })
         break
+      case 'pause':
+        const curTime = await mpv.getTimePosition()
+        sendEvent({ state: data.value, elapsed_seconds: curTime }, { event: 'pause' })
+        break
+      default:
+        console.log(data)
     }
   })
 
+}
+
+fs = require('fs')
+async function writeQueue(paths, pos) {
+  data = {
+    files: paths,
+    queuepos: pos,
+    // probably need loop and shuffle state here too
+  }
+  /*
+  fs.writeFile('data/playlist.json', JSON.stringify(data), function (err,data) {
+    if (err) {
+      return console.log(err);
+    }
+    console.log(data);
+  })
+  */
 }
 
 async function getQueue () {
@@ -35,6 +59,7 @@ async function getQueue () {
   const size = await mpv.getPlaylistSize()
   const cur = await mpv.getPlaylistPosition()
   let items = []
+  let paths = []
   for (i = 0; i < size; i++) {
     const path = await mpv.getProperty(`playlist/${i}/filename`)
     const track = database.tracks.trackByPath(path)
@@ -46,32 +71,37 @@ async function getQueue () {
       id: track.id,
       playing: ((i === cur) ? true : false)
     })
+    paths.push(path)
   }
+  writeQueue(paths, cur)
   return items
 }
 
 player = {
-  play: function () {
-    //if (mpv.isPaused()) {
-    //  mpv.resume()
-    //} else {
-      mpv.play()
-    //}
+  play: async function () {
+    await mpv.play()
   },
-  pause: function () {
-    mpv.pause()
+  stop: async function () {
+    await mpv.stop()
   },
-  stop: function () {
-    mpv.stop()
+  pause: async function () {
+    await mpv.pause()
   },
-  skip: function () {
-    mpv.next()
+  toggle: async function () {
+    if (await mpv.isPaused()) {
+      mpv.resume()
+    } else {
+      mpv.pause()
+    }
   },
-  prev: function () {
-    mpv.prev()
+  prev: async function () {
+    await mpv.prev()
   },
-  jump: function (pos) {
-    mpv.jump(pos)
+  next: async function () {
+    await mpv.next()
+  },
+  jump: async function (pos) {
+    await mpv.jump(pos)
   },
   clear: async function () {
     await mpv.clearPlaylist()
@@ -85,16 +115,9 @@ player = {
     await mpv.playlistRemove(pos)
     sendEvent(await getQueue(), { event: 'playlist' })
   },
-  replaceAndPlay: async function (tracks) {
-    await mpv.clearPlaylist()
-    for (i = 0; i < tracks.length; i++) {
-      await mpv.append(tracks[i])
-    }
-    sendEvent(await getQueue(), { event: 'playlist' })
-  },
   enqueue: async function (tracks) {
     for (i = 0; i < tracks.length; i++) {
-      await mpv.append(tracks[i])
+      await mpv.append(database.tracks.getPath(tracks[i]))
     }
     sendEvent(await getQueue(), { event: 'playlist' })
   },
@@ -105,6 +128,25 @@ player = {
       await mpv.playlistMove(await mpv.getPlaylistSize() - 1, cur + i + 1)
     }
     sendEvent(await getQueue(), { event: 'playlist' })
+  },
+  replaceAndPlay: async function (tracks, index) {
+    await mpv.stop()
+    await mpv.clearPlaylist()
+    for (i = 0; i < tracks.length; i++) {
+      await mpv.append(database.tracks.getPath(tracks[i]))
+    }
+    sendEvent(await getQueue(), { event: 'playlist' })
+    await mpv.jump(index)
+    mpv.play()
+  },
+  sendState: async function () {
+    const cur = await mpv.getPlaylistPosition()
+    sendEvent({
+      queue: await getQueue(),
+      position: cur,
+      elapsed_seconds: await mpv.getTimePosition(),
+      state: ((cur == -1) ? 'stop' : ((await mpv.isPaused() === true) ? 'pause' : 'play'))
+    }, { event: 'state' })
   }
 }
 

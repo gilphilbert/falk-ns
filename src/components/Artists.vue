@@ -12,11 +12,8 @@ export default {
     Tiles
   },
   created() {
-    fetch('/api/artists')
-      .then(data => data.json())
-      .then(data => {
-        this.artists = data
-      })
+    this.$database.getArtists()
+      .then(data => this.artists = data)
   },
   data () {
     return {

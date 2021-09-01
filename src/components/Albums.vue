@@ -12,12 +12,8 @@ export default {
     Tiles
   },
   created() {
-    //this.$database.getAlbums()
-    fetch(`/api/albums`)
-      .then(data => data.json())
-      .then(data => {
-        this.albums = data
-      })
+    this.$database.getAlbums()
+      .then(data => this.albums = data)
   },
   data () {
     return {
