@@ -1,6 +1,6 @@
 <template>
   <div id="control-bar" class="is-active" data-bind="swipeup: showQueue">
-    <div class="progress-topper" :class="((online) ? '' : 'offline')" v-if="this.playback.queue[this.playback.queuePos]" :style="{ width: (playback.elapsed / playback.queue[playback.queuePos].duration * $innerWidth) + 'px' }"></div>
+    <div class="progress-topper" :class="((online) ? '' : 'offline')" v-if="this.playback.queue[this.playback.queuePos]" :style="{ width: (playback.elapsed / (playback.queue[playback.queuePos].duration * 1000) * $innerWidth) + 'px' }"></div>
     <div class="row is-marginless">
       <div class="col-xs col-md">
         <div class="row now-playing">
@@ -30,7 +30,7 @@
       <div class="col-md has-text-right hidden--to-desktop">
         <div class="row end-md">
           <div class="col-md no-grow play-progress">
-            <span>{{ Math.floor(playback.elapsed / 60) + ':' + ('0' + (Math.round(playback.elapsed) % 60)).slice(-2, 3) }}</span>/<span>{{ ((this.playback.queue[this.playback.queuePos]) ? Math.floor(this.playback.queue[this.playback.queuePos].duration / 60) + ':' + ('0' + (this.playback.queue[this.playback.queuePos].duration % 60)).slice(-2, 3) : '0:00') }}</span>
+            <span>{{ Math.floor((playback.elapsed / 1000) / 60) + ':' + ('0' + (Math.round((playback.elapsed / 1000)) % 60)).slice(-2, 3) }}</span>/<span>{{ ((this.playback.queue[this.playback.queuePos]) ? Math.floor(this.playback.queue[this.playback.queuePos].duration / 60) + ':' + ('0' + (this.playback.queue[this.playback.queuePos].duration % 60)).slice(-2, 3) : '0:00') }}</span>
           </div>
           <div class="col-md no-grow">
             <svg class="queue feather hidden--to-desktop" @click="toggleQueue"><use href="/img/feather-sprite.svg#queue-alt"></use></svg>

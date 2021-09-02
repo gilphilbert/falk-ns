@@ -49,19 +49,19 @@ export default {
       const data = JSON.parse(evt.data)
       this.playback.queuePos = data.position
       this.playback.queue = data.queue
-      this.playback.elapsed = data.elapsed_seconds
+      this.playback.elapsed = data.elapsed_seconds * 1000
       if (data.state === "play") {
         this.playback.isPlaying = true
       }
     })
     events.addEventListener('play', evt => {
       const data = JSON.parse(evt.data)
-      this.playback.elapsed = data.elapsed_seconds
+      this.playback.elapsed = data.elapsed_seconds * 1000
       this.playback.isPlaying = true
     })
     events.addEventListener('pause', evt => {
       const data = JSON.parse(evt.data)
-      this.playback.elapsed = data.elapsed_seconds
+      this.playback.elapsed = data.elapsed_seconds * 1000
       if (data.state === true) {
         this.playback.isPlaying = false
       } else {
@@ -70,13 +70,17 @@ export default {
     })
     events.addEventListener('stop', evt => {
       const data = JSON.parse(evt.data)
-      this.playback.elapsed = data.elapsed_seconds
+      this.playback.elapsed = data.elapsed_seconds * 1000
       this.playback.isPlaying = false
       this.playback.elapsed = 0
     })
     events.addEventListener('pos', evt => {
       const data = JSON.parse(evt.data)
       this.playback.queuePos = data.position
+      if (data.position === -1) {
+        this.playback.isPlaying = false
+        this.playback.elapsed = 0
+      }
     })
     events.addEventListener('playlist', evt => {
       const data = JSON.parse(evt.data)
@@ -125,10 +129,11 @@ export default {
     },
     tick () {
       setTimeout(() => {
-        if (this.playback.isPlaying)
-          this.playback.elapsed++
+        if (this.playback.isPlaying) {
+          this.playback.elapsed += 100
           this.tick()
-      }, 1000)
+        }
+      }, 100)
     }
   },
   watch: {
