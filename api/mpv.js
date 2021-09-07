@@ -67,7 +67,7 @@ async function getQueue () {
   //const nextTrackFile = await this.getProperty(`playlist/${position}/filename`);
   try {
     const size = await mpv.getPlaylistSize()
-    let plPos = -1
+    let plPos = 0
     try {
      plPos = await mpv.getPlaylistPosition()
     } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
@@ -94,20 +94,32 @@ async function getQueue () {
   }
 }
 
-async function isPlaylistComplete () {
-  const size = await mpv.getPlaylistSize()
+// check this function
+async function isPlaylistComplete () { 
+  const pau = await mpv.isPaused()
+  if (!pau) {
+    return false
+  }
+
+  const rem = await mpv.getTimeRemaining()
+  if (rem > 0) {
+    return false
+  }
+
+  let plSize = -1
+  try {
+    plSize = await mpv.getPlaylistSize()
+  } catch (e) { console.log("[INFO] [Player] Can't get playlist size") }
 
   let plPos = -1
   try {
    plPos = await mpv.getPlaylistPosition()
   } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
-  
-  const rem = await mpv.getTimeRemaining()
-  const pau = await mpv.isPaused()
-  if (size !== plPos && rem === 0 && pau === true)
-    return true
-  else
+
+  if (plSize !== plPos)
     return false
+
+  return true
 }
 
 player = {
@@ -167,9 +179,15 @@ player = {
     try {
     plPos = await mpv.getPlaylistPosition()
     } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
+
+    let plSize = -1
+    try {
+      plSize = await mpv.getPlaylistSize()
+    } catch (e) { console.log("[INFO] [Player] Can't get playlist size") }
+
     for (i = 0; i < tracks.length; i++) {
       await mpv.append(tracks[i])
-      await mpv.playlistMove(await mpv.getPlaylistSize() - 1, plPos + i + 1)
+      await mpv.playlistMove(plSize - 1, plPos + i + 1)
     }
     sendEvent(await getQueue(), { event: 'playlist' })
   },
