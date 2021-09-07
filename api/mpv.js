@@ -5,7 +5,11 @@ const mpv = new mpvAPI({ "audio_only": true, "auto_restart": true }, ["--keep-op
 const database = require('./database')
 
 async function init (sendEvent) {
-  await mpv.start()
+  try {
+    await mpv.start()
+  } catch (e) {
+    console.log("[ERROR] [Player] Can't start mpv")
+  }
   mpv.on('started', async function() {
     let curTime = 0
     try {
@@ -20,8 +24,10 @@ async function init (sendEvent) {
   mpv.on('status', async (data) => {
     switch(data.property) {
       case 'playlist-pos':
-        const pos = await mpv.getPlaylistPosition()
-        sendEvent({ position: pos }, { event: 'pos' })
+        try {
+          const plPos = await mpv.getPlaylistPosition()
+          sendEvent({ position: plPos }, { event: 'pos' })
+        } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
         break
       case 'pause':
         const curTime = await mpv.getTimePosition()
@@ -61,7 +67,10 @@ async function getQueue () {
   //const nextTrackFile = await this.getProperty(`playlist/${position}/filename`);
   try {
     const size = await mpv.getPlaylistSize()
-    const cur = await mpv.getPlaylistPosition()
+    let plPos = -1
+    try {
+     plPos = await mpv.getPlaylistPosition()
+    } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
     let items = []
     let paths = []
     for (i = 0; i < size; i++) {
@@ -73,11 +82,11 @@ async function getQueue () {
         duration: track.info.duration,
         art: track.info.art,
         id: track.id,
-        playing: ((i === cur) ? true : false)
+        playing: ((i === plPos) ? true : false)
       })
       paths.push(path)
     }
-    writeQueue(paths, cur)
+    writeQueue(paths, plPos)
     return items
   } catch (e) {
     console.log(e)
@@ -87,10 +96,15 @@ async function getQueue () {
 
 async function isPlaylistComplete () {
   const size = await mpv.getPlaylistSize()
-  const cur = await mpv.getPlaylistPosition()
+
+  let plPos = -1
+  try {
+   plPos = await mpv.getPlaylistPosition()
+  } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
+  
   const rem = await mpv.getTimeRemaining()
   const pau = await mpv.isPaused()
-  if (size !== cur && rem === 0 && pau === true)
+  if (size !== plPos && rem === 0 && pau === true)
     return true
   else
     return false
@@ -149,10 +163,13 @@ player = {
     sendEvent(await getQueue(), { event: 'playlist' })
   },
   playNext: async function (tracks) {
-    const cur = await mpv.getPlaylistPosition()
+    let plPos = -1
+    try {
+    plPos = await mpv.getPlaylistPosition()
+    } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
     for (i = 0; i < tracks.length; i++) {
       await mpv.append(tracks[i])
-      await mpv.playlistMove(await mpv.getPlaylistSize() - 1, cur + i + 1)
+      await mpv.playlistMove(await mpv.getPlaylistSize() - 1, plPos + i + 1)
     }
     sendEvent(await getQueue(), { event: 'playlist' })
   },
@@ -179,10 +196,10 @@ player = {
   },
   sendState: async function () {
     try {
-      let cur = -1
+      let plPos = -1
       try {
-        cur = await mpv.getPlaylistPosition()
-      } catch (e) {}
+       plPos = await mpv.getPlaylistPosition()
+      } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
 
       let queue = []
       try {
@@ -195,9 +212,9 @@ player = {
       } catch (e) {}
       sendEvent({
         queue: queue,
-        position: cur,
+        position: plPos,
         elapsed_seconds: curTime,
-        state: ((cur == -1) ? 'stop' : ((await mpv.isPaused() === true) ? 'pause' : 'play'))
+        state: ((plPos == -1) ? 'stop' : ((await mpv.isPaused() === true) ? 'pause' : 'play'))
       }, { event: 'state' })
     } catch (e) {
       console.log(e)

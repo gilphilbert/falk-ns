@@ -7,7 +7,8 @@ module.exports = {
     after: function (app) {
       const private = require('./api/api')(app)
     },
-    historyApiFallback: false
+    historyApiFallback: false,
+    host: '100.115.92.204'
   },
   pwa: {
     name: 'FALK NS',
