@@ -170,6 +170,13 @@ module.exports = app => {
       })
   })
 
+  app.get('/api/audio/devices', function (req, res) {
+    mpv.player.devices()
+      .then((data) => {
+        res.send(data)
+      })
+  })
+
   function ext2MIME (ext) {
     let val = false
     switch (ext) {

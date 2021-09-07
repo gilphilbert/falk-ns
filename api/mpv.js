@@ -1,6 +1,6 @@
 const { mergeProps } = require('@vue/runtime-core');
 const mpvAPI = require('node-mpv');
-const mpv = new mpvAPI({ "audio_only": true, "auto_restart": true }, ["--keep-open=yes" ]);
+const mpv = new mpvAPI({ "audio_only": true, "auto_restart": true }, ["--keep-open=yes", "--gapless-audio=weak" ]);
 
 const database = require('./database')
 
@@ -10,6 +10,21 @@ async function init (sendEvent) {
   } catch (e) {
     console.log("[ERROR] [Player] Can't start mpv")
   }
+
+  try {
+    plDataRaw = await readQueue()
+    plData = JSON.parse(plDataRaw)
+    console.log(plData)
+    
+    for (let i = 0; i < plData.files.length; i++) {
+      await mpv.append(plData.files[i])
+    }
+    sendEvent(await getQueue(), { event: 'playlist' })
+
+    await mpv.jump(plData.queuepos)
+    sendEvent({ position: plData.queuepos }, { event: 'pos' })
+  } catch (e) { console.log("[INFO] [Player] Can't restore queue") }
+
   mpv.on('started', async function() {
     let curTime = 0
     try {
@@ -28,10 +43,17 @@ async function init (sendEvent) {
           const plPos = await mpv.getPlaylistPosition()
           sendEvent({ position: plPos }, { event: 'pos' })
         } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
+        getQueue() // write the queue
         break
       case 'pause':
         const curTime = await mpv.getTimePosition()
-        sendEvent({ state: data.value, elapsed_seconds: curTime }, { event: 'pause' })
+        if (isPlaylistComplete()) {
+          mpv.jump(0)
+          sendEvent({ position: 0 }, { event: 'pos' })
+          sendEvent({ state: data.value, elapsed_seconds: 0 }, { event: 'pause' })
+        } else {
+          sendEvent({ state: data.value, elapsed_seconds: curTime }, { event: 'pause' })
+        }
         break
       case 'playlist-count': // handled when we add/remove items
       case 'filename':
@@ -53,14 +75,25 @@ async function writeQueue(paths, pos) {
     queuepos: pos,
     // probably need loop and shuffle state here too
   }
-  /*
   fs.writeFile('data/playlist.json', JSON.stringify(data), function (err,data) {
     if (err) {
+      console.log("[INFO] [Player] Can't save queue")
       return console.log(err);
     }
-    console.log(data);
+    //console.log(data);
   })
-  */
+}
+
+async function readQueue() {
+  return new Promise((resolve, reject) => {
+    fs.readFile('data/playlist.json', 'utf8', function (err,data) {
+      if (err) {
+        console.log("[INFO] [Player] Can't read queue")
+        reject(err)
+      }
+      resolve(data)
+    })
+  })
 }
 
 async function getQueue () {
@@ -124,9 +157,6 @@ async function isPlaylistComplete () {
 
 player = {
   play: async function () {
-    const reset = await isPlaylistComplete()
-    if (reset)
-      mpv.jump(0)
     await mpv.play()
   },
   stop: async function () {
@@ -137,11 +167,6 @@ player = {
   },
   toggle: async function () {
     if (await mpv.isPaused()) {
-      if (await isPlaylistComplete()) {
-        mpv.jump(0)
-        mpv.play()
-        return
-      }
       mpv.resume()
     } else {
       mpv.pause()
@@ -237,6 +262,11 @@ player = {
     } catch (e) {
       console.log(e)
     }
+  },
+  devices: async function () {
+    const devices = await mpv.getProperty(`audio-device-list`)
+    console.log(devices)
+    return devices
   }
 }
 

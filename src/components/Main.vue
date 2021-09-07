@@ -61,12 +61,14 @@ export default {
     })
     events.addEventListener('pause', evt => {
       const data = JSON.parse(evt.data)
+      console.log(data)
       this.playback.elapsed = data.elapsed_seconds * 1000
       if (data.state === true) {
         this.playback.isPlaying = false
       } else {
         this.playback.isPlaying = true
       }
+      console.log(this.playback.isPlaying)
     })
     events.addEventListener('stop', evt => {
       const data = JSON.parse(evt.data)
@@ -81,6 +83,7 @@ export default {
         this.playback.isPlaying = false
         this.playback.elapsed = 0
       }
+      console.log(this.playback.isPlaying)
     })
     events.addEventListener('playlist', evt => {
       const data = JSON.parse(evt.data)
