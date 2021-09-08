@@ -124,6 +124,48 @@ module.exports = app => {
     res.json(genre)
   })
 
+  app.get('/api/playlist', function (req, res) {
+    const pls = database.playlists.list()
+    res.json(pls)
+  })
+  app.get('/api/playlist/:id', function (req, res) {
+    if (!req.params.id) {
+      res.status(400).json({ error: "id missing" })
+    } else {
+      const pl = database.playlists.get(req.params.id)
+      if (pl) 
+        res.json(pl)
+      else
+        res.status(400).json({ error: 'invalid id' })
+    }
+  })
+  app.post('/api/playlist', function (req, res) {
+    if (!req.body.name) {
+      res.status(400).json({ error: "name missing" })
+    } else {
+      const plId = database.playlists.add(req.body.name)
+      res.json({ id: plId })
+    }
+  })
+  app.put('/api/playlist/:id', function (req, res) {
+    if (!req.params.id) {
+      res.status(400).json({ error: "id missing" })
+      return
+    }
+    if (!req.body.tracks || !Array.isArray(req.body.tracks)) {
+      res.status(400).json({ error: "invalid tracks" })
+      return
+    }
+    const status = database.playlists.addTracks(req.params.id, req.body.tracks)
+    if (status) {
+      res.status(200).send()
+      console.log("success")
+    } else {
+      res.status(500).json({ error: 'unknown error' })
+      console.log("failed")
+    }
+  })
+
   app.get('/api/locations', function (req, res) {
     const locations = database.locations.mappings()
     if (locations !== null) {

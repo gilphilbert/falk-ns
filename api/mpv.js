@@ -5,12 +5,14 @@ const mpv = new mpvAPI({ "audio_only": true, "auto_restart": true }, ["--keep-op
 const database = require('./database')
 
 async function init (sendEvent) {
+  // start the mpv instance
   try {
     await mpv.start()
   } catch (e) {
     console.log("[ERROR] [Player] Can't start mpv")
   }
 
+  // try to restore the queue
   try {
     plDataRaw = await readQueue()
     plData = JSON.parse(plDataRaw)
@@ -21,10 +23,15 @@ async function init (sendEvent) {
     }
     sendEvent(await getQueue(), { event: 'playlist' })
 
-    await mpv.jump(plData.queuepos)
+    try {
+      await mpv.jump(plData.queuepos)
+    } catch (e) { console.log("[INFO] [Player] Can't set queue position") }
+
+    await mpv.pause()
     sendEvent({ position: plData.queuepos }, { event: 'pos' })
   } catch (e) { console.log("[INFO] [Player] Can't restore queue") }
 
+  // attach mpv events
   mpv.on('started', async function() {
     let curTime = 0
     try {
@@ -156,6 +163,7 @@ async function isPlaylistComplete () {
 }
 
 player = {
+  //playback related items
   play: async function () {
     await mpv.play()
   },
@@ -263,6 +271,12 @@ player = {
       console.log(e)
     }
   },
+  loadPlaylist: async function () {
+    // get the playlist from the database
+    // load the files, start playing
+  },
+
+  // settings related items
   devices: async function () {
     const devices = await mpv.getProperty(`audio-device-list`)
     console.log(devices)
@@ -272,5 +286,5 @@ player = {
 
 module.exports = {
   init,
-  player,
+  player
 }

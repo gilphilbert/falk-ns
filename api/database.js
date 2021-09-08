@@ -1,6 +1,7 @@
 const Loki = require('lokijs')
 const crypto = require('crypto')
 const { resolve } = require('path')
+const e = require('express')
 
 let musicDB = null
 let usersDB = null
@@ -27,6 +28,10 @@ function init (callBack = null) {
       locDB = db.getCollection('locations')
       if (locDB === null) {
         locDB = db.addCollection('locations', { unique: 'path' })
+      }
+      plDB = db.getCollection('playlists')
+      if (plDB === null) {
+        plDB = db.addCollection('playlists', { unique: 'name' })
       }
 
       if (callBack != null) {
@@ -211,6 +216,73 @@ const library = {
   }
 }
 
+const playlists = {
+  add: function (name) {
+    try {
+      const x = plDB.insert({
+        name: name,
+        tracks: [],
+        added: Date.now(),
+      })
+      return x.$loki
+    } catch (e) {
+      console.log(e)
+    }
+    return null
+  },
+  list: function () {
+    let playlists = plDB.find().map(e => {
+      return {
+        id: e.$loki,
+        name: e.name,
+        created: e.meta.created,
+        tracks: e.tracks.length
+      }
+    })
+    console.log(playlists)
+    return playlists
+  },
+  get: function (id) {
+    const pl = plDB.get(id)
+    if (pl) {
+      return {
+        id: pl.$loki,
+        name: pl.name,
+        created: pl.meta.created,
+        tracks: pl.tracks
+      }
+    }
+    return null
+  },
+  remove: function (id) {
+    plDB.chain()
+      .get(id)
+      .remove()
+  },
+  addTracks: function (id, tracks) {
+    console.log(id)
+    console.log(tracks)
+    let pl = plDB.get(id)
+    console.log(pl)
+    if (pl) {
+      tracks.forEach(tr => {
+        pl.tracks.push(tr)
+      })
+      console.log(pl)
+      return true
+    }
+    return false
+  },
+  removeTracks: function (id, tracks) {
+    let pl = plDB.get(id)
+    for(let i = 0; i < tracks.length; i++)
+      pl.tracks = pl.tracks.filter(tr => tr.id !== tracks[i])
+  },
+  moveTrack: function (id, oldPos, newPos) {
+
+  }
+}
+
 const locations = {
   mappings: function () {
     return locDB.chain()
@@ -240,5 +312,6 @@ module.exports = {
   init,
   tracks,
   locations,
-  library
+  library,
+  playlists
 }
