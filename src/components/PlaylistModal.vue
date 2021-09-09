@@ -1,28 +1,20 @@
 <template>
-  <div class="modal-mask" v-if="this.show">
-    <div class="modal-wrapper">
-      <div class="modal-container">
+  <div class="modal is-small modal-fx-3dSignDown is-active" v-if="this.show">
+    <div class="modal-content">
+      <div class="box">
+        <h1>Select Playlist</h1>
+        <table class="table is-fullwidth table-hover">
+          <tbody>
 
-        <div class="modal-header">
-          <slot name="header">
-            default header
-          </slot>
+          </tbody>
+        </table>
+        <div>
+          <button class="button is-rounded is-primary">+ New Playlist</button>
+          <input class="input is-hidden" type="text" placeholder="Playlist name" />
+          <p class="help is-danger is-6"></p>
         </div>
-
-        <div class="modal-body">
-          <slot name="body">
-            default body
-          </slot>
-        </div>
-
-        <div class="modal-footer">
-          <slot name="footer">
-            default footer
-            <button class="modal-default-button" @click="$emit('close')">
-              OK
-            </button>
-          </slot>
-        </div>
+        <button class="button is-rounded" @click="$emit('close')">Cancel</button>
+        <button class="button is-rounded is-primary">Save</button>
       </div>
     </div>
   </div>
