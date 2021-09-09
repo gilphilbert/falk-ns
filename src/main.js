@@ -5,6 +5,7 @@ import Vue3TouchEvents from 'vue3-touch-events'
 import App from './App.vue'
 import Home from './components/Home.vue'
 import Playlists from './components/Playlists.vue'
+import Playlist from './components/Playlist.vue'
 import Albums from './components/Albums.vue'
 import Artists from './components/Artists.vue'
 import Artist from './components/Artist.vue'
@@ -53,6 +54,7 @@ const router = new createRouter({
   routes: [
     { path: '/', component: Home, props: true, meta: { scrollToTop: true } },
     { path: '/playlists', component: Playlists, meta: { scrollToTop: true } },
+    { path: '/playlist/:id', component: Playlist, meta: { scrollToTop: true } },
     { path: '/albums', component: Albums, meta: { scrollToTop: true } },
     { path: '/artists', component: Artists, meta: { scrollToTop: true } },
     { path: '/artist/:artist', component: Artist, meta: { scrollToTop: true } },

@@ -167,7 +167,7 @@ const library = {
     return new Promise((resolve, reject) => {
       const data = musicDB.chain().find({ 'info.albumartist': artist, 'info.album': album }).compoundsort(['info.disc', 'info.track']).data()
       const info = data.map(s => {
-        s.info._id = s.$loki
+        s.info._id = s._id
         s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
         s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
         s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')
@@ -232,24 +232,38 @@ const playlists = {
   },
   list: function () {
     let playlists = plDB.find().map(e => {
+      let s = false
+      if (e.tracks.length > 0) {
+        s = musicDB.get(e.tracks[0])
+      }
       return {
         id: e.$loki,
-        name: e.name,
-        created: e.meta.created,
-        tracks: e.tracks.length
+        title: e.name,
+        url: `/playlist/${e.$loki}`,
+        art: s ? '/art/' + s.info.art.cover : '',
+        subtitle: e.tracks.length + ' track' + ((e.tracks.length === 1) ? '' : 's'),
+        surl: ''
       }
     })
-    console.log(playlists)
     return playlists
   },
   get: function (id) {
     const pl = plDB.get(id)
     if (pl) {
+      let tracks = pl.tracks.map(e => {
+        s = musicDB.get(e)
+        s.info._id = s.$loki
+        s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
+        s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
+        s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')
+        return s.info
+      })
       return {
         id: pl.$loki,
-        name: pl.name,
-        created: pl.meta.created,
-        tracks: pl.tracks
+        title: pl.name,
+        art: tracks.length > 0 ? '/art/' + tracks[0].art.cover : '',
+        playtime: tracks.reduce((p, c) => p.duration + c.duration),
+        tracks: tracks
       }
     }
     return null
@@ -260,15 +274,12 @@ const playlists = {
       .remove()
   },
   addTracks: function (id, tracks) {
-    console.log(id)
-    console.log(tracks)
     let pl = plDB.get(id)
-    console.log(pl)
     if (pl) {
       tracks.forEach(tr => {
         pl.tracks.push(tr)
       })
-      console.log(pl)
+      plDB.update(pl)
       return true
     }
     return false

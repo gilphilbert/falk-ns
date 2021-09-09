@@ -12,6 +12,11 @@ export default {
     Tiles
   },
   created() {
+    this.$database.getPlaylists()
+      .then(data => {
+        this.playlists = data
+        console.log(data)
+      })
   },
   data () {
     return {

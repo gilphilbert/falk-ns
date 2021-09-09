@@ -56,4 +56,20 @@ export class DatabaseHandler {
           .then(data => resolve(data))
       })
     }
+
+    getPlaylists () {
+      return new Promise((resolve, reject) => {
+        fetch(`/api/playlist`)
+          .then(data => data.json())
+          .then(data => resolve(data))
+      })
+    }
+
+    getPlaylist (id) {
+      return new Promise((resolve, reject) => {
+        fetch(`/api/playlist/${id}`)
+          .then(data => data.json())
+          .then(data => resolve(data))
+      })
+    }
   }

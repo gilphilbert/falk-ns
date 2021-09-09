@@ -14,6 +14,9 @@ async function init (sendEvent) {
 
   // try to restore the queue
   try {
+    // in case we're taking over an existing MPV instance
+    await mpv.clear()
+
     plDataRaw = await readQueue()
     plData = JSON.parse(plDataRaw)
     console.log(plData)
@@ -283,6 +286,10 @@ player = {
     return devices
   }
 }
+
+process.on('SIGTERM', async function () {
+  await mpv.stop()
+})
 
 module.exports = {
   init,

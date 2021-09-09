@@ -159,10 +159,8 @@ module.exports = app => {
     const status = database.playlists.addTracks(req.params.id, req.body.tracks)
     if (status) {
       res.status(200).send()
-      console.log("success")
     } else {
       res.status(500).json({ error: 'unknown error' })
-      console.log("failed")
     }
   })
 
