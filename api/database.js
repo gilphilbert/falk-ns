@@ -167,7 +167,7 @@ const library = {
     return new Promise((resolve, reject) => {
       const data = musicDB.chain().find({ 'info.albumartist': artist, 'info.album': album }).compoundsort(['info.disc', 'info.track']).data()
       const info = data.map(s => {
-        s.info._id = s._id
+        s.info.id = s.$loki
         s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
         s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
         s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')
@@ -252,7 +252,7 @@ const playlists = {
     if (pl) {
       let tracks = pl.tracks.map(e => {
         s = musicDB.get(e)
-        s.info._id = s.$loki
+        s.info.id = s.$loki
         s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
         s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
         s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')

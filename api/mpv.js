@@ -138,69 +138,92 @@ async function getQueue () {
 }
 
 // check this function
-async function isPlaylistComplete () { 
-  const pau = await mpv.isPaused()
-  if (!pau) {
+async function isPlaylistComplete () {
+  try {
+    const pau = await mpv.isPaused()
+    if (!pau) {
+      return false
+    }
+
+    const rem = await mpv.getTimeRemaining()
+    if (rem > 0) {
+      return false
+    }
+
+    let plSize = -1
+    try {
+      plSize = await mpv.getPlaylistSize()
+    } catch (e) { console.log("[INFO] [Player] Can't get playlist size") }
+
+    let plPos = -1
+    try {
+    plPos = await mpv.getPlaylistPosition()
+    } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
+
+    if (plSize !== plPos)
+      return false
+  } catch(e) {
     return false
   }
-
-  const rem = await mpv.getTimeRemaining()
-  if (rem > 0) {
-    return false
-  }
-
-  let plSize = -1
-  try {
-    plSize = await mpv.getPlaylistSize()
-  } catch (e) { console.log("[INFO] [Player] Can't get playlist size") }
-
-  let plPos = -1
-  try {
-   plPos = await mpv.getPlaylistPosition()
-  } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
-
-  if (plSize !== plPos)
-    return false
-
   return true
 }
 
 player = {
   //playback related items
   play: async function () {
-    await mpv.play()
+    try {
+      await mpv.play()
+    } catch (e) { console.log("[INFO] [Player] Error playing") }
   },
   stop: async function () {
-    await mpv.stop()
+    try {
+      await mpv.stop()
+    } catch (e) { console.log("[INFO] [Player] Error stopping") }
   },
   pause: async function () {
-    await mpv.pause()
+    try {
+      await mpv.pause()
+    } catch (e) { console.log("[INFO] [Player] Error pausing") }
   },
   toggle: async function () {
     if (await mpv.isPaused()) {
-      mpv.resume()
+      try {
+        await mpv.resume()
+      } catch (e) { console.log("[INFO] [Player] Error resuming") }
     } else {
-      mpv.pause()
+      try {
+        await mpv.pause()
+      } catch (e) { console.log("[INFO] [Player] Error pausing") }
     }
   },
   prev: async function () {
-    await mpv.prev()
+    try {
+      await mpv.prev()
+    } catch (e) { console.log("[INFO] [Player] Error skipping back") }
   },
   next: async function () {
-    await mpv.next()
+    try {
+      await mpv.next()
+    } catch (e) { console.log("[INFO] [Player] Error skipping forward") }
   },
   jump: async function (pos) {
-    await mpv.jump(pos)
+    try {
+      await mpv.jump(pos)
+    } catch (e) { console.log("[INFO] [Player] Error jumping") }
   },
   clear: async function () {
-    await mpv.clearPlaylist()
-    sendEvent(await getQueue(), { event: 'playlist' })
+    try {
+      await mpv.clearPlaylist()
+      sendEvent(await getQueue(), { event: 'playlist' })
+    } catch (e) { console.log("[INFO] [Player] Error clearing playlist") }
   },
   shuffle: async function () {
-    await mpv.shuffle()
-    sendEvent(await getQueue(), { event: 'playlist' })
+    try {
+      await mpv.shuffle()
+      sendEvent(await getQueue(), { event: 'playlist' })
+    } catch (e) { console.log("[INFO] [Player] Error shuffling") }
   },
-  remove: async function () {
+  remove: async function (pos) {
     await mpv.playlistRemove(pos)
     sendEvent(await getQueue(), { event: 'playlist' })
   },

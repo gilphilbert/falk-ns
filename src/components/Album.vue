@@ -21,17 +21,17 @@
             <h1 class="hidden--to-tablet">Album Tracks</h1>
             <table class="table songs">
               <tbody>
-                <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track._id">
+                <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track.id">
                   <td class="pointer" @click="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortformat }}</span></td>
                   <td class="is-narrow">
                     <div class="dropdown is-right">
                       <span onclick="this.closest('div').classList.toggle('is-active')"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#more-vertical"></use></svg></span>
-                      <div class="dropdown-content">
+                      <div class="dropdown-content" onclick="this.closest('div.dropdown').classList.toggle('is-active')">
                         <span class="dropdown-item">Play</span>
                         <span class="dropdown-item">Add to queue</span>
                         <span class="dropdown-item">Clear and play</span>
-                        <span class="dropdown-item">Add to playlist</span>
+                        <span class="dropdown-item" @click="addToPlaylist(track.id)">Add to playlist</span>
                       </div>
                     </div>
                   </td>
@@ -42,14 +42,17 @@
         </div>
       </div>
     </div>
+    <PlaylistModal :show="modalShow" @close="modalHide" />
   </div>
 </template>
 <script>
 import Tiles from './Tiles.vue'
+import PlaylistModal from './PlaylistModal.vue'
 export default {
   name: 'Album',
   components: {
-    Tiles
+    Tiles,
+    PlaylistModal
   },
   created() {
     this.$database.getAlbum(this.$route.params.artist, this.$route.params.album)
@@ -69,13 +72,23 @@ export default {
       shortformat: '',
       title: '',
       tracks: [],
-      year: ''
+      year: '',
+      selectedId: -1,
+      modalShow: false
     }
   },
   methods: {
     playAll(index) {
-      const tr = this.tracks.map(e => { return { id: e._id, path: e.path, meta: e } } )
+      const tr = this.tracks.map(e => { return { id: e.id, path: e.path, meta: e } } )
       this.$player.replaceAndPlay(tr, index)
+    },
+    addToPlaylist(id, item) {
+      console.log(item)
+      this.selectedId = id
+      this.modalShow = true
+    },
+    modalHide() {
+      this.modalShow = false
     }
   }
 }
