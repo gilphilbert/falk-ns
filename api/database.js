@@ -217,11 +217,11 @@ const library = {
 }
 
 const playlists = {
-  add: function (name) {
+  add: function (name, tracks) {
     try {
       const x = plDB.insert({
         name: name,
-        tracks: [],
+        tracks: tracks,
         added: Date.now(),
       })
       return x.$loki

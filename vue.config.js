@@ -8,8 +8,9 @@ module.exports = {
       const private = require('./api/api')(app)
     },
     historyApiFallback: false,
-    //host: '100.115.92.204'
+    host: '100.115.92.204'
   },
+  /*
   pwa: {
     name: 'FALK NS',
     short_name: 'FALK NS',
@@ -81,4 +82,5 @@ module.exports = {
       ],
     }
   }
+  */
 } 

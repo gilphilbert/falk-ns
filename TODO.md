@@ -1,12 +1,16 @@
 ## App
-* Remove items from queue
-* Welcome
-* Log out
-* On stop, reset elapsed time
-
-## Player
-* Reset elapsed time after playback stops
-* Remove items from queue
-* Resume after pause borked
-* Better skip (simply stop and drop current, start next now)
-* Tracks stop after 1-3 on mobile devices
+* Pause issue (restarting in UI)
+* Remove items from playlist
+* Rearrange playlist
+* Auto playlists
+* Home controls working
+* Search (global / current view)
+* Scan status
+* Remove logout icon
+* Enqueue tracks
+* Play next tracks
+* Play album button
+* Change default behavior (settings)
+* Sound quality on home
+* Remove from playing queue
+* Rearrange playing queue

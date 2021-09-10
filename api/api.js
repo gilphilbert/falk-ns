@@ -143,7 +143,11 @@ module.exports = app => {
     if (!req.body.name) {
       res.status(400).json({ error: "name missing" })
     } else {
-      const plId = database.playlists.add(req.body.name)
+      let tracks = []
+      if (req.body.tracks) {
+        tracks = req.body.tracks
+      }
+      const plId = database.playlists.add(req.body.name, tracks)
       res.json({ id: plId })
     }
   })

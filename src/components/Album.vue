@@ -42,7 +42,7 @@
         </div>
       </div>
     </div>
-    <PlaylistModal :show="modalShow" @close="modalHide" />
+    <PlaylistModal :show="modalShow" :selectedId="selectedId" @close="modalHide" />
   </div>
 </template>
 <script>
@@ -82,8 +82,7 @@ export default {
       const tr = this.tracks.map(e => { return { id: e.id, path: e.path, meta: e } } )
       this.$player.replaceAndPlay(tr, index)
     },
-    addToPlaylist(id, item) {
-      console.log(item)
+    addToPlaylist(id) {
       this.selectedId = id
       this.modalShow = true
     },
