@@ -4,7 +4,7 @@
     <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" ></router-view>
   </div>
   <Menu :isActive="showMenu" @hide="doHideMenu" />
-  <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" :online="online" />
+  <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" :online="online" v-touch:swipe.top="unhideQueue" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
     <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
@@ -115,10 +115,13 @@ export default {
   },
   props: [ 'isLoggedIn' ],
   methods: {
-    toggleQueue (fixed = null) {
+    unhideQueue () {
+      this.showQueue = true
+    },
+    toggleQueue () {
       this.showQueue = !this.showQueue
     },
-    doShowMenu () {true
+    doShowMenu () {
       this.showMenu = true
     },
     doHideMenu () {

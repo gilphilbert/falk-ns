@@ -67,7 +67,7 @@ const router = new createRouter({
 
 const app = createApp(App)
 app.use(router)
-app.use(Vue3TouchEvents)
+app.use(Vue3TouchEvents, { swipeTolerance: 100 })
 app.config.globalProperties.$player = player
 app.config.globalProperties.$innerWidth = window.innerWidth
 app.config.globalProperties.$database = new DatabaseHandler()

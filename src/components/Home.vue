@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid max" v-touch:swipe.up="showQueue">
+  <div class="container-fluid max">
     <div class="background-container hidden--to-desktop" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.background !== ''" >
       <figure class="image"><img :src=" '/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.background + '?size=full' : '')"></figure>
     </div>
@@ -40,7 +40,7 @@
       </div>
       <div class="col-xs-10 col-xs-offset-1 hidden--for-desktop">
         <div id="mobile-progress-bar">
-          <div style="width: 0px;"></div>
+          <div style="width: 0px;" :style="{ width: progressWidth }"></div>
         </div>
       </div>
     </div>
@@ -51,9 +51,12 @@
 export default {
   name: 'Home',
   props: [ 'playback' ],
-  methods: {
-    showQueue () {
-      this.$emit('showQueue', true)
+  computed: {
+    progressWidth: function () {
+      if (this.playback.queue.length > 0) {
+        return (this.playback.elapsed / (this.playback.queue[this.playback.queuePos].duration * 1000)) * 100 + '%'
+      }
+      return '0%'
     }
   }
 }
