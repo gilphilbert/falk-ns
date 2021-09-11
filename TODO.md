@@ -3,14 +3,12 @@
 * Remove items from playlist
 * Rearrange playlist
 * Auto playlists
+ * Most recent
 * Home controls working
 * Search (global / current view)
 * Scan status
-* Remove logout icon
-* Enqueue tracks
-* Play next tracks
 * Play album button
 * Change default behavior (settings)
-* Sound quality on home
 * Remove from playing queue
+ * A bit wonky after 2-3 removes while playing
 * Rearrange playing queue

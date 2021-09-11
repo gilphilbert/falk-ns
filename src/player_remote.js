@@ -69,17 +69,18 @@ function repeat () {
   fetch('/api/repeat')
 }
 
-async function addTrack ({ id, url, meta }) {
-
-}
-
-async function enqueueOne ({ id, url, meta }) {
-  addTrack(id, url, meta)
-}
-
 async function enqueue (tracks) {
-  let body = { tracks: tracks.map(e => e.id) }
+  let body = { tracks: tracks }
   fetch('/api/enqueue', {
+    method: 'post',
+    body: JSON.stringify(body),
+    headers: { 'Content-type': 'application/json; charset=UTF-8' }
+  })
+}
+
+async function playNext (tracks) {
+  let body = { tracks: tracks }
+  fetch('/api/playNext', {
     method: 'post',
     body: JSON.stringify(body),
     headers: { 'Content-type': 'application/json; charset=UTF-8' }
@@ -99,15 +100,20 @@ function changePos (index) {
   fetch('/api/jump/' + index)
 }
 
+function remove (index) {
+  fetch('/api/queue/' + index, { method: 'delete' })
+}
+
 module.exports = {
   on,
   toggle,
   skip,
   prev,
   enqueue,
-  enqueueOne,
+  playNext,
   replaceAndPlay,
   random,
   repeat,
   changePos,
+  remove,
 }

@@ -20,16 +20,19 @@
             <table class="table songs">
               <tbody>
                 <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track._id">
-                  <td class="pointer" @click="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
+                  <td class="pointer" @click="playAll(index)">
+                    <p class="is-5" v-if="'count' in track">{{ track.title }} ({{ track.count }})</p>
+                    <p class="is-5" v-else>{{ track.title }}</p>
+                    <p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p>
+                  </td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortformat }}</span></td>
                   <td class="is-narrow">
                     <div class="dropdown is-right">
                       <span onclick="this.closest('div').classList.toggle('is-active')"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#more-vertical"></use></svg></span>
-                      <div class="dropdown-content">
-                        <span class="dropdown-item">Play</span>
-                        <span class="dropdown-item">Add to queue</span>
-                        <span class="dropdown-item">Clear and play</span>
-                        <span class="dropdown-item">Add to playlist</span>
+                      <div class="dropdown-content" onclick="this.closest('div.dropdown').classList.toggle('is-active')">
+                        <span class="dropdown-item">Play from here</span>
+                        <span class="dropdown-item">Enqueue</span>
+                        <span class="dropdown-item">Remove from playlist</span>
                       </div>
                     </div>
                   </td>
@@ -43,15 +46,15 @@
   </div>
 </template>
 <script>
-import Tiles from './Tiles.vue'
 export default {
-  name: 'Album',
-  components: {
-    Tiles
-  },
+  name: 'Playlist',
   created() {
-    console.log(this.$route.params.id)
-    this.$database.getPlaylist(this.$route.params.id)
+    let id = this.$route.params.id
+    if (id.substr(0, 1) === '_') {
+      id = 'auto/' + id.substr(1)
+    }
+
+    this.$database.getPlaylist(id)
       .then(data => {
         this.art = data.art
         this.title = data.title

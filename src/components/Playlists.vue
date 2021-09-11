@@ -1,6 +1,7 @@
 <template>
 <div class="container-fluid">
   <h1 class="is-capitalized">Playlists</h1>
+  <Tiles :tiles="autoplaylists" />
   <Tiles :tiles="playlists" />
 </div>
 </template>
@@ -15,11 +16,21 @@ export default {
     this.$database.getPlaylists()
       .then(data => {
         this.playlists = data
-        console.log(data)
       })
+    
+    this.autoplaylists = [{
+      id: -1,
+      title: 'Most Played',
+      url: `/playlist/_mostplayed`,
+      art: '/img/placeholder.png',
+      subtitle: '',
+      surl: ''
+    }]
+    
   },
   data () {
     return {
+      autoplaylists: [],
       playlists: []
     }
   }

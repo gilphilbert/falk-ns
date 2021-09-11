@@ -108,6 +108,13 @@ const tracks = {
       .map(e => { return { path: e.path } })
       .data({ removeMeta: true })
   },
+  incrementPlay: (path) => {
+    const track = musicDB.findOne({ path: path })
+    if (track) {
+      track.meta.playCount++
+      musicDB.update(track)
+    }
+  }
 }
 
 const library = {
@@ -126,7 +133,7 @@ const library = {
       const artists = musicDB.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
       resolve(artists
         .filter((tag, index, array) => array.findIndex(t => t.info.albumartist === tag.info.albumartist) === index)
-        .map(a => { return { title: a.info.albumartist, art: '/art/' + ((a.info.art.artist !== '') ? a.info.art.artist : 'placeholder.png'), url: `/artist/${encodeURIComponent(a.info.albumartist)}`, subtitle: '', surl: '' } })
+        .map(a => { return { title: a.info.albumartist, art: '/art/' + ((a.info.art.artist !== '') ? a.info.art.artist : '/img/placeholder.png'), url: `/artist/${encodeURIComponent(a.info.albumartist)}`, subtitle: '', surl: '' } })
       )
     })
   },
@@ -136,8 +143,8 @@ const library = {
       const songs = musicDB.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
       const albums = songs.map(e => {
         return {
-          art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
-          artistart: '/art/' + ((artistArt !== '') ? artistArt : 'placeholder.png'),
+          art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : '/img/placeholder.png'),
+          artistart: '/art/' + ((artistArt !== '') ? artistArt : '/img/placeholder.png'),
           background: ((e.info.art.background !== '') ? '/art/' + e.info.art.background : ''),
           title: e.info.album,
           url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
@@ -153,7 +160,7 @@ const library = {
       const songs = musicDB.chain().find().simplesort('info.album').data()
       const albums = songs.map(e => {
         return {
-          art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : 'placeholder.png'),
+          art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : '/img/placeholder.png'),
           title: e.info.album,
           url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
           subtitle: e.info.albumartist,
@@ -170,7 +177,7 @@ const library = {
         s.info.id = s.$loki
         s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
         s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
-        s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')
+        s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : '/img/placeholder.png')
         return s.info
       })
       resolve({
@@ -189,7 +196,7 @@ const library = {
       const songs = musicDB.chain().find().simplesort('info.genre').data()
       const genres = songs.map(e => {
         return {
-          art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : 'placeholder.png'),
+          art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : '/img/placeholder.png'),
           title: e.info.genre,
           url: `/genre/${encodeURIComponent(e.info.genre)}`,
           subtitle: '',
@@ -204,7 +211,7 @@ const library = {
       const songs = musicDB.chain().find({ 'info.genre': genre }).simplesort('info.album').data()
       const albums = songs.map(e => {
         return {
-          art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : 'placeholder.png'),
+          art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : '/img/placeholder.png'),
           title: e.info.album,
           url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
           subtitle: e.info.albumartist,
@@ -212,6 +219,40 @@ const library = {
         }
       }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
       resolve(albums)
+    })
+  },
+  popular: function () {
+    return new Promise((resolve, reject) => {
+      const songs = musicDB.chain().find().simplesort('meta.playCount', true).limit(100).data()
+      const tracks = songs.map(s => {
+        const i = s.info
+        return {
+          id: s.$loki,
+          track: i.track,
+          title: i.title,
+          album: i.album,
+          albumartist: i.albumartist,
+          artist: ((i.artists.length > 0) ? i.artists[0] : i.albumartist),
+          duration: i.duration,
+          genre: i.genre,
+          year: i.year,
+          disc: i.disc,
+          format: i.format,
+          shortformat: (i.format.samplerate / 1000) + 'kHz ' + ((i.format.bits) ? i.format.bits + 'bit' : ''),
+          art: {
+            cover: ((i.art.cover !== '') ? i.art.cover : '/img/placeholder.png')
+          },
+          count: s.meta.playCount
+        }
+      })
+
+      resolve({
+        id: 'mostplayed',
+        title: 'Most Played',
+        art: tracks.length > 0 ? '/art/' + tracks[0].art.cover : '/img/placeholder.png',
+        playtime: tracks.reduce((p, c) => p.duration + c.duration),
+        tracks: tracks
+      })
     })
   }
 }
@@ -255,7 +296,7 @@ const playlists = {
         s.info.id = s.$loki
         s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
         s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
-        s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : 'placeholder.png')
+        s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : '/img/placeholder.png')
         return s.info
       })
       return {

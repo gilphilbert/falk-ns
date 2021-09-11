@@ -73,12 +73,20 @@ module.exports = app => {
     res.status(200).send()
   })
   app.post('/api/playNext', async function( req, res ) {
-    await mpv.player.playnext(req.body.tracks)
+    await mpv.player.playNext(req.body.tracks)
     res.status(200).send()
   })
   app.post('/api/replaceAndPlay', async function( req, res ) {
     await mpv.player.replaceAndPlay(req.body.tracks, req.body.index)
     res.status(200).send()
+  })
+  app.delete('/api/queue/:id', async function( req, res ) {
+    if (!req.params.id) {
+      res.status(400).json({ error: "id missing" })
+    } else {
+      await mpv.player.remove(req.params.id)
+      res.status(200).send()
+    }
   })
 
   app.get('/api/stats', async function( req, res ) {
@@ -127,6 +135,12 @@ module.exports = app => {
   app.get('/api/playlist', function (req, res) {
     const pls = database.playlists.list()
     res.json(pls)
+  })
+  app.get('/api/playlist/auto/mostplayed', function (req, res) {
+    database.library.popular()
+      .then(pls => {
+        res.json(pls)
+      })
   })
   app.get('/api/playlist/:id', function (req, res) {
     if (!req.params.id) {
@@ -272,7 +286,7 @@ module.exports = app => {
             }
           })
       } else {
-        res.sendFile(path.resolve(__dirname, '../placeholder.png'))
+        res.sendFile(path.resolve(__dirname, '../public/img/placeholder.png'))
       }
     } else {
       res.send({})

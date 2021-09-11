@@ -28,9 +28,8 @@
                     <div class="dropdown is-right">
                       <span onclick="this.closest('div').classList.toggle('is-active')"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#more-vertical"></use></svg></span>
                       <div class="dropdown-content" onclick="this.closest('div.dropdown').classList.toggle('is-active')">
-                        <span class="dropdown-item">Play</span>
-                        <span class="dropdown-item">Add to queue</span>
-                        <span class="dropdown-item">Clear and play</span>
+                        <span class="dropdown-item" @click="$player.enqueue([track.id])">Enqueue</span>
+                        <span class="dropdown-item" @click="$player.playNext([track.id])">Play next</span>
                         <span class="dropdown-item" @click="addToPlaylist(track.id)">Add to playlist</span>
                       </div>
                     </div>

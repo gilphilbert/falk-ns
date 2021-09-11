@@ -125,7 +125,8 @@ async function getQueue () {
         duration: track.info.duration,
         art: track.info.art,
         id: track.id,
-        playing: ((i === plPos) ? true : false)
+        playing: ((i === plPos) ? true : false),
+        shortformat: (track.info.format.samplerate / 1000) + 'kHz ' + ((track.info.format.bits) ? track.info.format.bits + 'bit' : ''),
       })
       paths.push(path)
     }
@@ -236,17 +237,17 @@ player = {
   playNext: async function (tracks) {
     let plPos = -1
     try {
-    plPos = await mpv.getPlaylistPosition()
+      plPos = await mpv.getPlaylistPosition()
     } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
 
     let plSize = -1
     try {
       plSize = await mpv.getPlaylistSize()
     } catch (e) { console.log("[INFO] [Player] Can't get playlist size") }
-
+    console.log('size :: ' + plSize)
     for (i = 0; i < tracks.length; i++) {
-      await mpv.append(tracks[i])
-      await mpv.playlistMove(plSize - 1, plPos + i + 1)
+      await mpv.append(database.tracks.getPath(tracks[i]))
+      await mpv.playlistMove(plSize + i, plPos + i + 1)
     }
     sendEvent(await getQueue(), { event: 'playlist' })
   },

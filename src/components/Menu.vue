@@ -12,7 +12,6 @@
     <li><router-link to="/albums"><svg class="feather"><use href="/img/feather-sprite.svg#disc"></use></svg><div class="detail">Albums</div></router-link></li>
     <li><router-link to="/genres"><svg class="feather"><use href="/img/feather-sprite.svg#music"></use></svg><div class="detail">Genres</div></router-link></li>
     <li><router-link to="/settings"><svg class="feather"><use href="/img/feather-sprite.svg#settings"></use></svg><div class="detail">Settings</div></router-link></li>
-    <li><a href="#" @click="doLogout"><svg class="feather"><use href="/img/feather-sprite.svg#log-out"></use></svg><div class="detail">Log Out</div></a></li>
   </ul>
 </aside>
 </template>
@@ -26,9 +25,6 @@ export default {
     },
     hideMenu () {
       this.$emit('hide')
-    },
-    doLogout () {
-      this.$emit('doLogout')
     }
   }
 }
