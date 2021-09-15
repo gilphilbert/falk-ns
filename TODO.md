@@ -1,5 +1,6 @@
 ## General
-* Home controls working
+* Show queue on home
+* Home controls working (play, pause, skip, repeat, shuffle)
 * Search (global / current view)
 * Scan status
 

@@ -88,7 +88,7 @@ async function playNext (tracks) {
 }
 
 async function replaceAndPlay (tracks, playPosition = 0) {
-  let body = { tracks: tracks.map(e => e.id), index: playPosition }
+  let body = { tracks: tracks, index: playPosition }
   fetch('/api/replaceAndPlay', {
     method: 'post',
     body: JSON.stringify(body),

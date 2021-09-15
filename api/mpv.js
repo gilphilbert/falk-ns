@@ -1,4 +1,3 @@
-const { mergeProps } = require('@vue/runtime-core');
 const mpvAPI = require('node-mpv');
 const mpv = new mpvAPI({ "audio_only": true, "auto_restart": true }, ["--keep-open=yes", "--gapless-audio=weak" ]);
 
@@ -52,6 +51,9 @@ async function init (sendEvent) {
         try {
           const plPos = await mpv.getPlaylistPosition()
           sendEvent({ position: plPos }, { event: 'pos' })
+          //console.log('Playing at position ' + plPos)
+          const path = await mpv.getProperty(`playlist/${plPos}/filename`)
+          database.tracks.incrementPlay(path)
         } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
         getQueue() // write the queue
         break
@@ -297,10 +299,6 @@ player = {
     } catch (e) {
       console.log(e)
     }
-  },
-  loadPlaylist: async function () {
-    // get the playlist from the database
-    // load the files, start playing
   },
 
   // settings related items

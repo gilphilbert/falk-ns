@@ -79,7 +79,7 @@ export default {
   },
   methods: {
     playAll(index) {
-      const tr = this.tracks.map(e => { return { id: e._id, path: e.path, meta: e } } )
+      const tr = this.tracks.map(e => e.id)
       this.$player.replaceAndPlay(tr, index)
     }
   }
