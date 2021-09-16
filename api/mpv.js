@@ -48,6 +48,7 @@ async function init (sendEvent) {
   mpv.on('status', async (data) => {
     switch(data.property) {
       case 'playlist-pos':
+        /*
         try {
           const plPos = await mpv.getPlaylistPosition()
           sendEvent({ position: plPos }, { event: 'pos' })
@@ -55,9 +56,11 @@ async function init (sendEvent) {
           const path = await mpv.getProperty(`playlist/${plPos}/filename`)
           database.tracks.incrementPlay(path)
         } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
-        getQueue() // write the queue
         break
+        sendQueue(true) // write the queue
+        */
       case 'pause':
+        /*
         const curTime = await mpv.getTimePosition()
         if (isPlaylistComplete()) {
           mpv.jump(0)
@@ -66,6 +69,8 @@ async function init (sendEvent) {
         } else {
           sendEvent({ state: data.value, elapsed_seconds: curTime }, { event: 'pause' })
         }
+        */
+        _sendState()
         break
       case 'playlist-count': // handled when we add/remove items
       case 'filename':
@@ -108,8 +113,7 @@ async function readQueue() {
   })
 }
 
-async function getQueue () {
-  //const nextTrackFile = await this.getProperty(`playlist/${position}/filename`);
+async function sendQueue (save = false) {
   try {
     const size = await mpv.getPlaylistSize()
     let plPos = 0
@@ -132,12 +136,39 @@ async function getQueue () {
       })
       paths.push(path)
     }
-    writeQueue(paths, plPos)
+    sendEvent({ queue: items }, { event: 'queue' })
+    if (save) {
+      writeQueue(paths, plPos)
+    }
     return items
   } catch (e) {
     console.log(e)
     return null
   }
+}
+
+async function _sendState() {
+  let paused = false
+  let position = -1
+  let duration = 0
+  let elapsed = 0
+  let timerem = 0
+  let percent = 0
+  try { paused = await mpv.isPaused() } catch (e) {}
+  try { position = await mpv.getPlaylistPosition() } catch (e) {}
+  try { duration = await mpv.getDuration() } catch (e) {}
+  try { elapsed = await mpv.getTimePosition() } catch (e) {}
+  try { timerem = await mpv.getTimeRemaining() } catch (e) {}
+  try { percent = await mpv.getPercentPosition() } catch (e) {}
+  const data = {
+    paused,
+    position,
+    duration,
+    elapsed,
+    remaining: timerem,
+    percent
+  }
+  sendEvent(data, { event: 'status' })
 }
 
 // check this function
@@ -223,18 +254,23 @@ player = {
   shuffle: async function () {
     try {
       await mpv.shuffle()
-      sendEvent(await getQueue(), { event: 'playlist' })
+      //sendEvent(await getQueue(), { event: 'playlist' })
+      sendQueue()
     } catch (e) { console.log("[INFO] [Player] Error shuffling") }
   },
   remove: async function (pos) {
-    await mpv.playlistRemove(pos)
-    sendEvent(await getQueue(), { event: 'playlist' })
+    try {
+      await mpv.playlistRemove(pos)
+      //sendEvent(await getQueue(), { event: 'playlist' })
+      sendQueue()
+    } catch (e) {}
   },
   enqueue: async function (tracks) {
     for (i = 0; i < tracks.length; i++) {
       await mpv.append(database.tracks.getPath(tracks[i]))
     }
-    sendEvent(await getQueue(), { event: 'playlist' })
+    //sendEvent(await getQueue(), { event: 'playlist' })
+    sendQueue()
   },
   playNext: async function (tracks) {
     let plPos = -1
@@ -251,7 +287,8 @@ player = {
       await mpv.append(database.tracks.getPath(tracks[i]))
       await mpv.playlistMove(plSize + i, plPos + i + 1)
     }
-    sendEvent(await getQueue(), { event: 'playlist' })
+    //sendEvent(await getQueue(), { event: 'playlist' })
+    sendQueue()
   },
   replaceAndPlay: async function (tracks, index) {
     try {
@@ -267,14 +304,18 @@ player = {
         await mpv.append(database.tracks.getPath(tracks[i]))
       } catch (e) { console.log(`[ERROR] [Player] Can't add track (${ tracks[i] })`) }
     }
-    sendEvent(await getQueue(), { event: 'playlist' })
+    //sendEvent(await getQueue(), { event: 'playlist' })
     try {
       await mpv.jump(index)
     } catch (e) { console.log("[INFO] [Player] Can't set playlist index (invalid)") }
+    sendQueue()
 
     mpv.play()
   },
   sendState: async function () {
+    _sendState()
+    sendQueue()
+    /*
     try {
       let plPos = -1
       try {
@@ -299,6 +340,7 @@ player = {
     } catch (e) {
       console.log(e)
     }
+    */
   },
 
   // settings related items

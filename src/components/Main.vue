@@ -45,50 +45,19 @@ export default {
     events.addEventListener('error', evt => {
       this.online = false
     })
-    events.addEventListener('state', evt => {
+
+    events.addEventListener('queue', evt => {
       const data = JSON.parse(evt.data)
-      this.playback.queuePos = data.position
       this.playback.queue = data.queue
-      this.playback.elapsed = data.elapsed_seconds * 1000
-      if (data.state === "play") {
-        this.playback.isPlaying = true
-      }
     })
-    events.addEventListener('play', evt => {
-      const data = JSON.parse(evt.data)
-      this.playback.elapsed = data.elapsed_seconds * 1000
-      this.playback.isPlaying = true
-    })
-    events.addEventListener('pause', evt => {
-      const data = JSON.parse(evt.data)
-      console.log(data)
-      this.playback.elapsed = data.elapsed_seconds * 1000
-      if (data.state === true) {
-        this.playback.isPlaying = false
-      } else {
-        this.playback.isPlaying = true
-      }
-      console.log(this.playback.isPlaying)
-    })
-    events.addEventListener('stop', evt => {
-      const data = JSON.parse(evt.data)
-      this.playback.elapsed = data.elapsed_seconds * 1000
-      this.playback.isPlaying = false
-      this.playback.elapsed = 0
-    })
-    events.addEventListener('pos', evt => {
+
+    events.addEventListener('status', evt => {
       const data = JSON.parse(evt.data)
       this.playback.queuePos = data.position
-      if (data.position === -1) {
-        this.playback.isPlaying = false
-        this.playback.elapsed = 0
-      }
-      console.log(this.playback.isPlaying)
+      this.playback.elapsed = data.elapsed * 1000
+      this.playback.isPlaying = ((data.position !== -1 && !data.paused) ? true : false)
     })
-    events.addEventListener('playlist', evt => {
-      const data = JSON.parse(evt.data)
-      this.playback.queue = data
-    })
+
     events.addEventListener('update', evt => {
       const data = JSON.parse(evt.data)
       if (data.status === 'complete') {
