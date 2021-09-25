@@ -3,10 +3,9 @@
 * Home controls working (play, pause, skip, repeat, shuffle)
 * Search (global / current view)
 * Scan status
+* Save queue on shutdown
 
 ## Playback
-* Remove from playing queue
- * A bit wonky after 2-3 removes while playing
 * Rearrange playing queue
 
 ## Playlists

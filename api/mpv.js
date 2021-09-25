@@ -1,4 +1,5 @@
 const mpvAPI = require('node-mpv');
+const { isDataView } = require('util/types');
 const mpv = new mpvAPI({ "audio_only": true, "auto_restart": true }, ["--keep-open=yes", "--gapless-audio=weak" ]);
 
 const database = require('./database')
@@ -48,28 +49,7 @@ async function init (sendEvent) {
   mpv.on('status', async (data) => {
     switch(data.property) {
       case 'playlist-pos':
-        /*
-        try {
-          const plPos = await mpv.getPlaylistPosition()
-          sendEvent({ position: plPos }, { event: 'pos' })
-          //console.log('Playing at position ' + plPos)
-          const path = await mpv.getProperty(`playlist/${plPos}/filename`)
-          database.tracks.incrementPlay(path)
-        } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
-        break
-        sendQueue(true) // write the queue
-        */
       case 'pause':
-        /*
-        const curTime = await mpv.getTimePosition()
-        if (isPlaylistComplete()) {
-          mpv.jump(0)
-          sendEvent({ position: 0 }, { event: 'pos' })
-          sendEvent({ state: data.value, elapsed_seconds: 0 }, { event: 'pause' })
-        } else {
-          sendEvent({ state: data.value, elapsed_seconds: curTime }, { event: 'pause' })
-        }
-        */
         _sendState()
         break
       case 'playlist-count': // handled when we add/remove items
@@ -86,19 +66,20 @@ async function init (sendEvent) {
 }
 
 fs = require('fs')
-async function writeQueue(paths, pos) {
+function writeQueue() {
+  // get paths, pos
   data = {
     files: paths,
     queuepos: pos,
     // probably need loop and shuffle state here too
   }
-  fs.writeFile('data/playlist.json', JSON.stringify(data), function (err,data) {
-    if (err) {
-      console.log("[INFO] [Player] Can't save queue")
-      return console.log(err);
-    }
-    //console.log(data);
-  })
+  try {
+    fs.writeFileSync('data/playlist.json', JSON.stringify(data))
+  } catch (e) {
+    console.log("[INFO] [Player] Can't save queue")
+    return console.log(err);
+  }
+  console.log("[INFO] [Player] Saved queue")
 }
 
 async function readQueue() {
@@ -136,10 +117,7 @@ async function sendQueue (save = false) {
       })
       paths.push(path)
     }
-    sendEvent({ queue: items }, { event: 'queue' })
-    if (save) {
-      writeQueue(paths, plPos)
-    }
+    sendEvent({ queue: items, state: await getState() }, { event: 'queue' })
     return items
   } catch (e) {
     console.log(e)
@@ -147,7 +125,7 @@ async function sendQueue (save = false) {
   }
 }
 
-async function _sendState() {
+async function getState() {
   let paused = false
   let position = -1
   let duration = 0
@@ -168,6 +146,11 @@ async function _sendState() {
     remaining: timerem,
     percent
   }
+  return data
+}
+
+async function _sendState(send) {
+  data = await getState()
   sendEvent(data, { event: 'status' })
 }
 
@@ -351,9 +334,14 @@ player = {
   }
 }
 
-process.on('SIGTERM', async function () {
-  await mpv.stop()
-})
+function shutdown() {
+  console.log("[INFO] [Player] Shutting down...")
+  //writeQueue()
+  console.log("Done.")
+}
+
+process.on('SIGTERM', shutdown)
+process.on('SIGINT', shutdown)
 
 module.exports = {
   init,

@@ -24,12 +24,6 @@ export default {
     Queue
   },
   created () {
-    //this.$player.on('play', () => { this.playback.isPlaying = true })
-    //this.$player.on('pause', () => { this.playback.isPlaying = false })
-    //this.$player.on('queue', q => { this.playback.queue = q.queue; this.playback.queuePos = q.pos })
-    //this.$player.on('progress', p => this.playback.elapsed = p.detail.elapsed)
-    //this.$player.on('stop', () => this.playback.elapsed = 0)
-
     this.$database.getStats()
       .then(data => this.stats = data)
 
@@ -48,7 +42,12 @@ export default {
 
     events.addEventListener('queue', evt => {
       const data = JSON.parse(evt.data)
+
       this.playback.queue = data.queue
+
+      this.playback.queuePos = data.state.position
+      this.playback.elapsed = data.state.elapsed * 1000
+      this.playback.isPlaying = ((data.state.position !== -1 && !data.state.paused) ? true : false)
     })
 
     events.addEventListener('status', evt => {
