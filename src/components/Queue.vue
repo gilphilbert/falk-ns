@@ -1,6 +1,6 @@
 <template>
   <div id="queue-list" :class="{ 'is-active': isActive }">
-    <div id="queue-header" @click="hideQueue">
+    <div id="queue-header" @click="hideQueue" v-touch:swipe.bottom="hideQueue">
       <h1>Play Queue</h1>
     </div>
     <div id="queue-items">

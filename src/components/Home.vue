@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid max">
+  <div class="container-fluid max" v-touch:swipe.top="showQueue">
     <div class="background-container hidden--to-desktop" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.background !== ''" >
       <figure class="image"><img :src=" '/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.background + '?size=full' : '')"></figure>
     </div>
@@ -57,6 +57,11 @@ export default {
         return (this.playback.elapsed / (this.playback.queue[this.playback.queuePos].duration * 1000)) * 100 + '%'
       }
       return '0%'
+    }
+  },
+  methods: {
+    showQueue: function () {
+      this.$emit('showQueue')
     }
   }
 }
