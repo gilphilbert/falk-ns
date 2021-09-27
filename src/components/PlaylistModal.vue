@@ -55,6 +55,8 @@ export default {
       } else {
         this.$database.addToPlaylist(this.selected, this.selectedId)
       }
+
+      this.$emit('close')
     }
   }
 }

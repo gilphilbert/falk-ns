@@ -104,4 +104,14 @@ export class DatabaseHandler {
         .catch((e) => reject(e))
     })
   }
+
+  removeFromPlaylist (plID, index) {
+    console.log(index)
+    return new Promise((resolve, reject) => {
+      const body = JSON.stringify({ index: index })
+      fetch(`/api/playlist/${plID}/${index}`, { method: 'delete' })
+        .then(() => resolve())
+        .catch((e) => reject(e))
+    })
+  }
 }

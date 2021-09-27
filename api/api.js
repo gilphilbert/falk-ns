@@ -181,6 +181,14 @@ module.exports = app => {
       res.status(500).json({ error: 'unknown error' })
     }
   })
+  app.delete('/api/playlist/:id/:index', function (req, res) {
+    const status = database.playlists.removeTracks(req.params.id, [req.params.index])
+    if (status) {
+      res.status(200).send()
+    } else {
+      res.status(500).json({ error: 'unknown error' })
+    }
+  })
 
   app.get('/api/locations', function (req, res) {
     const locations = database.locations.mappings()

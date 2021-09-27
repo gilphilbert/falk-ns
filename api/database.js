@@ -303,7 +303,7 @@ const playlists = {
         id: pl.$loki,
         title: pl.name,
         art: tracks.length > 0 ? '/art/' + tracks[0].art.cover : '',
-        playtime: tracks.reduce((p, c) => p.duration + c.duration),
+        playtime: tracks.map(e => e.duration).reduce((c, n) => c + n),
         tracks: tracks
       }
     }
@@ -325,10 +325,16 @@ const playlists = {
     }
     return false
   },
-  removeTracks: function (id, tracks) {
+  removeTracks: function (id, indices) {
     let pl = plDB.get(id)
-    for(let i = 0; i < tracks.length; i++)
-      pl.tracks = pl.tracks.filter(tr => tr.id !== tracks[i])
+    let removed = 0;
+    for(let i = 0; i < indices.length; i++)
+      if (pl.tracks.splice(indices[i], 1))
+        removed++
+    plDB.update(pl)
+    if (removed > 0)
+      return true
+    return false
   },
   moveTrack: function (id, oldPos, newPos) {
 

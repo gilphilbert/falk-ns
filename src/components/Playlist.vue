@@ -32,7 +32,7 @@
                       <div class="dropdown-content" onclick="this.closest('div.dropdown').classList.toggle('is-active')">
                         <span class="dropdown-item">Play from here</span>
                         <span class="dropdown-item">Enqueue</span>
-                        <span class="dropdown-item">Remove from playlist</span>
+                        <span class="dropdown-item" @click="removeTrack(index)">Remove from playlist</span>
                       </div>
                     </div>
                   </td>
@@ -49,38 +49,50 @@
 export default {
   name: 'Playlist',
   created() {
-    let id = this.$route.params.id
-    if (id.substr(0, 1) === '_') {
-      id = 'auto/' + id.substr(1)
-    }
-
-    this.$database.getPlaylist(id)
-      .then(data => {
-        this.art = data.art
-        this.title = data.title
-        this.tracks = data.tracks
-        let pt = new Date(data.playtime * 1000).toISOString().substr(11, 8)
-        if (pt.substr(0, 3) === "00:") {
-          pt = pt.substr(3)
-        }
-        if (pt.substr(0, 1) === "0") {
-          pt = pt.substr(1)
-        }
-        this.playtime = pt
-      })
+    this.refreshPlaylist()
   },
   data () {
     return {
       art: '',
       title: '',
       tracks: [],
-      playtime: 0
+      playtime: 0,
+      plID: -1
     }
   },
   methods: {
     playAll(index) {
       const tr = this.tracks.map(e => e.id)
       this.$player.replaceAndPlay(tr, index)
+    },
+    refreshPlaylist() {
+      let id = this.$route.params.id
+      this.plID = id
+      if (id.substr(0, 1) === '_') {
+        id = 'auto/' + id.substr(1)
+      }
+
+      this.$database.getPlaylist(id)
+        .then(data => {
+          this.art = data.art
+          this.title = data.title
+          this.tracks = data.tracks
+          let pt = new Date(data.playtime * 1000).toISOString().substr(11, 8)
+          if (pt.substr(0, 3) === "00:") {
+            pt = pt.substr(3)
+          }
+          if (pt.substr(0, 1) === "0") {
+            pt = pt.substr(1)
+          }
+          this.playtime = pt
+        })
+    },
+    removeTrack (index) {
+      this.$database.removeFromPlaylist(this.plID, index)
+        .then(() => {
+          this.refreshPlaylist()
+        })
+        .catch()
     }
   }
 }

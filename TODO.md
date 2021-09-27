@@ -1,16 +1,14 @@
 ## General
-* Show queue on home
-* Home controls working (play, pause, skip, repeat, shuffle)
+* Mobile Home controls working (play, pause, skip, repeat, shuffle)
 * Search (global / current view)
 * Scan status
 * Save queue on shutdown
 
 ## Playback
 * Rearrange playing queue
+* Pause issue (restarting in UI)
 
 ## Playlists
-* Pause issue (restarting in UI)
-* Remove items from playlist
 * Rearrange playlist
 * Auto playlists
  * Most recent
