@@ -42,6 +42,7 @@ export default {
 
     events.addEventListener('queue', evt => {
       const data = JSON.parse(evt.data)
+      console.log(data)
 
       this.playback.queue = data.queue
 
@@ -52,6 +53,7 @@ export default {
 
     events.addEventListener('status', evt => {
       const data = JSON.parse(evt.data)
+      console.log(data)
       this.playback.queuePos = data.position
       this.playback.elapsed = data.elapsed * 1000
       this.playback.isPlaying = ((data.position !== -1 && !data.paused) ? true : false)

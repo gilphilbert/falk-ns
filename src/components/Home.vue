@@ -28,6 +28,11 @@
           <span id="home-quality" class="tag is-small">{{ this.playback.queue[this.playback.queuePos].shortformat }}</span>
         </p>
       </div>
+      <div class="col-xs-10 col-xs-offset-1 hidden--for-desktop">
+        <div id="mobile-progress-bar">
+          <div style="width: 0px;" :style="{ width: progressWidth }"></div>
+        </div>
+      </div>
       <div id="mobile-controls" class="col-xs-12 mobile-controls hidden--for-desktop">
         <span><svg class="feather random is-small"><use xlink:href="/img/feather-sprite.svg#shuffle"></use></svg></span>
         <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-back"></use></svg></span>
@@ -37,11 +42,6 @@
         </button>
         <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-forward"></use></svg></span>
         <span><svg class="feather repeat is-small"><use xlink:href="/img/feather-sprite.svg#repeat"></use></svg></span>
-      </div>
-      <div class="col-xs-10 col-xs-offset-1 hidden--for-desktop">
-        <div id="mobile-progress-bar">
-          <div style="width: 0px;" :style="{ width: progressWidth }"></div>
-        </div>
       </div>
     </div>
     <div class="hidden--for-desktop" id="swipe-up-queue" @click="showQueue"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#chevron-up"></use></svg></div>

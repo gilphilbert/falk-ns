@@ -26,7 +26,7 @@ aside.menu
         fill: var(--brand-inner)
  
   .menu-label, .menu-list a
-    color: #ffffff
+    color: var(--menu-text)
     letter-spacing: inherit
     text-transform: none
     
@@ -34,12 +34,22 @@ aside.menu
     display: flex
     width: 100%
     padding: 18px 0 18px 30px
+    border-radius: 15px
     background: transparent
     transition: background 200ms linear
     &:focus
       outline: none
     &:hover
-      background: rgba(255,255,255,0.2)
+      .detail
+        position: relative
+        &:before
+          content: ''
+          position: absolute
+          bottom: 2px
+          left: 0
+          height: 3px
+          width: calc(100% + 10px)
+          background-color: var(--primary)
       text-decoration: none
     &.router-link-active
       .feather
@@ -64,3 +74,9 @@ aside.menu
       padding: 18px 0
       .feather
         margin: 0 auto
+
+html.light aside.menu .image.menu-brand svg
+  path
+    fill: var(--primary)
+  circle
+    fill: var(--background-color)

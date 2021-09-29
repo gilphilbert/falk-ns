@@ -403,6 +403,7 @@ input:checked + .slider:before
       height: 100%
       .row
         height: 100%
+        padding-bottom: 40px
 //.artist-info
 //  padding-bottom: 50px
 //  figure
@@ -483,12 +484,15 @@ table.songs
 
 #app>.no-controls #queue-list
   right: 0
+  border-left: none
   @include media("≤tablet")
     #queue-items
       // height: calc(100% - 73px)
       height: calc(100% - 50px - 1.8rem)
 #queue-list
+  background: var(--background-color)
   color: var(--text-color)
+  border-left: 2px solid var(--primary)
   position: fixed
   top: 0
   height: 100vh
