@@ -1,12 +1,12 @@
 //this contains the left hand menu
 aside.menu
   height: 100%
-  background: var(--menu-background)
+  background: var(--background-color)
   color: var(--menu-text)
   position: fixed
   top: 0
   left: 0
-  width: 90px
+  width: 190px
   z-index: 2
   transition: width 250ms
 
@@ -31,9 +31,9 @@ aside.menu
     text-transform: none
     
   .menu-list a
-    display: inline-block
+    display: flex
     width: 100%
-    padding: 14px 0
+    padding: 18px 0 18px 30px
     background: transparent
     transition: background 200ms linear
     &:focus
@@ -41,14 +41,18 @@ aside.menu
     &:hover
       background: rgba(255,255,255,0.2)
       text-decoration: none
+    &.router-link-active
+      .feather
+        stroke: var(--primary)
 
   .detail
-    margin-top: 5px
-    visibility: hidden
-    opacity: 0
-    transition: visibility 0s linear 300ms, opacity 300ms
-    
+    display: inline-block
+    margin-left: 14px
+    line-height: 1.7
+
   @include media("≤tablet")
+    background: var(--menu-background)
+    width: 90px
     left: -90px
     transition: 250ms
     &.is-active
@@ -58,12 +62,5 @@ aside.menu
       display: none
     .menu-list a
       padding: 18px 0
-
-  @include media(">tablet")
-    &:hover
-      width: 180px
-      .detail
-        visibility: visible
-        opacity: 1
-        transition: visibility 0s linear 0s, opacity 300ms
-
+      .feather
+        margin: 0 auto

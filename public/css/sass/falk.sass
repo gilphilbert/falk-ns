@@ -353,7 +353,7 @@ input:checked + .slider:before
 // this contains the right hand content pane
 #content-container
   // padding: 2.5em 1.5em calc(100px + .75em) calc(1.5em + 90px)
-  padding: 0 0 120px 90px
+  padding: 0 0 120px 190px
   touch-action: pan-y !important
   min-height: 100vh
   @include media("≤tablet")
@@ -496,7 +496,7 @@ table.songs
   right: -450px
   transition: right 0.3s ease-in-out
   display: block
-  background: var(--gray-darker)
+  //background: var(--gray-darker)
   padding: 0
   // padding: 20px 30px 100px 30px
   &.is-active
@@ -504,6 +504,18 @@ table.songs
     &:hover
       color: var(--primary)
   .is-playing
+    td
+      background-color: var(--primary)
+      padding: 12px 0
+      .subtitle
+        color: var(--text-color)
+      &:first-child
+        border-top-left-radius: 15px
+        border-bottom-left-radius: 15px
+      &:last-child
+        padding-right: 15px
+        border-top-right-radius: 15px
+        border-bottom-right-radius: 15px
     figure
       position: relative
       &:before
@@ -531,28 +543,36 @@ table.songs
     color: var(--gray-lighter)
     text-decoration: underline
   #queue-header
-    background: var(--gray-darkest)
+    //background: var(--gray-darkest)
     padding: 25px 20px 25px 20px
   #queue-items
     padding: 0 20px 0 20px
     height: calc(100% - 50px - 1.8rem - 100px)
     overflow-y: scroll
-    //padding-bottom: 140px
-    //scrollbar-width: none
-    //-ms-overflow-style: none
-    //&::-webkit-scrollbar
-    //  display: none
+  table
+    border-collapse: separate
+    border-spacing: 0 8px
   td
     cursor: pointer
     vertical-align: middle
     padding: 8px 0
+    margin: 4px 0
+    //background: var(--gray-darker)
     &:first-child
       width: 44px
+      padding-left: 15px
+      padding-right: 8px
+      //padding-left: 15px
+      //padding-right: 8px
+      //border-top-left-radius: 15px
+      //border-bottom-left-radius: 15px
       @include media("≤tablet")
         width: 40px
-      padding-right: 8px
     &:last-child
       width: 20px
+      //padding-right: 15px
+      //border-top-right-radius: 15px
+      //border-bottom-right-radius: 15px
   @include media("≤tablet")
     top: 100vh
     left: 0

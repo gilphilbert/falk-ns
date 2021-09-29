@@ -2869,7 +2869,7 @@ input:checked + .slider:before {
   align-items: center; }
 
 #content-container {
-  padding: 0 0 120px 90px;
+  padding: 0 0 120px 190px;
   touch-action: pan-y !important;
   min-height: 100vh; }
   @media (max-width: 768px) {
@@ -2990,12 +2990,23 @@ table.songs td {
   right: -450px;
   transition: right 0.3s ease-in-out;
   display: block;
-  background: var(--gray-darker);
   padding: 0; }
   #queue-list.is-active {
     right: 0; }
     #queue-list.is-active:hover {
       color: var(--primary); }
+  #queue-list .is-playing td {
+    background-color: var(--primary);
+    padding: 12px 0; }
+    #queue-list .is-playing td .subtitle {
+      color: var(--text-color); }
+    #queue-list .is-playing td:first-child {
+      border-top-left-radius: 15px;
+      border-bottom-left-radius: 15px; }
+    #queue-list .is-playing td:last-child {
+      padding-right: 15px;
+      border-top-right-radius: 15px;
+      border-bottom-right-radius: 15px; }
   #queue-list .is-playing figure {
     position: relative; }
     #queue-list .is-playing figure:before {
@@ -3023,18 +3034,22 @@ table.songs td {
     color: var(--gray-lighter);
     text-decoration: underline; }
   #queue-list #queue-header {
-    background: var(--gray-darkest);
     padding: 25px 20px 25px 20px; }
   #queue-list #queue-items {
     padding: 0 20px 0 20px;
     height: calc(100% - 50px - 1.8rem - 100px);
     overflow-y: scroll; }
+  #queue-list table {
+    border-collapse: separate;
+    border-spacing: 0 8px; }
   #queue-list td {
     cursor: pointer;
     vertical-align: middle;
-    padding: 8px 0; }
+    padding: 8px 0;
+    margin: 4px 0; }
     #queue-list td:first-child {
       width: 44px;
+      padding-left: 15px;
       padding-right: 8px; }
       @media (max-width: 768px) {
         #queue-list td:first-child {
@@ -3305,12 +3320,12 @@ table.songs td {
 
 aside.menu {
   height: 100%;
-  background: var(--menu-background);
+  background: var(--background-color);
   color: var(--menu-text);
   position: fixed;
   top: 0;
   left: 0;
-  width: 90px;
+  width: 190px;
   z-index: 2;
   transition: width 250ms; }
   aside.menu .feather {
@@ -3331,9 +3346,9 @@ aside.menu {
     letter-spacing: inherit;
     text-transform: none; }
   aside.menu .menu-list a {
-    display: inline-block;
+    display: flex;
     width: 100%;
-    padding: 14px 0;
+    padding: 18px 0 18px 30px;
     background: transparent;
     transition: background 200ms linear; }
     aside.menu .menu-list a:focus {
@@ -3341,13 +3356,16 @@ aside.menu {
     aside.menu .menu-list a:hover {
       background: rgba(255, 255, 255, 0.2);
       text-decoration: none; }
+    aside.menu .menu-list a.router-link-active .feather {
+      stroke: var(--primary); }
   aside.menu .detail {
-    margin-top: 5px;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s linear 300ms, opacity 300ms; }
+    display: inline-block;
+    margin-left: 14px;
+    line-height: 1.7; }
   @media (max-width: 768px) {
     aside.menu {
+      background: var(--menu-background);
+      width: 90px;
       left: -90px;
       transition: 250ms; }
       aside.menu.is-active {
@@ -3356,14 +3374,9 @@ aside.menu {
       aside.menu .detail {
         display: none; }
       aside.menu .menu-list a {
-        padding: 18px 0; } }
-  @media (min-width: 769px) {
-    aside.menu:hover {
-      width: 180px; }
-      aside.menu:hover .detail {
-        visibility: visible;
-        opacity: 1;
-        transition: visibility 0s linear 0s, opacity 300ms; } }
+        padding: 18px 0; }
+        aside.menu .menu-list a .feather {
+          margin: 0 auto; } }
 .audio-wave {
   display: flex;
   align-items: flex-end;
