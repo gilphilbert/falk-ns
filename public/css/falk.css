@@ -2908,12 +2908,12 @@ input:checked + .slider:before {
         height: 45vh; }
 
 @media (max-width: 768px) {
-  .no-controls #content-container {
+  #app > .no-controls #content-container {
     height: 100vh;
     padding: 0 0 40px 0; }
-    .no-controls #content-container .container-fluid.max {
+    #app > .no-controls #content-container .container-fluid.max {
       height: 100%; }
-      .no-controls #content-container .container-fluid.max .row {
+      #app > .no-controls #content-container .container-fluid.max .row {
         height: 100%; } }
 
 @media (max-width: 768px) {
@@ -2976,10 +2976,10 @@ table.songs td {
   @media screen and (max-height: 600px) {
     #mobile-toolbar {
       display: none; } }
-.no-controls #queue-list {
+#app > .no-controls #queue-list {
   right: 0; }
   @media (max-width: 768px) {
-    .no-controls #queue-list #queue-items {
+    #app > .no-controls #queue-list #queue-items {
       height: calc(100% - 50px - 1.8rem); } }
 #queue-list {
   color: var(--text-color);
@@ -3246,7 +3246,7 @@ table.songs td {
   line-height: 0.8; }
   .mobile-controls svg.feather {
     margin: 0 25px;
-      margin-stroke: var(--text-color); }
+    stroke: var(--text-color); }
     .mobile-controls svg.feather.is-small {
       height: 17px;
       width: 17px; }
