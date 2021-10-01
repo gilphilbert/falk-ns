@@ -5,6 +5,7 @@
 * Home screen
 * Queue
 * Share mounting
+* Native handling of right-click dropdowns
 
 ## Playback
 * Rearrange playing queue

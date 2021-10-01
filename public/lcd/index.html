@@ -632,17 +632,6 @@
         document.body.style.setProperty('--body-background', "url('" + this.src + "')")
       })
       const events = new EventSource('/events')
-      events.onmessage = function(e) {
-        console.log(e)
-      }
-      events.addEventListener('open', evt => {
-        this.online = true
-        console.log("SSE Connected")
-      })
-      events.addEventListener('error', evt => {
-        this.online = false
-      })
-
       events.addEventListener('queue', evt => {
         const data = JSON.parse(evt.data)
         State = data
@@ -650,7 +639,6 @@
       })
       events.addEventListener('status', evt => {
         const data = JSON.parse(evt.data)
-        console.log(data)
         if (State !== null) {
           State.state = data
           updateStatus()
