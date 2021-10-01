@@ -25,14 +25,7 @@
                   <td class="pointer" @click="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortformat }}</span></td>
                   <td class="is-narrow">
-                    <div class="dropdown is-right">
-                      <span onclick="this.closest('div').classList.toggle('is-active')"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#more-vertical"></use></svg></span>
-                      <div class="dropdown-content" onclick="this.closest('div.dropdown').classList.toggle('is-active')">
-                        <span class="dropdown-item" @click="$player.enqueue([track.id])">Enqueue</span>
-                        <span class="dropdown-item" @click="$player.playNext([track.id])">Play next</span>
-                        <span class="dropdown-item" @click="addToPlaylist(track.id)">Add to playlist</span>
-                      </div>
-                    </div>
+                    <AlbumDropDown :index="index" :trackID="track.id" @addToPlaylist="addToPlaylist" />
                   </td>
                 </tr>
               </tbody>
@@ -47,11 +40,14 @@
 <script>
 import Tiles from './Tiles.vue'
 import PlaylistModal from './PlaylistModal.vue'
+import AlbumDropDown from './AlbumDropDown.vue'
+
 export default {
   name: 'Album',
   components: {
     Tiles,
-    PlaylistModal
+    PlaylistModal,
+    AlbumDropDown
   },
   created() {
     this.$database.getAlbum(this.$route.params.artist, this.$route.params.album)
@@ -60,7 +56,7 @@ export default {
         this.genre = data.genre
         this.shortformat = data.shortformat
         this.title = data.title
-        this.tracks = data.tracks
+        this.tracks = data.tracks.map(e => { e.dropdown = false; return e })
         this.year = data.year
       })
   },

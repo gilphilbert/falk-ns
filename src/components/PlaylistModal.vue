@@ -30,7 +30,6 @@ export default {
   created () {
     this.$database.getPlaylists()
       .then(data => {
-        console.log(data)
         this.playlists = data
       })
   },

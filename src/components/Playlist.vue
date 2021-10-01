@@ -27,14 +27,7 @@
                   </td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortformat }}</span></td>
                   <td class="is-narrow">
-                    <div class="dropdown is-right">
-                      <span onclick="this.closest('div').classList.toggle('is-active')"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#more-vertical"></use></svg></span>
-                      <div class="dropdown-content" onclick="this.closest('div.dropdown').classList.toggle('is-active')">
-                        <span class="dropdown-item">Play from here</span>
-                        <span class="dropdown-item">Enqueue</span>
-                        <span class="dropdown-item" @click="removeTrack(index)">Remove from playlist</span>
-                      </div>
-                    </div>
+                    <PlaylistDropDown :index="index" :trackID="track.id" @removeTrack="removeTrack" />
                   </td>
                 </tr>
               </tbody>
@@ -46,10 +39,13 @@
   </div>
 </template>
 <script>
+import PlaylistDropDown from './PlaylistDropDown.vue'
 export default {
   name: 'Playlist',
+  components: {
+    PlaylistDropDown
+  },
   created() {
-    console.log('test')
     this.refreshPlaylist()
   },
   data () {
@@ -77,7 +73,7 @@ export default {
         .then(data => {
           this.art = data.art
           this.title = data.title
-          this.tracks = data.tracks
+          this.tracks = data.tracks.map(e => { e.dropdown = false; return e })
           let pt = new Date(data.playtime * 1000).toISOString().substr(11, 8)
           if (pt.substr(0, 3) === "00:") {
             pt = pt.substr(3)

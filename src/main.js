@@ -3,6 +3,7 @@ import { createApp } from 'vue/dist/vue.cjs.prod.js'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Vue3TouchEvents from 'vue3-touch-events'
 
+import VueClickAway from "vue3-click-away";
 
 import App from './App.vue'
 import Home from './components/Home.vue'
@@ -97,6 +98,8 @@ const router = new createRouter({
 const app = createApp(App)
 app.use(router)
 app.use(Vue3TouchEvents, { swipeTolerance: 100 })
+app.use(VueClickAway)
+
 app.config.globalProperties.$player = player
 app.config.globalProperties.$innerWidth = window.innerWidth
 app.config.globalProperties.$database = new DatabaseHandler()
