@@ -2885,7 +2885,7 @@ input:checked + .slider:before {
     padding: 40px 0 0 0; }
   #content-container .container-fluid {
     max-width: 90vw;
-    padding: 40px 0 0 0; }
+    padding: 40px 30px 0 30px; }
     #content-container .container-fluid.no-padding {
       padding: 0;
       max-width: 100vw; }
@@ -2984,10 +2984,11 @@ table.songs td {
   @media (max-width: 768px) {
     #app > .no-controls #queue-list #queue-items {
       height: calc(100% - 50px - 1.8rem); } }
+  #app > .no-controls #queue-list:before {
+    display: none; }
+
 #queue-list {
-  background: var(--background-color);
   color: var(--text-color);
-  border-left: 2px solid var(--primary);
   position: fixed;
   top: 0;
   height: 100vh;
@@ -2998,8 +2999,6 @@ table.songs td {
   padding: 0; }
   #queue-list.is-active {
     right: 0; }
-    #queue-list.is-active:hover {
-      color: var(--primary); }
   #queue-list .is-playing td {
     background-color: var(--primary);
     padding: 12px 0; }
@@ -3315,7 +3314,8 @@ aside.menu {
   z-index: 2;
   transition: width 250ms; }
   aside.menu .feather {
-    stroke: var(--menu-text); }
+    stroke: var(--menu-text);
+    transition: stroke ease 0.3s; }
   aside.menu .image.menu-brand {
     width: 55px;
     height: auto;
@@ -3338,6 +3338,20 @@ aside.menu {
     border-radius: 15px;
     background: transparent;
     transition: background 200ms linear; }
+    aside.menu .menu-list a .detail {
+      display: inline-block;
+      margin-left: 14px;
+      line-height: 1.5;
+      font-size: 16px; }
+      aside.menu .menu-list a .detail:before {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        height: 3px;
+        width: 0;
+        background-color: var(--primary);
+        transition: width ease 0.3s; }
     aside.menu .menu-list a:focus {
       outline: none; }
     aside.menu .menu-list a:hover {
@@ -3345,19 +3359,11 @@ aside.menu {
       aside.menu .menu-list a:hover .detail {
         position: relative; }
         aside.menu .menu-list a:hover .detail:before {
-          content: '';
-          position: absolute;
-          bottom: 2px;
-          left: 0;
-          height: 3px;
           width: calc(100% + 10px);
-          background-color: var(--primary); }
+          transition: width ease 0.3s; }
     aside.menu .menu-list a.router-link-active .feather {
-      stroke: var(--primary); }
-  aside.menu .detail {
-    display: inline-block;
-    margin-left: 14px;
-    line-height: 1.7; }
+      stroke: var(--primary);
+      transition: stroke ease 0.3s; }
   @media (max-width: 768px) {
     aside.menu {
       background: var(--menu-background);

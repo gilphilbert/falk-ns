@@ -8,9 +8,9 @@
           </div>
           <div class="col-md-8 col-md-offset-2 col-xs-8">
             <h1 class="album-title">{{ this.title }}</h1>
-            <p class="subtitle is-1"><router-link :to="'/artist/' + encodeURIComponent(this.$route.params.artist)">{{ this.$route.params.artist }}</router-link></p>
+            <p class="subtitle is-1"><router-link :to="{ name: 'Artist', params: { artist: this.$route.params.artist } }">{{ this.$route.params.artist }}</router-link></p>
             <p class="is-4 detail">{{ this.year }}</p>
-            <p class="is-4"><router-link :to="'/genre/' + encodeURIComponent(this.genre)">{{ this.genre }}</router-link></p>
+            <p class="is-4"><router-link :to="{ name: 'Genre', params: { genre: this.genre } }">{{ this.genre }}</router-link></p>
             <p class="is-6 tag is-rounded detail">{{ shortformat }}</p>
           </div>
         </div>
@@ -67,7 +67,7 @@ export default {
   data () {
     return {
       art: '',
-      genre: '',
+      genre: ' ',
       shortformat: '',
       title: '',
       tracks: [],

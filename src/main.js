@@ -1,6 +1,8 @@
-import { createApp } from 'vue'
+//import { createApp } from 'vue'
+import { createApp } from 'vue/dist/vue.cjs.prod.js'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Vue3TouchEvents from 'vue3-touch-events'
+
 
 import App from './App.vue'
 import Home from './components/Home.vue'
@@ -17,7 +19,6 @@ import Settings from './components/Settings.vue'
 import { DatabaseHandler } from './database_remote.js'
 import * as player from './player_remote.js'
 
-// Vue.use(VueRouter)
 const scrollBehavior = (to, from, savedPosition) => {
   if (savedPosition) {
     // savedPosition is only available for popstate navigations.
@@ -52,16 +53,44 @@ const router = new createRouter({
   history: createWebHashHistory(),
   scrollBehavior,
   routes: [
-    { path: '/', component: Home, props: true, meta: { scrollToTop: true } },
-    { path: '/playlists', component: Playlists, meta: { scrollToTop: true } },
-    { path: '/playlist/:id', component: Playlist, meta: { scrollToTop: true } },
-    { path: '/albums', component: Albums, meta: { scrollToTop: true } },
-    { path: '/artists', component: Artists, meta: { scrollToTop: true } },
-    { path: '/artist/:artist', component: Artist, meta: { scrollToTop: true } },
-    { path: '/album/:artist/:album', component: Album, meta: { scrollToTop: true } },
-    { path: '/genres', component: Genres, meta: { scrollToTop: true } },
-    { path: '/genre/:genre', component: Genre, meta: { scrollToTop: true } },
-    { path: '/settings', component: Settings, meta: { scrollToTop: true } }
+    { path: '/', name: 'Home', component: Home, props: true, meta: { scrollToTop: true } },
+    {
+      path: '/playlists',
+      name: 'playlists-home',
+      component: { template: '<router-view></router-view>' },
+      children: [
+        { path: '', name: 'Playlists', component: Playlists, meta: { scrollToTop: true } },
+        { path: ':id', name: 'Playlist', component: Playlist, meta: { scrollToTop: true } }
+      ]
+    },
+    {
+      path: '/artists',
+      name: 'artists-home',
+      component: { template: '<router-view></router-view>' },
+      children: [
+        { path: '', name: 'Artists', component: Artists, meta: { scrollToTop: true } },
+        { path: ':artist', name: 'Artist', component: Artist, meta: { scrollToTop: true } }
+      ]
+    },
+    {
+      path: '/albums',
+      name: 'albums-home',
+      component: { template: '<router-view></router-view>' },
+      children: [
+        { path: '', name: 'Albums', component: Albums, meta: { scrollToTop: true } },
+        { path: ':artist/:album', name: 'Album', component: Album, meta: { scrollToTop: true } }
+      ]
+    },
+    {
+      path: '/genres',
+      name: 'genres-home',
+      component: { template: '<router-view></router-view>' },
+      children: [
+        { path: '', name: 'Genres', component: Genres, meta: { scrollToTop: true } },
+        { path: ':genre', name: 'Genre', component: Genre, meta: { scrollToTop: true } }
+      ]
+    },
+    { path: '/settings', name: 'Settings', component: Settings, meta: { scrollToTop: true } }
   ]
 })
 

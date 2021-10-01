@@ -13,7 +13,14 @@ export default {
   },
   created() {
     this.$database.getArtists()
-      .then(data => this.artists = data)
+      .then(data => {
+        data = data.map(e => {
+          e.urlParams = { name: 'Artist', params: { 'artist': e.title } }
+          e.surlParams = false
+          return e
+        })
+        this.artists = data
+      })
   },
   data () {
     return {

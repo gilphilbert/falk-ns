@@ -13,7 +13,15 @@ export default {
   },
   created() {
     this.$database.getAlbums()
-      .then(data => this.albums = data)
+      .then(data => {
+        console.log(data)
+        data = data.map(e => {
+          e.urlParams = { name: 'Album', params: { 'album': e.title, 'artist': e.subtitle } }
+          e.surlParams = { name: 'Artist', params: { 'artist': e.subtitle } }
+          return e
+        })
+        this.albums = data
+      })
   },
   data () {
     return {

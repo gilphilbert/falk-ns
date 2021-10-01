@@ -1,0 +1,664 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>FALK LCD Screen</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca&display=swap" rel="stylesheet">
+
+    <style>
+      /* reset.css */
+      html, body, div, span, applet, object, iframe,
+      h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+      a, abbr, acronym, address, big, cite, code,
+      del, dfn, em, img, ins, kbd, q, s, samp,
+      small, strike, strong, sub, sup, tt, var,
+      b, u, i, center,
+      dl, dt, dd, ol, ul, li,
+      fieldset, form, label, legend,
+      table, caption, tbody, tfoot, thead, tr, th, td,
+      article, aside, canvas, details, embed, 
+      figure, figcaption, footer, header, hgroup, 
+      menu, nav, output, ruby, section, summary,
+      time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+      }
+      /* HTML5 display-role reset for older browsers */
+      article, aside, details, figcaption, figure, 
+      footer, header, hgroup, menu, nav, section {
+        display: block;
+      }
+      body {
+        line-height: 1;
+      }
+      ol, ul {
+        list-style: none;
+      }
+      blockquote, q {
+        quotes: none;
+      }
+      blockquote:before, blockquote:after,
+      q:before, q:after {
+        content: '';
+        content: none;
+      }
+      table {
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
+      /* end of reset */
+
+      #albumart {
+        background: #444;
+        border-radius: 4%;
+      }
+      #quality {
+        padding: 10px 16px;
+        background-color: rgb(255,255,255);
+        border-radius: 1000px;
+        display: inline;
+      }
+      progress {
+        -webkit-appearance: none;
+        appearance: none;
+        overflow: hidden;
+      }
+      progress::-webkit-progress-bar {
+        border-radius: 1000px;
+      }
+      #not-playing {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: #2A2A2A;
+        transition: left 0.5s ease;
+      }
+      #not-playing img {
+        position: absolute;
+        height: 60vh;
+        top: calc(50% - (60vh / 2));
+        left: calc(50% - (60vh / 2));
+        border-radius: 7%;
+      }
+      #not-playing.hide {
+        left: calc(0px - 100vw);
+        transition: left 0.5s ease;
+      }
+
+      body, button, input, select, textarea {
+        font-family: "Lexend Deca", sans-serif;
+        line-height: normal;
+
+      }
+      body {
+        color: white;
+        overflow: hidden;
+      }
+      body.light {
+        color: rgba(0,0,0,0.6);
+      }
+      #quality {
+        background-color: white;
+      }
+      body.light #quality {
+        background-color: rgba(0,0,0,0.6);
+      }
+      .hidden {
+        display: none;
+      }
+
+      @media screen and (width: 480px) and (height: 320px) {
+        body {
+          --body-background: white;
+        }
+        body, button, input, select, textarea {
+          font-family: 'Lexend Deca', sans-serif!important;
+        }
+        body:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: 100vw;
+          z-index: -1;
+          background: var(--body-background);
+          background-repeat: no-repeat;
+          background-size: cover;
+          background-position-y: center;
+          filter: grayscale(100%);
+          opacity: 0.07;
+        }
+        #albumart {
+          position: absolute;
+          top: 17px;
+          left: 17px;
+          height: 145px;
+          border-radius: 3px;
+          box-shadow: 0px 0px 7px 0px rgba(0,0,0,0.33);
+        }
+        #title {
+          position: absolute;
+          top: 22px;
+          left: 180px;
+          font-size: 22px;
+          max-width: 285px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #artist {
+          position: absolute;
+          top: 56px;
+          left: 180px;
+          font-size: 16px;
+          max-width: 285px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #album {
+          position: absolute;
+          top: 86px;
+          left: 180px;
+          font-size: 16px;
+          max-width: 285px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #quality {
+          position: absolute;
+          top: 123px;
+          left: 180px;
+          font-size: 12px;
+          padding: 6px 8px 7px 8px;
+          background-color: white;
+          border-radius: 1000px;
+        }
+        body.light #quality {
+          background-color: rgba(0,0,0,0.6);
+        }
+        #state-play, #state-pause {
+          position: absolute;
+          height: 32px;
+          width: 32px;
+          top: 202px;
+          left: calc(50vw - 16px);
+        }
+        #queue {
+          display: none;
+        }
+        progress {
+          width: 90vw;
+          height: 15px;
+          position: absolute;
+          top: 280px;
+          left: 5vw;
+        }
+        progress::-webkit-progress-bar {
+          background-color: rgba(255,255,255,0.2);
+          border-radius: 1000px;
+          overflow: hidden;
+        }
+        body.light progress::-webkit-progress-bar {
+          background-color: rgba(0,0,0,0.2);
+        }
+        progress::-webkit-progress-value {
+          background-color: rgb(255,255,255);
+        }
+        body.light progress::-webkit-progress-value {
+          background-color: rgba(0,0,0,0.45);
+        }
+        #elapsed {
+          position: absolute;
+          bottom: 47px;
+          left: 5vw;
+        }
+        #duration {
+          position: absolute;
+          bottom: 47px;
+          right: 5vw;
+        }
+        #queue-pos {
+          display: none;
+        }
+      }
+
+      @media screen and (width: 1920px) and (height: 480px), screen and (width: 1919px) and (height: 479px) {
+        #albumart {
+          height: 420px;
+          width: 420px;
+          position: absolute;
+          top: 30px;
+          left: 30px;
+          box-shadow: 0px 0px 7px 0px rgba(0,0,0,0.33);
+        }
+        #title {
+          font-size: 50px;
+          position: absolute;
+          top: 50px;
+          left: 503px;
+          max-width: 875px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #artist {
+          font-size: 35px;
+          position: absolute;
+          top: 115px;
+          left: 503px;
+          max-width: 875px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #album {
+          font-size: 30px;
+          position: absolute;
+          top: 170px;
+          left: 503px;
+          max-width: 875px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #quality {
+          font-size: 22px;
+          position: absolute;
+          top: 232px;
+          left: 503px;
+        }
+        body.light #quality {
+          background-color: rgba(0,0,0,0.6);
+        }
+        #state-play, #state-pause {
+          position: absolute;
+          left: 940px;
+          top: 350px;
+          height: 48px;
+          width: 48px;
+        }
+        #elapsed {
+          font-size: 28px;
+          position: absolute;
+          top: 366px;
+          left: 503px;
+        }
+        #duration {
+          font-size: 28px;
+          position: absolute;
+          top: 366px;
+          right: 542px;
+        }
+        body.light progress::-webkit-progress-value {
+          background-color: rgba(0,0,0,0.45);
+        }
+        progress {
+          width: 875px;
+          height: 27px;
+          position: absolute;
+          top: 413px;
+          left: 503px;
+        }
+        progress::-webkit-progress-bar {
+          background-color: rgba(255,255,255,0.2);
+          border-radius: 1000px;
+          overflow: hidden;
+        }
+        body.light progress::-webkit-progress-bar {
+          background-color: rgba(0,0,0,0.2);
+        }
+        progress::-webkit-progress-value {
+          background-color: rgb(255,255,255);
+        }
+        body.light progress::-webkit-progress-value {
+          background-color: rgba(0,0,0,0.45);
+        }
+
+        #queue {
+          position: absolute;
+          top: 0px;
+          right: 0;
+          width: 480px;
+          height: 480px;
+          background: rgba(255,255,255,0.12);
+        }
+        body.light #queue {
+          background: rgba(0,0,0,0.06);
+        }
+        #queue li {
+          font-size: 30px;
+          height: 120px;
+          width: 100%;
+          vertical-align: middle;
+          display: flex;
+          align-items: center;
+          padding: 0 20px;
+        }
+        #queue span {
+          max-width: 420px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: block;
+        }
+        #queue span:last-child {
+          font-size: 20px;
+        }
+        #queue li.active {
+          background: rgba(255,255,255,0.1);
+        }
+        body.light #queue li.active {
+          background: rgba(0,0,0,0.1);
+        }
+        #queue li .title {
+          display: block;
+        }
+        #queue-pos {
+          display: none;
+        }
+      }
+      @media screen and (width: 800px) and (height: 480px) {
+        body {
+          --body-background: white;
+        }
+        body:before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: 100vw;
+          z-index: -1;
+          background: var(--body-background);
+          background-repeat: no-repeat;
+          background-size: cover;
+          background-position-y: center;
+          filter: grayscale(100%);
+          opacity: 0.07;
+        }
+        #albumart {
+          height: 250px;
+          box-shadow: 0px 0px 7px 0px rgba(0,0,0,0.33);
+          margin: 40px;
+        }
+        #title, #artist, #album, #quality {
+          position: absolute;
+          left: 330px;
+          max-width: 430px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #title {
+          top: 90px;
+          font-size: 30px;
+        }
+        #artist {
+          top: 130px;
+          font-size: 23px;
+        }
+        #album {
+          top: 160px;
+          font-size: 20px;
+        }
+        #quality {
+          top: 205px;
+          font-size: 17px;
+          padding: 7px 12px;
+        }
+        #progress {
+          position: absolute;
+          left: 40px;
+          width: 720px;
+          top: 423px;
+        }
+        #elapsed {
+          position: absolute;
+          left: 40px;
+          top: 394px;
+          font-size: 18px;
+        }
+        #duration {
+          position: absolute;
+          right: 40px;
+          top: 394px;
+          font-size: 18px;
+        }
+        #state-play, #state-pause {
+          height: 48px;
+          width: 48px;
+          position: absolute;
+          left: calc(50vw - 24px);
+          top: 330px;
+        }
+        progress::-webkit-progress-bar {
+          background-color: rgba(255,255,255,0.2);
+          border-radius: 1000px;
+          overflow: hidden;
+        }
+        body.light progress::-webkit-progress-bar {
+          background-color: rgba(0,0,0,0.2);
+        }
+        progress::-webkit-progress-value {
+          background-color: rgb(255,255,255);
+        }
+        body.light progress::-webkit-progress-value {
+          background-color: rgba(0,0,0,0.45);
+        }
+        #queue {
+          display: none;
+        }
+        #queue-pos {
+          position: absolute;
+          width: 100%;
+          top: 446px;
+          left: 0;
+          text-align: center;
+        }
+      }
+
+    </style>
+  </head>
+  <body class="">
+    <img id="albumart" />
+    <p id="title"></p>
+    <p id="artist"></p>
+    <p id="album"></p>
+    <p id="quality"></p>
+    <ul id="queue">
+      <li><div><span class="title"></span><span class="artist"></span></div></li>
+      <li><div><span class="title"></span><span class="artist"></span></div></li>
+      <li><div><span class="title"></span><span class="artist"></span></div></li>
+      <li><div><span class="title"></span><span class="artist"></span></div></li>
+    </ul>
+    <p id="queue-pos"></p>
+    <p id="elapsed">0:00</p>
+    <svg id="state-play" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+    <svg id="state-pause" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-pause"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+    <p id="duration">0:00</p>
+    <progress id="progress" value="0" max="1000"></progress>
+    <div id="progress-container"><div id="progress-bar"></div></div>
+    <div id="not-playing">
+      <img src="/img/falk-blue-white.svg">
+    </div>
+  </body>
+  <script src="/lcd/color-thief.min.js"></script>
+  <script>
+    var ColorThief = new ColorThief()
+    let State = null
+    let Clock = null
+    let Elapsed = 0
+    let Duration = 0
+
+    function formatTime(s) {
+      function str_pad_left(string,pad,length) {
+        return (new Array(length+1).join(pad)+string).slice(-length);
+      }
+      var hours = Math.floor(s / 3600)
+      s = s - hours * 3600
+      var minutes = Math.floor(s / 60)
+      var seconds = s - minutes * 60
+      if (hours > 0) {
+        return hours + ':' + str_pad_left(minutes,'0',2) + ':'+str_pad_left(seconds,'0',2)
+      } else {}
+        return minutes + ':'+str_pad_left(seconds,'0',2)
+    }
+
+    function getLightness(rgb){
+      var r = rgb[0] / 255
+      var g = rgb[1] / 255
+      var b = rgb[2] / 255
+
+      var maxColor = Math.max(r,g,b)
+      var minColor = Math.min(r,g,b)
+      //Calculate L:
+      var l = (maxColor + minColor) / 2
+      return Math.round(l * 100)
+    }
+
+    function setBackground(el) {
+      var result = null
+      try {
+        result = ColorThief.getPalette(el)
+      } catch(err) {
+        console.log("couldn't get background")
+      }
+      if (result !== null) {
+        let _r = result[1]
+        if (getLightness(_r) > 80) {
+          _r = result[2]
+        }
+        if (getLightness(_r) < 60) {
+          document.body.classList.remove("light")
+        } else {
+          document.body.classList.add("light")
+        }
+        document.body.style.backgroundColor = "rgb(" + _r + ")"
+        document.getElementById('quality').style.color = "rgb(" + _r + ")"
+      } else {
+        document.body.style.backgroundColor = "#888"
+        document.getElementById('quality').style.color = "#888"
+        document.body.classList.remove("light")
+      }
+    }
+
+    function tick() {
+      Elapsed = Elapsed + 100
+      setProgress()
+    }
+
+    function setProgress() {
+      document.getElementById('progress').value = Math.round(Elapsed / Duration * 1000)
+      document.getElementById('elapsed').innerText = formatTime(Math.round(Elapsed / 1000))
+    }
+
+    function updateStatus () {
+      window.clearInterval(Clock)
+      if (State.queue.length > 0) {
+        curTrack = State.queue[State.state.position]
+        document.querySelector('#albumart').setAttribute('src', window.location.origin + '/art/' + curTrack.art.cover)
+        document.getElementById('title').innerText = curTrack.title
+        document.getElementById('artist').innerText = curTrack.artist
+        document.getElementById('album').innerText = curTrack.album
+        document.getElementById('quality').innerText = curTrack.shortformat
+        document.getElementById('duration').innerText = formatTime(curTrack.duration)
+        Elapsed = State.state.elapsed * 1000
+        Duration = State.state.duration * 1000
+        setProgress()
+        if (State.state.paused) {
+          document.getElementById("state-play").classList.add('hidden')
+          document.getElementById("state-pause").classList.remove('hidden')
+        } else {
+          document.getElementById("state-play").classList.remove('hidden')
+          document.getElementById("state-pause").classList.add('hidden')
+          Clock = window.setInterval(tick, 100)
+        }
+        document.getElementById('not-playing').classList.add('hide')
+      } else {
+        // nothing playing
+        document.getElementById('not-playing').classList.remove('hide')
+      }
+      updateQueue()
+    }
+
+    function updateQueue (queue) {
+      if (State !== null && State !== undefined) {
+        const els = document.querySelectorAll('#queue > *')
+        const p = State.state.position
+
+        let start = ((p === 0) ? p : p - 1)
+        if (start + 4 > State.queue.length) {
+          start = State.queue.length - 4
+          if (start < 0) {
+            start = 0
+          }
+        }
+        //if current position is not at the start
+        songs = State.queue.slice(start, start + 4)
+        for (let i = 0; i < 4; i++) {
+          if (i<State.queue.length) {
+          els[i].querySelector('.title').innerText = songs[i].title
+            els[i].querySelector('.artist').innerText = songs[i].artist
+            if (songs[i].pos == p) {
+              els[i].classList.add('active')
+            } else {
+              els[i].classList.remove('active')
+            }
+            els[i].classList.remove('hidden')
+          } else {
+            els[i].classList.add('hidden')
+          }
+        }
+
+        document.getElementById('queue-pos').innerText = (p + 1) + "/" + State.queue.length;
+      }
+    }
+
+    function start() {
+      document.querySelector('#albumart').addEventListener('load', function() {
+        setBackground(this)
+        document.body.style.setProperty('--body-background', "url('" + this.src + "')")
+      })
+      const events = new EventSource('/events')
+      events.onmessage = function(e) {
+        console.log(e)
+      }
+      events.addEventListener('open', evt => {
+        this.online = true
+        console.log("SSE Connected")
+      })
+      events.addEventListener('error', evt => {
+        this.online = false
+      })
+
+      events.addEventListener('queue', evt => {
+        const data = JSON.parse(evt.data)
+        State = data
+        updateStatus()
+      })
+      events.addEventListener('status', evt => {
+        const data = JSON.parse(evt.data)
+        console.log(data)
+        if (State !== null) {
+          State.state = data
+          updateStatus()
+        }
+      })
+    }
+   
+    document.addEventListener("DOMContentLoaded", start);
+
+  </script>
+</html>

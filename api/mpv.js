@@ -110,6 +110,7 @@ async function sendQueue (save = false) {
         title: track.info.title,
         artist: track.info.albumartist,
         duration: track.info.duration,
+        album: track.info.album,
         art: track.info.art,
         id: track.id,
         playing: ((i === plPos) ? true : false),

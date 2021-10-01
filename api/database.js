@@ -133,7 +133,7 @@ const library = {
       const artists = musicDB.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
       resolve(artists
         .filter((tag, index, array) => array.findIndex(t => t.info.albumartist === tag.info.albumartist) === index)
-        .map(a => { return { title: a.info.albumartist, art: '/art/' + ((a.info.art.artist !== '') ? a.info.art.artist : '/img/placeholder.png'), url: `/artist/${encodeURIComponent(a.info.albumartist)}`, subtitle: '', surl: '' } })
+        .map(a => { return { title: a.info.albumartist, art: '/art/' + ((a.info.art.artist !== '') ? a.info.art.artist : '/img/placeholder.png'), subtitle: '' } })
       )
     })
   },
@@ -147,9 +147,7 @@ const library = {
           artistart: '/art/' + ((artistArt !== '') ? artistArt : '/img/placeholder.png'),
           background: ((e.info.art.background !== '') ? '/art/' + e.info.art.background : ''),
           title: e.info.album,
-          url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
           subtitle: e.info.year,
-          surl: ''
         }
       }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
       resolve({ albums: albums })
@@ -162,9 +160,7 @@ const library = {
         return {
           art: '/art/' + ((e.info.art.cover !== '') ? e.info.art.cover : '/img/placeholder.png'),
           title: e.info.album,
-          url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
           subtitle: e.info.albumartist,
-          surl: `/artist/${encodeURIComponent(e.info.albumartist)}`
         }
       }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
       resolve(albums)
@@ -198,9 +194,7 @@ const library = {
         return {
           art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : '/img/placeholder.png'),
           title: e.info.genre,
-          url: `/genre/${encodeURIComponent(e.info.genre)}`,
           subtitle: '',
-          surl: ''
         }
       }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.title !== '') === index)
       resolve(genres)
@@ -213,9 +207,7 @@ const library = {
         return {
           art: '/art/' + ((e.info.art.cover) ? e.info.art.cover : '/img/placeholder.png'),
           title: e.info.album,
-          url: `/album/${encodeURIComponent(e.info.albumartist)}/${encodeURIComponent(e.info.album)}`,
           subtitle: e.info.albumartist,
-          surl: `/artist/${encodeURIComponent(e.info.albumartist)}`
         }
       }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
       resolve(albums)
@@ -280,10 +272,8 @@ const playlists = {
       return {
         id: e.$loki,
         title: e.name,
-        url: `/playlist/${e.$loki}`,
         art: s ? '/art/' + s.info.art.cover : '',
         subtitle: e.tracks.length + ' track' + ((e.tracks.length === 1) ? '' : 's'),
-        surl: ''
       }
     })
     return playlists

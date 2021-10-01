@@ -29,7 +29,12 @@ export default {
   created() {
     this.$database.getArtist(this.$route.params.artist)
       .then(data => {
-        this.albums = data.albums
+        data.albums = data.albums.map(e => {
+          e.urlParams = { name: 'Album', params: { 'album': e.title, 'artist': this.$route.params.artist } }
+          e.surlParams = false
+          return e
+        })
+      this.albums = data.albums
       })
   },
   data () {

@@ -49,6 +49,7 @@
 export default {
   name: 'Playlist',
   created() {
+    console.log('test')
     this.refreshPlaylist()
   },
   data () {

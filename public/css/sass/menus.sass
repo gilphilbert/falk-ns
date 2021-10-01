@@ -12,6 +12,7 @@ aside.menu
 
   .feather
     stroke: var(--menu-text)
+    transition: stroke ease 0.3s
 
   .image.menu-brand
     width: 55px
@@ -37,28 +38,33 @@ aside.menu
     border-radius: 15px
     background: transparent
     transition: background 200ms linear
+    .detail
+      display: inline-block
+      margin-left: 14px
+      line-height: 1.5
+      font-size: 16px
+      &:before
+        content: ''
+        position: absolute
+        bottom: 2px
+        left: 0
+        height: 3px
+        width: 0
+        background-color: var(--primary)
+        transition: width ease 0.3s
     &:focus
       outline: none
     &:hover
       .detail
         position: relative
         &:before
-          content: ''
-          position: absolute
-          bottom: 2px
-          left: 0
-          height: 3px
           width: calc(100% + 10px)
-          background-color: var(--primary)
+          transition: width ease 0.3s
       text-decoration: none
     &.router-link-active
       .feather
         stroke: var(--primary)
-
-  .detail
-    display: inline-block
-    margin-left: 14px
-    line-height: 1.7
+        transition: stroke ease 0.3s
 
   @include media("≤tablet")
     background: var(--menu-background)

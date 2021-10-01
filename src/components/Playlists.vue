@@ -15,18 +15,22 @@ export default {
   created() {
     this.$database.getPlaylists()
       .then(data => {
+        data = data.map(e => {
+          e.urlParams = { name: 'Playlist', params: { 'id': e.id } }
+          e.surlParams = false
+          return e
+        })
         this.playlists = data
       })
     
     this.autoplaylists = [{
       id: -1,
       title: 'Most Played',
-      url: `/playlist/_mostplayed`,
+      urlParams: { name: 'Playlist', params: { id: '_mostplayed' } },
       art: '/img/placeholder.png',
       subtitle: '',
-      surl: ''
+      surlParams: false
     }]
-    
   },
   data () {
     return {
