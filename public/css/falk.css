@@ -2886,6 +2886,9 @@ input:checked + .slider:before {
   #content-container .container-fluid {
     max-width: 90vw;
     padding: 40px 30px 0 30px; }
+    @media (max-width: 768px) {
+      #content-container .container-fluid {
+        padding: 40px 10px 0 10px; } }
     #content-container .container-fluid.no-padding {
       padding: 0;
       max-width: 100vw; }
@@ -3373,10 +3376,10 @@ aside.menu {
       aside.menu.is-active {
         transition: 250ms;
         left: 0; }
-      aside.menu .detail {
-        display: none; }
       aside.menu .menu-list a {
         padding: 18px 0; }
+        aside.menu .menu-list a .detail {
+          display: none; }
         aside.menu .menu-list a .feather {
           margin: 0 auto; } }
 html.light aside.menu .image.menu-brand svg path {
