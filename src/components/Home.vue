@@ -19,10 +19,10 @@
       <div class="col-xs-10 col-xs-offset-1">
         <h1 id="home-title" class="has-text-centered has-no-overflow">{{ ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].title : 'Nothing playing') }}</h1>
         <p class="has-text-centered subtitle is-3 has-no-overflow hidden--to-desktop" v-if="this.playback.queue[this.playback.queuePos]">
-          <router-link id="home-album" :to="'/album/' + this.playback.queue[this.playback.queuePos].artist + '/' + this.playback.queue[this.playback.queuePos].album">{{ this.playback.queue[this.playback.queuePos].album }}</router-link>
+          <router-link id="home-album" :to="{ name: 'Album', params: { artist: this.playback.queue[this.playback.queuePos].artist, album: this.playback.queue[this.playback.queuePos].album } }">{{ this.playback.queue[this.playback.queuePos].album }}</router-link>
         </p>
         <p class="has-text-centered subtitle is-3 has-no-overflow" v-if="this.playback.queue[this.playback.queuePos]">
-          <router-link id="home-artist" :to="'/artist/' + this.playback.queue[this.playback.queuePos].artist">{{ this.playback.queue[this.playback.queuePos].artist }}</router-link>
+          <router-link id="home-artist" :to="{ name: 'Artist', params: { artist: this.playback.queue[this.playback.queuePos].artist } }">{{ this.playback.queue[this.playback.queuePos].artist }}</router-link>
         </p>
         <p class="has-text-centered" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].shortformat !== ''">
           <span id="home-quality" class="tag is-small">{{ this.playback.queue[this.playback.queuePos].shortformat }}</span>

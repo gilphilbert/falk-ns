@@ -4,7 +4,6 @@
 * Save queue on shutdown
 * Home screen
 * Queue
-* Native handling of right-click dropdowns
 * Share mounting
 
 ## Playback

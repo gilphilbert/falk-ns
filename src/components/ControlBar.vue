@@ -12,7 +12,7 @@
           <div class="col-xs">
             <p class="is-5">{{ ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].title : 'Not playing') }}</p>
             <p class="subtitle is-5" v-if="this.playback.queue[this.playback.queuePos]">
-              <router-link class="subtitle is-5" :to="'/artist/' + this.playback.queue[this.playback.queuePos].artist">{{ this.playback.queue[this.playback.queuePos].artist }}</router-link>
+              <router-link class="subtitle is-5" :to="{ name: 'Artist', params: { artist: this.playback.queue[this.playback.queuePos].artist } }">{{ this.playback.queue[this.playback.queuePos].artist }}</router-link>
             </p>
           </div>
         </div>
