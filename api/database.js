@@ -172,6 +172,7 @@ const library = {
       const info = data.map(s => {
         s.info.id = s.$loki
         s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
+        s.info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
         s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
         s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : '/img/placeholder.png')
         return s.info
@@ -183,6 +184,7 @@ const library = {
         year: info[0].year,
         genre: info[0].genre,
         shortformat: info[0].shortformat,
+        shortestformat: info[0].shortestformat,
         tracks: info
       })
     })
@@ -231,6 +233,7 @@ const library = {
           disc: i.disc,
           format: i.format,
           shortformat: (i.format.samplerate / 1000) + 'kHz ' + ((i.format.bits) ? i.format.bits + 'bit' : ''),
+          shortestformat: (i.info.format.samplerate / 1000) + '/' + ((i.info.format.bits) ? i.info.format.bits : ''),
           art: {
             cover: ((i.art.cover !== '') ? i.art.cover : '/img/placeholder.png')
           },
@@ -285,6 +288,7 @@ const playlists = {
         s = musicDB.get(e)
         s.info.id = s.$loki
         s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
+        s.info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
         s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
         s.info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : '/img/placeholder.png')
         return s.info

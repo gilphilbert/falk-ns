@@ -1,12 +1,14 @@
 <template>
   <div class="container-fluid max" v-touch:swipe.top="showQueue">
-    <div class="background-container hidden--to-desktop" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.background !== ''" >
+    <!--<div class="hidden--to-desktop home-background" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.background !== ''" >
       <figure class="image"><img :src=" '/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.background + '?size=full' : '')"></figure>
-    </div>
+    </div>-->
     <div class="row">
-      <div class="col-xs-10 col-md-3 has-margin-auto art">
-        <figure id="home-albumart" class="image is-1by1"><img :src=" '/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : 'placeholder.png') + '?size=600'" style="z-index: 1;"></figure>
-        <figure id="home-albumart" class="image is-1by1" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.disc !== ''" style="margin-top: -65%; background-color: transparent;"><img :class="{ 'rotate': this.playback.isPlaying }" :src="'/art/' + this.playback.queue[this.playback.queuePos].art.disc + '?size=600'"></figure>
+      <div class="col-xs-10 col-md-4 col-md-offset-4 has-margin-auto-mobile">
+        <div class="art">
+          <figure id="home-albumart" class="image is-1by1"><img :src=" '/art/' + ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : 'placeholder.png') + '?size=600'" style="z-index: 1;"></figure>
+          <figure id="home-albumart" class="image is-1by1" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.disc !== ''" style="margin-top: -65%; background-color: transparent;"><img :class="{ 'rotate': this.playback.isPlaying }" :src="'/art/' + this.playback.queue[this.playback.queuePos].art.disc + '?size=600'"></figure>
+        </div>
         <div id="mobile-toolbar" class="has-text-centered" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].album !== ''">
           <div>
             <svg class="feather"><use xlink:href="/img/feather-sprite.svg#heart"></use></svg>

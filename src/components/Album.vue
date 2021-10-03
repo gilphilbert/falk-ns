@@ -11,7 +11,7 @@
             <p class="subtitle is-1"><router-link :to="{ name: 'Artist', params: { artist: this.$route.params.artist } }">{{ this.$route.params.artist }}</router-link></p>
             <p class="is-4 detail">{{ this.year }}</p>
             <p class="is-4"><router-link :to="{ name: 'Genre', params: { genre: this.genre } }">{{ this.genre }}</router-link></p>
-            <p class="is-6 tag is-rounded detail">{{ shortformat }}</p>
+            <p class="is-6 tag is-rounded detail">{{ shortestformat }}</p>
           </div>
         </div>
       </div>
@@ -23,7 +23,7 @@
               <tbody>
                 <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track.id">
                   <td class="pointer" @click="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
-                  <td class="hidden--to-tablet"><span class="tag">{{ track.shortformat }}</span></td>
+                  <td class="hidden--to-tablet"><span class="tag">{{ track.shortestformat }}</span></td>
                   <td class="is-narrow">
                     <AlbumDropDown :index="index" :trackID="track.id" @addToPlaylist="addToPlaylist" />
                   </td>
@@ -55,6 +55,7 @@ export default {
         this.art = data.art
         this.genre = data.genre
         this.shortformat = data.shortformat
+        this.shortestformat = data.shortestformat
         this.title = data.title
         this.tracks = data.tracks.map(e => { e.dropdown = false; return e })
         this.year = data.year
@@ -65,6 +66,7 @@ export default {
       art: '',
       genre: ' ',
       shortformat: '',
+      shortestformat: '',
       title: '',
       tracks: [],
       year: '',

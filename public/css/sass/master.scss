@@ -13,15 +13,15 @@
 }
 
 :root {
-  --blue: #4D84C3;
-  --blue-light: #5f90c9;
+  --blue: #4A6FA5;
+  --blue-light: #C0D6DF;
   --white: #FFFFFF;
   --black: #000000; // not used
   --green: #4BBE87; // not used
   --orange: #FF6B35; // not used
-  --red: #A31621;
+  --red: #F87060;
   --red-light: #c01a27;
-  --yellow: #E3B505; // not used
+  --yellow: #EFCB68; // not used
 
   --primary: var(--blue);
   --primary-light: var(--blue-light);
@@ -42,9 +42,9 @@
   --gray-darker: #3f3f3f;
   --gray-darkest: #2A2A2A;
 
-  --background-color: var(--gray-darkest);
+  --background-color: var(--blue);
   --text-color: var(--white);
-  --subtitle-color: var(--gray-dark);
+  --subtitle-color: var(--blue-light);
 
   --menu-background: var(--gray-darker);
   --menu-text: var(--white);
@@ -55,7 +55,7 @@
 
   --input-background: var(--gray-quite-dark);
 
-  --control-bar: #383838; // a shade darker than the sidebar for differentiation
+  --control-bar: #405678; // a shade darker than the sidebar for differentiation
 
   --brand-logo: var(--primary);
   --brand-inner: var(--white);  

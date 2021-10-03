@@ -6,7 +6,12 @@
     </router-link>
   </figure>
   <ul class="menu-list">
-    <li><router-link :to="{ name: 'Home' }"><svg class="feather"><use href="/img/feather-sprite.svg#play"></use></svg><div class="detail">Playing</div></router-link></li>
+    <li>
+      <router-link :to="{ name: 'Home' }">
+        <svg class="feather"><use href="/img/feather-sprite.svg#play"></use></svg>
+        <div class="detail">Playing</div>
+      </router-link>
+    </li>
     <li><router-link :to="{ name: 'Playlists' }"><svg class="feather"><use href="/img/feather-sprite.svg#list"></use></svg><div class="detail">Playlists</div></router-link></li>
     <li><router-link :to="{ name: 'Artists' }"><svg class="feather"><use href="/img/feather-sprite.svg#mic"></use></svg><div class="detail">Artists</div></router-link></li>
     <li><router-link :to="{ name: 'Albums' }"><svg class="feather"><use href="/img/feather-sprite.svg#disc"></use></svg><div class="detail">Albums</div></router-link></li>
