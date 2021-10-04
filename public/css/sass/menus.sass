@@ -1,12 +1,16 @@
 //this contains the left hand menu
 aside.menu
-  height: 200px
+  height: 90px
   position: fixed
   top: 0
   left: 0
   width: 100vw
   color: var(--menu-text)
   z-index: 2
+  @include media(">tablet")
+    padding-left: 20px
+    display: flex
+    align-items: center
 
   .feather
     display: none
@@ -44,15 +48,16 @@ aside.menu
     .detail
       display: inline-block
       font-size: 16px
-      &:before
+      transition: color 0.2s ease
+      &::after
         content: ''
-        position: absolute
-        bottom: 2px
-        left: 0
+        display: block
+        width: 100%
         height: 3px
-        width: 0
-        background-color: var(--primary)
-        transition: width ease 0.3s
+        top: 2px
+        left: 0
+        background: var(--primary)
+        transition: background 0.2s ease
     &:focus
       outline: none
     &:hover
@@ -70,12 +75,12 @@ aside.menu
       .detail
         color: var(--white)
         &::after
-          content: ''
-          display: block
-          width: 100%
-          height: 3px
-          top: 2px
-          left: 0
+          //content: ''
+          //display: block
+          //width: 100%
+          //height: 3px
+          //top: 2px
+          //left: 0
           background: var(--yellow)
 
   @include media("≤tablet")

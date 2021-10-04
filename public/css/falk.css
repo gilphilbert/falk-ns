@@ -3321,13 +3321,18 @@ table.songs td {
     transition: bottom 250ms ease-in-out; } }
 
 aside.menu {
-  height: 200px;
+  height: 90px;
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   color: var(--menu-text);
   z-index: 2; }
+  @media (min-width: 769px) {
+    aside.menu {
+      padding-left: 20px;
+      display: flex;
+      align-items: center; } }
   aside.menu .feather {
     display: none;
     stroke: var(--menu-text);
@@ -3359,16 +3364,17 @@ aside.menu {
     transition: background 200ms linear; }
     aside.menu .menu-list a .detail {
       display: inline-block;
-      font-size: 16px; }
-      aside.menu .menu-list a .detail:before {
+      font-size: 16px;
+      transition: color 0.2s ease; }
+      aside.menu .menu-list a .detail::after {
         content: '';
-        position: absolute;
-        bottom: 2px;
-        left: 0;
+        display: block;
+        width: 100%;
         height: 3px;
-        width: 0;
-        background-color: var(--primary);
-        transition: width ease 0.3s; }
+        top: 2px;
+        left: 0;
+        background: var(--primary);
+        transition: background 0.2s ease; }
     aside.menu .menu-list a:focus {
       outline: none; }
     aside.menu .menu-list a:hover {
@@ -3381,12 +3387,6 @@ aside.menu {
     aside.menu .menu-list a.router-link-active .detail {
       color: var(--white); }
       aside.menu .menu-list a.router-link-active .detail::after {
-        content: '';
-        display: block;
-        width: 100%;
-        height: 3px;
-        top: 2px;
-        left: 0;
         background: var(--yellow); }
   @media (max-width: 768px) {
     aside.menu {
