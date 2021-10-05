@@ -77,8 +77,18 @@ const tracks = {
       .remove()
   },
   trackByPath: (path) => {
-    const track = musicDB.findOne({ path: path })
-    return track
+    let tr = JSON.parse(JSON.stringify(musicDB.findOne({ path: path })))
+    if ('info' in tr && 'art' in tr.info) {
+      if ('cover' in tr.info.art && tr.info.art.cover !== '')
+        tr.info.art.cover = '/art/' + tr.info.art.cover
+      if ('artist' in tr.info.art && tr.info.art.artist !== '')
+        tr.info.art.artist = '/art/' + tr.info.art.artist
+      if ('background' in tr.info.art && tr.info.art.background !== '')
+        tr.info.art.background = '/art/' + tr.info.art.background
+      if ('disc' in tr.info.art && tr.info.art.disc !== '')
+        tr.info.art.disc = '/art/' + tr.info.art.disc
+    }
+    return tr
   },
   getAll: (offset = 0, limit = 0) => {
     const allSongs = musicDB.chain()
@@ -170,12 +180,13 @@ const library = {
     return new Promise((resolve, reject) => {
       const data = musicDB.chain().find({ 'info.albumartist': artist, 'info.album': album }).compoundsort(['info.disc', 'info.track']).data()
       const info = data.map(s => {
-        s.info.id = s.$loki
-        s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
-        s.info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
-        s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
-        s.info.art.cover = ((s.info.art.cover !== '') ? '/art/' + s.info.art.cover : '')
-        return s.info
+        let info = JSON.parse(JSON.stringify(s.info))
+        info.id = s.$loki
+        info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
+        info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
+        info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
+        info.art.cover = ((s.info.art.cover !== '') ? '/art/' + s.info.art.cover : '')
+        return info
       })
       resolve({
         title: info[0].album,
@@ -286,12 +297,13 @@ const playlists = {
     if (pl) {
       let tracks = pl.tracks.map(e => {
         s = musicDB.get(e)
-        s.info.id = s.$loki
-        s.info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
-        s.info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
-        s.info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
-        s.info.art.cover = ((s.info.art.cover !== '') ? '/art/' + s.info.art.cover : '')
-        return s.info
+        let info = JSON.parse(JSON.stringify(s.info))
+        info.id = s.$loki
+        info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
+        info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
+        info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
+        info.art.cover = ((s.info.art.cover !== '') ? '/art/' + s.info.art.cover : '')
+        return info
       })
       return {
         id: pl.$loki,
