@@ -15,6 +15,7 @@
 :root {
   --blue: #4A6FA5;
   --blue-light: #C0D6DF;
+  --blue-dark: #465b7a; //#405678;
   --white: #FFFFFF;
   --black: #000000; // not used
   --green: #4BBE87; // not used
@@ -42,7 +43,7 @@
   --gray-darker: #3f3f3f;
   --gray-darkest: #2A2A2A;
 
-  --background-color: var(--blue);
+  --background-color: var(--blue-dark);
   --text-color: var(--white);
   --subtitle-color: var(--blue-light);
 
@@ -55,7 +56,7 @@
 
   --input-background: var(--gray-quite-dark);
 
-  --control-bar: #405678; // a shade darker than the sidebar for differentiation
+  --control-bar: var(--blue); // a shade darker than the sidebar for differentiation
 
   --brand-logo: var(--primary);
   --brand-inner: var(--white);  

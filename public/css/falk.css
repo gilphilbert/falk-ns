@@ -3,6 +3,7 @@
 :root {
   --blue: #4A6FA5;
   --blue-light: #C0D6DF;
+  --blue-dark: #465b7a;
   --white: #FFFFFF;
   --black: #000000;
   --green: #4BBE87;
@@ -26,7 +27,7 @@
   --gray-quite-dark: #6f6f6f;
   --gray-darker: #3f3f3f;
   --gray-darkest: #2A2A2A;
-  --background-color: var(--blue);
+  --background-color: var(--blue-dark);
   --text-color: var(--white);
   --subtitle-color: var(--blue-light);
   --menu-background: var(--gray-darker);
@@ -34,7 +35,7 @@
   --icon-background: var(--gray-darkest);
   --highlight-background: var(--gray-darker);
   --input-background: var(--gray-quite-dark);
-  --control-bar: #405678;
+  --control-bar: var(--blue);
   --brand-logo: var(--primary);
   --brand-inner: var(--white); }
 
@@ -3373,7 +3374,7 @@ aside.menu {
         height: 3px;
         top: 2px;
         left: 0;
-        background: var(--primary);
+        background: var(--background-color);
         transition: background 0.2s ease; }
     aside.menu .menu-list a:focus {
       outline: none; }
