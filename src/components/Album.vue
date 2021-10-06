@@ -7,7 +7,7 @@
             <figure class="image"><img :src="this.art + '?size=800'"></figure>
           </div>
           <div class="col-md-8 col-md-offset-2 col-xs-8">
-            <h1 class="album-title">{{ this.title }}</h1>
+            <h2 class="album-title">{{ this.title }}</h2>
             <p class="subtitle is-1"><router-link :to="{ name: 'Artist', params: { artist: this.$route.params.artist } }">{{ this.$route.params.artist }}</router-link></p>
             <p class="is-4 detail">{{ this.year }}</p>
             <p class="is-4"><router-link :to="{ name: 'Genre', params: { genre: this.genre } }">{{ this.genre }}</router-link></p>
@@ -18,7 +18,7 @@
       <div class="col-xs-12 col-md-7">
         <div class="col-xs-12 col-md-11">
           <div class="row album-detail">
-            <h1 class="hidden--to-tablet">Album Tracks</h1>
+            <h2 class="hidden--to-tablet">Album Tracks</h2>
             <table class="table songs">
               <tbody>
                 <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track.id">
