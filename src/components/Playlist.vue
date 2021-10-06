@@ -71,7 +71,6 @@ export default {
 
       this.$database.getPlaylist(id)
         .then(data => {
-          console.log(data)
           this.art = data.art
           this.title = data.title
           this.tracks = data.tracks.map(e => { e.dropdown = false; return e })

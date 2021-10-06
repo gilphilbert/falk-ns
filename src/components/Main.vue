@@ -42,7 +42,6 @@ export default {
 
     events.addEventListener('queue', evt => {
       const data = JSON.parse(evt.data)
-      console.log(data)
 
       this.playback.queue = data.queue
 
