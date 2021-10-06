@@ -308,7 +308,7 @@ const playlists = {
       return {
         id: pl.$loki,
         title: pl.name,
-        art: tracks.length > 0 ? '/art/' + tracks[0].art.cover : '',
+        art: tracks.length > 0 ? tracks[0].art.cover : '',
         playtime: tracks.map(e => e.duration).reduce((c, n) => c + n),
         tracks: tracks
       }
