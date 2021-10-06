@@ -4,13 +4,12 @@
       <h1>Play Queue</h1>
     </div>
     <div id="queue-items">
-      <table>
-        <tr v-for="(item, index) in playback.queue" :key="index" :class="{ 'is-playing': index === playback.queuePos }">
-          <td @click="$player.changePos(index)"><figure class="image is-40x40"><img v-bind:src="item.art.cover" load="lazy"></figure></td>
-          <td @click="$player.changePos(index)"><p class="is-5">{{ item.title }}</p><p class="subtitle is-5">{{ item.artist + ' - ' + (Math.floor(item.duration / 60) + ':' + ('0' + (item.duration % 60)).slice(-2, 3)) }}</p></td>
-          <td @click="$player.remove(index)"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
-        </tr>
-      </table>
+      <div class="row middle-xs" v-for="(item, index) in playback.queue" :key="index" :class="{ 'is-playing': index === playback.queuePos }" style="position: relative; overflow: hidden">
+        <div class="progress" v-if="index == playback.queuePos"></div>
+        <div class="col-xs no-grow" @click="$player.changePos(index)"><figure class="image is-40x40"><img v-bind:src="item.art.cover" load="lazy"></figure></div>
+        <div class="col-xs" @click="$player.changePos(index)"><p class="is-5">{{ item.title }}</p><p class="subtitle is-5">{{ item.artist + ' - ' + (Math.floor(item.duration / 60) + ':' + ('0' + (item.duration % 60)).slice(-2, 3)) }}</p></div>
+        <div class="col-xs no-grow" @click="$player.remove(index)"><p><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></p></div>
+      </div>
     </div>
   </div>
 </template>

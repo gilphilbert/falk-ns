@@ -11,7 +11,9 @@
   --red: #F87060;
   --red-light: #c01a27;
   --yellow: #EFCB68;
+  --yellow-light: #e7dfca;
   --yellow-dark: #AC9969;
+  --yellow-darkest: #9b895d;
   --primary: var(--blue);
   --primary-light: var(--blue-light);
   --danger: var(--red);
@@ -3044,69 +3046,11 @@ table.songs td {
   transition: right 0.3s ease-in-out;
   display: block;
   padding: 0; }
-  #queue-list.is-active {
-    right: 0; }
-  #queue-list .is-playing td {
-    background-color: var(--primary);
-    padding: 12px 0; }
-    #queue-list .is-playing td .subtitle {
-      color: var(--text-color); }
-    #queue-list .is-playing td:first-child {
-      border-top-left-radius: 15px;
-      border-bottom-left-radius: 15px; }
-    #queue-list .is-playing td:last-child {
-      padding-right: 15px;
-      border-top-right-radius: 15px;
-      border-bottom-right-radius: 15px; }
-  #queue-list .is-playing figure {
-    position: relative; }
-    #queue-list .is-playing figure:before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.5); }
-    #queue-list .is-playing figure:after {
-      content: '';
-      position: absolute;
-      top: 14px;
-      left: 14px;
-      width: 0;
-      height: 0;
-      border-top: 9px solid transparent;
-      border-bottom: 9px solid transparent;
-      border-left: 12px solid var(--gray-lighter); }
   #queue-list h1 {
     margin: 0;
     padding: 0; }
-  #queue-list a {
-    color: var(--gray-lighter);
-    text-decoration: underline; }
-  #queue-list #queue-header {
-    padding: 25px 20px 25px 20px; }
-  #queue-list #queue-items {
-    padding: 0 20px 0 20px;
-    height: calc(100% - 50px - 1.8rem - 100px);
-    overflow-y: scroll; }
-  #queue-list table {
-    border-collapse: separate;
-    border-spacing: 0 8px; }
-  #queue-list td {
-    cursor: pointer;
-    vertical-align: middle;
-    padding: 8px 0;
-    margin: 4px 0; }
-    #queue-list td:first-child {
-      width: 44px;
-      padding-left: 15px;
-      padding-right: 8px; }
-      @media (max-width: 768px) {
-        #queue-list td:first-child {
-          width: 40px; } }
-    #queue-list td:last-child {
-      width: 20px; }
+  #queue-list.is-active {
+    right: 0; }
   @media (max-width: 768px) {
     #queue-list {
       top: 100vh;
@@ -3114,10 +3058,59 @@ table.songs td {
       width: 100vw;
       transition: top 250ms ease 0s;
       z-index: 1; }
-      #queue-list #queue-items {
-        height: calc(100% - 50px - 1.8rem - 78px); }
       #queue-list.is-active {
-        top: 0; } }
+        top: 0; }
+      #queue-list #queue-items {
+        height: calc(100% - 50px - 1.8rem - 78px); } }
+  #queue-list #queue-header {
+    padding: 25px 20px 25px 20px; }
+  #queue-list #queue-items {
+    padding: 0 20px 0 20px;
+    height: calc(100% - 50px - 1.8rem - 100px);
+    overflow-y: scroll; }
+    #queue-list #queue-items .subtitle {
+      color: var(--yellow-light);
+      margin-bottom: 0; }
+    #queue-list #queue-items .row {
+      cursor: pointer;
+      vertical-align: middle;
+      padding: 8px 0;
+      margin: 4px 0;
+      border-radius: 15px; }
+      #queue-list #queue-items .row div {
+        z-index: 2; }
+        #queue-list #queue-items .row div.progress {
+          z-index: 1;
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 25%;
+          background: rgba(0, 0, 0, 0.1); }
+      #queue-list #queue-items .row.is-playing {
+        background-color: var(--yellow-darkest);
+        padding: 12px 0; }
+        #queue-list #queue-items .row.is-playing figure {
+          position: relative; }
+          #queue-list #queue-items .row.is-playing figure:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5); }
+          #queue-list #queue-items .row.is-playing figure:after {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            width: 0;
+            height: 0;
+            border-top: 9px solid transparent;
+            border-bottom: 9px solid transparent;
+            border-left: 12px solid var(--gray-lighter); }
+
 #setting-page .label {
   color: inherit; }
 
