@@ -21,12 +21,9 @@ function init (callBack = null) {
       }
       musicDB.on('insert', (doc) => {
         doc.id = doc.$loki
-        console.log(doc)
         const artist = artistDB.findOne({ name: doc.info.albumartist })
-        console.log(artist)
         if (!artist) {
           artistDB.insert({ name: doc.info.albumartist, albums: [{ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art }] })
-          console.log(artistDB.find())
         } else {
           let found = false
           artist.albums.forEach(album => {
@@ -178,20 +175,23 @@ const library = {
       resolve(artists)
     })
   },
-  artist: function (artist) {
+  artist: function (artistName) {
     return new Promise((resolve, reject) => {
-      const artistArt = musicDB.chain().find({ 'info.albumartist': artist }).compoundsort([['info.artist.art', true], 'info.albumartist']).limit(1).data()[0].info.art.artist
-      const songs = musicDB.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
-      const albums = songs.map(e => {
-        return {
-          art: ((e.info.art.cover !== '') ? e.info.art.cover : ''),
-          artistart: ((artistArt !== '') ? artistArt : ''),
-          background: ((e.info.art.background !== '') ? e.info.art.background : ''),
-          title: e.info.album,
-          subtitle: e.info.year,
-        }
-      }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
-      resolve({ albums: albums })
+      //const artistArt = musicDB.chain().find({ 'info.albumartist': artist }).compoundsort([['info.artist.art', true], 'info.albumartist']).limit(1).data()[0].info.art.artist
+      //const songs = musicDB.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
+      //const albums = songs.map(e => {
+      //  return {
+      //    art: ((e.info.art.cover !== '') ? e.info.art.cover : ''),
+      //    artistart: ((artistArt !== '') ? artistArt : ''),
+      //    background: ((e.info.art.background !== '') ? e.info.art.background : ''),
+      //    title: e.info.album,
+      //    subtitle: e.info.year,
+      //  }
+      //}).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
+      //resolve({ albums: albums })
+      console.log(artistName)
+      const artist = artistDB.findOne({ name: artistName })
+      resolve(artist)
     })
   },
   albums: function () {

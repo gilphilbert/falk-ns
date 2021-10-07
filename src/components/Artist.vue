@@ -30,9 +30,15 @@ export default {
     this.$database.getArtist(this.$route.params.artist)
       .then(data => {
         data.albums = data.albums.map(e => {
-          e.urlParams = { name: 'Album', params: { 'album': e.title, 'artist': this.$route.params.artist } }
-          e.surlParams = false
-          return e
+          return {
+            title: e.name,
+            urlParams: { name: 'Album', params: { 'album': e.name, 'artist': data.name } },
+            subtitle: e.year,
+            surlParams: false,
+            art: e.art.cover,
+            background: e.art.background,
+            artistart: e.art.artist
+          }
         })
       this.albums = data.albums
       })
