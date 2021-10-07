@@ -50,19 +50,19 @@ async function processFile(ffname) {
           switch (pic.type) {
             case 'Cover (front)':
               fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-cover.' + ext
-              song.art.cover = fn
+              song.art.cover = '/art/' + fn
               break
             case 'Media (e.g. label side of CD)':
               fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-disc.' + ext
-              song.art.disc = fn
+              song.art.disc = '/art/' + fn
               break
             case 'Artist/performer':
               fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '.' + ext
-              song.art.artist = fn
+              song.art.artist = '/art/' + fn
               break
             case 'Illustration':
               fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '-bg.' + ext
-              song.art.background = fn
+              song.art.background = '/art/' + fn
               break
           }
           fn = path.resolve(__dirname, '../art/' + fn)

@@ -6,6 +6,7 @@ const e = require('express')
 let musicDB = null
 let usersDB = null
 let locDB = null
+let artistDB = null
 
 let db = false
 
@@ -20,6 +21,23 @@ function init (callBack = null) {
       }
       musicDB.on('insert', (doc) => {
         doc.id = doc.$loki
+        console.log(doc)
+        const artist = artistDB.findOne({ name: doc.info.albumartist })
+        console.log(artist)
+        if (!artist) {
+          artistDB.insert({ name: doc.info.albumartist, albums: [{ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art }] })
+          console.log(artistDB.find())
+        } else {
+          let found = false
+          artist.albums.forEach(album => {
+            if (album.name === doc.info.album)
+              found = true
+          })
+          if (!found) {
+            artist.albums.push({ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art })
+            artistDB.update(artist)
+          }
+        }
       })
       usersDB = db.getCollection('users')
       if (usersDB === null) {
@@ -34,14 +52,19 @@ function init (callBack = null) {
         plDB = db.addCollection('playlists', { unique: 'name' })
       }
 
+      artistDB = db.getCollection('artists')
+      if (artistDB === null) {
+        artistDB = db.addCollection('artists', { unique: 'name' })
+      }
+
       if (callBack != null) {
         callBack()
       }
 
+
       //users.welcome('admin', 'password')
       //locations.add(1, '/home/phill/Music', [1])
 
-      // console.log(tracks.getPath(1, 13))
       // users.add(1, { user: 'phill', pass: 'password', admin: true })
       // locations.setUsers(1, '/home/phill/Music', [1, 2])
       // locations.remove(1, '/home/phill/Music')
@@ -80,13 +103,13 @@ const tracks = {
     let tr = JSON.parse(JSON.stringify(musicDB.findOne({ path: path })))
     if ('info' in tr && 'art' in tr.info) {
       if ('cover' in tr.info.art && tr.info.art.cover !== '')
-        tr.info.art.cover = '/art/' + tr.info.art.cover
+        tr.info.art.cover = tr.info.art.cover
       if ('artist' in tr.info.art && tr.info.art.artist !== '')
-        tr.info.art.artist = '/art/' + tr.info.art.artist
+        tr.info.art.artist = tr.info.art.artist
       if ('background' in tr.info.art && tr.info.art.background !== '')
-        tr.info.art.background = '/art/' + tr.info.art.background
+        tr.info.art.background = tr.info.art.background
       if ('disc' in tr.info.art && tr.info.art.disc !== '')
-        tr.info.art.disc = '/art/' + tr.info.art.disc
+        tr.info.art.disc = tr.info.art.disc
     }
     return tr
   },
@@ -140,12 +163,13 @@ const library = {
   },
   artists: function () {
     return new Promise((resolve, reject) => {
-      const artists = musicDB.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
-      resolve(artists
-        //.filter((tag, index, array) => array.findIndex(t => t.info.albumartist === tag.info.albumartist) === index)
-        .map(a => { return { title: a.info.albumartist, art: ((a.info.art.artist !== '') ? '/art/' + a.info.art.artist : ''), subtitle: '' } })
-        .filter((tag, index, array) => array.findIndex(t => t.title === tag.title) === index)
-      )
+      //const artists = musicDB.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
+      //resolve(artists
+      //  .map(a => { return { title: a.info.albumartist, art: ((a.info.art.artist !== '') ? a.info.art.artist : ''), subtitle: '' } })
+      //  .filter((tag, index, array) => array.findIndex(t => t.title === tag.title) === index)
+      //)
+      const artists = artistDB.find()
+      resolve(artists)
     })
   },
   artist: function (artist) {
@@ -154,9 +178,9 @@ const library = {
       const songs = musicDB.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
       const albums = songs.map(e => {
         return {
-          art: ((e.info.art.cover !== '') ? '/art/' + e.info.art.cover : ''),
-          artistart: ((artistArt !== '') ? '/art/' + artistArt : ''),
-          background: ((e.info.art.background !== '') ? '/art/' + e.info.art.background : ''),
+          art: ((e.info.art.cover !== '') ? e.info.art.cover : ''),
+          artistart: ((artistArt !== '') ? artistArt : ''),
+          background: ((e.info.art.background !== '') ? e.info.art.background : ''),
           title: e.info.album,
           subtitle: e.info.year,
         }
@@ -169,7 +193,7 @@ const library = {
       const songs = musicDB.chain().find().simplesort('info.album').data()
       const albums = songs.map(e => {
         return {
-          art: ((e.info.art.cover !== '') ? '/art/' + e.info.art.cover : ''),
+          art: ((e.info.art.cover !== '') ? e.info.art.cover : ''),
           title: e.info.album,
           subtitle: e.info.albumartist,
         }
@@ -186,7 +210,7 @@ const library = {
         info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
         info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
         info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
-        info.art.cover = ((s.info.art.cover !== '') ? '/art/' + s.info.art.cover : '')
+        info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : '')
         return info
       })
       resolve({
@@ -206,7 +230,7 @@ const library = {
       const songs = musicDB.chain().find().simplesort('info.genre').data()
       const genres = songs.map(e => {
         return {
-          art: ((e.info.art.cover) ? '/art/' + e.info.art.cover : ''),
+          art: ((e.info.art.cover) ? e.info.art.cover : ''),
           title: e.info.genre,
           subtitle: '',
         }
@@ -219,7 +243,7 @@ const library = {
       const songs = musicDB.chain().find({ 'info.genre': genre }).simplesort('info.album').data()
       const albums = songs.map(e => {
         return {
-          art: ((e.info.art.cover) ? '/art/' + e.info.art.cover : ''),
+          art: ((e.info.art.cover) ? e.info.art.cover : ''),
           title: e.info.album,
           subtitle: e.info.albumartist,
         }
@@ -247,7 +271,7 @@ const library = {
           shortformat: (i.format.samplerate / 1000) + 'kHz ' + ((i.format.bits) ? i.format.bits + 'bit' : ''),
           shortestformat: (i.info.format.samplerate / 1000) + '/' + ((i.info.format.bits) ? i.info.format.bits : ''),
           art: {
-            cover: ((i.art.cover !== '') ? '/art/' + i.art.cover : '')
+            cover: ((i.art.cover !== '') ? i.art.cover : '')
           },
           count: s.meta.playCount
         }
@@ -256,7 +280,7 @@ const library = {
       resolve({
         id: 'mostplayed',
         title: 'Most Played',
-        art: tracks.length > 0 ? '/art/' + tracks[0].art.cover : '',
+        art: tracks.length > 0 ? tracks[0].art.cover : '',
         playtime: tracks.reduce((p, c) => p.duration + c.duration),
         tracks: tracks
       })
@@ -287,7 +311,7 @@ const playlists = {
       return {
         id: e.$loki,
         title: e.name,
-        art: s ? '/art/' + s.info.art.cover : '',
+        art: s ? s.info.art.cover : '',
         subtitle: e.tracks.length + ' track' + ((e.tracks.length === 1) ? '' : 's'),
       }
     })
@@ -303,7 +327,7 @@ const playlists = {
         info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
         info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
         info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
-        info.art.cover = ((s.info.art.cover !== '') ? '/art/' + s.info.art.cover : '')
+        info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : '')
         return info
       })
       return {
