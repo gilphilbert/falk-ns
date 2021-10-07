@@ -106,6 +106,10 @@ async function walkFunc (err, pathname, dirent) {
     return Promise.resolve()
   }
 
+  // check here to see if file exists in database
+  if (database.tracks.trackExists(path.dirname(pathname) + '/' + dirent.name)) {
+    return Promise.resolve()
+  }
   await processFile(path.dirname(pathname) + '/' + dirent.name)
 }
 

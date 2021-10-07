@@ -113,6 +113,12 @@ const tracks = {
     }
     return tr
   },
+  trackExists: (path) => {
+    if (!musicDB.findOne({ path: path })) {
+      return false
+    }
+    return true
+  },
   getAll: (offset = 0, limit = 0) => {
     const allSongs = musicDB.chain()
       .find()
