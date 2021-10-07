@@ -171,7 +171,7 @@ const library = {
       //  .map(a => { return { title: a.info.albumartist, art: ((a.info.art.artist !== '') ? a.info.art.artist : ''), subtitle: '' } })
       //  .filter((tag, index, array) => array.findIndex(t => t.title === tag.title) === index)
       //)
-      const artists = artistDB.find()
+      const artists = artistDB.chain().find().simplesort('name').data()
       resolve(artists)
     })
   },
@@ -189,11 +189,16 @@ const library = {
       //  }
       //}).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
       //resolve({ albums: albums })
-      console.log(artistName)
-      const artist = artistDB.chain().findOne({ name: artistName }).simplesort('name').data()
-      // artists need to be sorted!
-      resolve(artist)
-    })
+      let artist = artistDB.chain().find({ name: artistName }).data()
+      if (artist.length > 0) {
+        artist = artist[0]
+        artist.albums.sort((a, b) => {
+          return a.year - b.year;
+        })
+        resolve(artist)
+      }
+      resolve(null)
+   })
   },
   albums: function () {
     return new Promise((resolve, reject) => {
