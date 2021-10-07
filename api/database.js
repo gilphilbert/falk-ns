@@ -190,7 +190,8 @@ const library = {
       //}).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
       //resolve({ albums: albums })
       console.log(artistName)
-      const artist = artistDB.findOne({ name: artistName })
+      const artist = artistDB.chain().findOne({ name: artistName }).simplesort('name').data()
+      // artists need to be sorted!
       resolve(artist)
     })
   },
