@@ -142,8 +142,9 @@ const library = {
     return new Promise((resolve, reject) => {
       const artists = musicDB.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
       resolve(artists
-        .filter((tag, index, array) => array.findIndex(t => t.info.albumartist === tag.info.albumartist) === index)
+        //.filter((tag, index, array) => array.findIndex(t => t.info.albumartist === tag.info.albumartist) === index)
         .map(a => { return { title: a.info.albumartist, art: ((a.info.art.artist !== '') ? '/art/' + a.info.art.artist : ''), subtitle: '' } })
+        .filter((tag, index, array) => array.findIndex(t => t.title === tag.title) === index)
       )
     })
   },
