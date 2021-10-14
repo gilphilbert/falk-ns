@@ -1,12 +1,12 @@
 <template>
   <div id="control-bar" class="is-active" data-bind="swipeup: showQueue">
-    <div class="progress-topper" :class="((online) ? '' : 'offline')" v-if="this.playback.queue[this.playback.queuePos]" :style="{ width: (playback.elapsed / (playback.queue[playback.queuePos].duration * 1000) * $innerWidth) + 'px' }"></div>
+    <div class="progress-topper" v-if="this.playback.queue[this.playback.queuePos]" :style="{ width: (playback.elapsed / (playback.queue[playback.queuePos].duration * 1000) * $innerWidth) + 'px' }"></div>
     <div class="row is-marginless">
       <div class="col-xs col-md">
         <div class="row now-playing">
           <div class="col-xs is-narrow">
             <figure class="image is-70x70">
-              <img v-bind:src="((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : 'placeholder.png')">
+              <img v-bind:src="((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : '/img/placeholder.png')">
             </figure>
           </div>
           <div class="col-xs">
@@ -43,7 +43,7 @@
 <script>
 export default {
   name: 'ControlBar',
-  props: [ 'isActive', 'playback', 'online' ],
+  props: [ 'isActive', 'playback' ],
   methods: {
     toggleQueue () {
       this.$emit('toggleQueue')
