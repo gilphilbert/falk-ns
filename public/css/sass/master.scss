@@ -18,7 +18,9 @@
   --blue-dark: #465b7a; //#405678;
   --white: #FFFFFF;
   --black: #000000; // not used
+  --green-dark: #53a08a;
   --green: #75BBA7; // not used
+  --green-lightest: #dcefea;
   --orange: #FF6B35; // not used
   --red: #F87060;
   --red-light: #c01a27;
@@ -82,6 +84,8 @@ html.light {
 
   --brand-logo: var(--white);
   --brand-inner: var(--primary);
+
+  --queue-background: var(--green);
 }
 
 $family-sans-serif: 'Lexend Deca', sans-serif;

@@ -22,7 +22,7 @@
             <table class="table songs">
               <tbody>
                 <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track.id">
-                  <td class="pointer" @click="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
+                  <td class="pointer" @cborder-rilick="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortestformat }}</span></td>
                   <td class="is-narrow">
                     <AlbumDropDown :index="index" :trackID="track.id" @addToPlaylist="addToPlaylist" />
@@ -52,8 +52,9 @@ export default {
   created() {
     this.$database.getAlbum(this.$route.params.artist, this.$route.params.album)
       .then(data => {
-        this.art = data.art
-        this.genre = data.genre
+        console.log(data)
+        this.art = data.art || '/img/placeholder.png'
+        this.genre = data.genre || 'Unknown'
         this.shortformat = data.shortformat
         this.shortestformat = data.shortestformat
         this.title = data.title

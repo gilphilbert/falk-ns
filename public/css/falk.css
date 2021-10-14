@@ -6,7 +6,9 @@
   --blue-dark: #465b7a;
   --white: #FFFFFF;
   --black: #000000;
+  --green-dark: #53a08a;
   --green: #75BBA7;
+  --green-lightest: #dcefea;
   --orange: #FF6B35;
   --red: #F87060;
   --red-light: #c01a27;
@@ -53,7 +55,8 @@ html.light {
   --input-background: var(--gray-mid);
   --control-bar: var(--gray-lighter);
   --brand-logo: var(--white);
-  --brand-inner: var(--primary); }
+  --brand-inner: var(--primary);
+  --queue-background: var(--green); }
 
 * {
   box-sizing: border-box; }
@@ -2657,9 +2660,10 @@ fieldset {
 .tag {
   font-weight: 600;
   border-radius: 1000px;
-  color: var(--yellow);
+  color: var(--background-color);
   display: inline-block;
-  padding: 7px 10px; }
+  padding: 7px 10px;
+  background-color: var(--green); }
   .tag.is-grey {
     background-color: var(--gray); }
   .tag.is-danger {
@@ -2996,8 +3000,6 @@ table.songs td {
   position: relative;
   overflow: hidden;
   padding-bottom: 100%;
-  border-right: 3px solid var(--yellow);
-  border-bottom: 3px solid var(--yellow);
   object-fit: cover;
   object-position: center; }
   .art figure img {
@@ -3038,13 +3040,14 @@ table.songs td {
   display: none; }
 
 #queue-list {
-  background: var(--yellow-dark);
+  background: var(--green);
   color: var(--text-color);
   position: fixed;
   top: 0;
   height: 100vh;
   width: 450px;
   right: -450px;
+  z-index: 2;
   transition: right 0.3s ease-in-out;
   display: block;
   padding: 0; }
@@ -3071,7 +3074,7 @@ table.songs td {
     height: calc(100% - 50px - 1.8rem - 100px);
     overflow-y: scroll; }
     #queue-list #queue-items .subtitle {
-      color: var(--yellow-light);
+      color: var(--green-lightest);
       margin-bottom: 0; }
     #queue-list #queue-items .row {
       cursor: pointer;
@@ -3090,7 +3093,7 @@ table.songs td {
           width: 25%;
           background: rgba(0, 0, 0, 0.1); }
       #queue-list #queue-items .row.is-playing {
-        background-color: var(--yellow-darkest);
+        background-color: var(--green-dark);
         padding: 12px 0; }
         #queue-list #queue-items .row.is-playing figure {
           position: relative; }
@@ -3225,11 +3228,10 @@ table.songs td {
     height: 48px;
     min-width: 48px;
     max-width: 48px;
-    background: var(--white);
+    background: var(--yellow);
     border-radius: 1000px;
     display: inline-flex;
-    align-items: center;
-    border: 4px solid rgba(255, 255, 255, 0.2); }
+    align-items: center; }
     @media (max-width: 768px) {
       #control-bar .play-button {
         margin: 0 7px; } }
