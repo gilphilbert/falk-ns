@@ -14,7 +14,6 @@ export default {
   created() {
     this.$database.getArtists()
       .then(data => {
-        console.log(data)
         data = data.map(e => {
           return {
             urlParams: { name: 'Artist', params: { 'artist': e.name } },
