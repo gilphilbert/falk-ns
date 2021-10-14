@@ -7,7 +7,7 @@
     <div class="row center">
       <div class="col-md-1 hidden--to-tablet">
         <figure class="image is-rounded has-no-overflow">
-          <img v-bind:src="((this.albums.length) ? this.albums[0].artistart : '')" />
+          <img v-bind:src="((this.albums.length && this.albums[0].artistart) ? this.albums[0].artistart : '/img/placeholder.png')" />
         </figure>
       </div>
       <div class="col-xs-12 col-md-6">
