@@ -16,6 +16,7 @@
   --blue: #4A6FA5;
   --blue-light: #C0D6DF;
   --blue-dark: #465b7a; //#405678;
+  --blue-darkest: #3f4754; //#405678;
   --white: #FFFFFF;
   --black: #000000; // not used
   --green-dark: #53a08a;
@@ -36,6 +37,8 @@
   --success: var(--green); //not used
   --warning: var(--yellow); //not used
 
+  --lighten-heavy: rgba(255,255,255,0.8);
+  --lighten: rgba(255,255,255,0.1);
   --darken: rgba(0,0,0,0.1);
 
   --gray-lighter: #F7F7F7;

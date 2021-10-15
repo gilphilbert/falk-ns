@@ -4,72 +4,102 @@ const { resolve } = require('path')
 const e = require('express')
 
 let musicDB = null
-let usersDB = null
 let locDB = null
 let artistDB = null
+let albumDB = null
+let genreDB = null
 
 let db = false
 
-function init (callBack = null) {
-  db = new Loki('data/falkv1.db', {
-    autoload: true,
-    autosave: true,
-    autoloadCallback: () => {
-      musicDB = db.getCollection('music')
-      if (musicDB === null) {
-        musicDB = db.addCollection('music', { unique: 'path', indices: ['location'] })
-      }
-      musicDB.on('insert', (doc) => {
-        doc.id = doc.$loki
-        const artist = artistDB.findOne({ name: doc.info.albumartist })
-        if (!artist) {
-          artistDB.insert({ name: doc.info.albumartist, albums: [{ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art }] })
-        } else {
-          let found = false
-          artist.albums.forEach(album => {
-            if (album.name === doc.info.album)
-              found = true
-          })
-          if (!found) {
-            artist.albums.push({ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art })
-            artistDB.update(artist)
-          }
+function init () {
+  return new Promise((resolve, reject) => {
+    db = new Loki('data/falkv1.db', {
+      autoload: true,
+      autosave: true,
+      autoloadCallback: () => {
+        musicDB = db.getCollection('music')
+        if (musicDB === null) {
+          musicDB = db.addCollection('music', { unique: 'path', indices: ['location'] })
         }
-      })
-      usersDB = db.getCollection('users')
-      if (usersDB === null) {
-        usersDB = db.addCollection('users', { unique: ['user'] })
-      }
-      locDB = db.getCollection('locations')
-      if (locDB === null) {
-        locDB = db.addCollection('locations', { unique: 'path' })
-      }
-      plDB = db.getCollection('playlists')
-      if (plDB === null) {
-        plDB = db.addCollection('playlists', { unique: 'name' })
-      }
+        musicDB.on('insert', (doc) => {
+          doc.id = doc.$loki
+          const artist = artistDB.findOne({ name: doc.info.albumartist })
+          if (!artist) {
+            artistDB.insert({ name: doc.info.albumartist, albums: [{ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art }] })
+          } else {
+            let found = false
+            artist.albums.forEach(album => {
+              if (album.name === doc.info.album)
+                found = true
+            })
+            if (!found) {
+              artist.albums.push({ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art })
+              artistDB.update(artist)
+            }
+          }
 
-      artistDB = db.getCollection('artists')
-      if (artistDB === null) {
-        artistDB = db.addCollection('artists', { unique: 'name' })
+          const album = albumDB.findOne({ name: doc.info.album, artist: doc.info.albumartist })
+          if (!album) {
+            albumDB.insert({ name: doc.info.album, artist: doc.info.albumartist, year: doc.info.year, art: doc.info.art.cover })
+          }
+
+          const genre = genreDB.findOne({ name: doc.info.genre })
+          if (!genre) {
+            console.log('inserting genre')
+            genreDB.insert({ name: doc.info.genre, artist: doc.info.albumartist, art: doc.info.art.cover, albums: [{ 'name': doc.info.album, artist: doc.info.albumartist, 'year': doc.info.year, art: doc.info.art }] })
+          } else {
+            let found = false
+            genre.albums.forEach(album => {
+              if (album.name === doc.info.album && album.artist === doc.info.albumartist)
+                found = true
+            })
+            if (!found) {
+              genre.albums.push({ 'name': doc.info.album, 'artist': doc.info.albumartist, 'year': doc.info.year, art: doc.info.art.cover })
+              genreDB.update(genre)
+            }
+          }
+        })
+        musicDB.on('delete', (doc) => {
+          // check to see if other documents feature this album, delete them if they do
+        })
+        locDB = db.getCollection('locations')
+        if (locDB === null) {
+          locDB = db.addCollection('locations', { unique: 'path' })
+        }
+        plDB = db.getCollection('playlists')
+        if (plDB === null) {
+          plDB = db.addCollection('playlists', { unique: 'name' })
+        }
+
+        artistDB = db.getCollection('artists')
+        if (artistDB === null) {
+          artistDB = db.addCollection('artists', { unique: 'name' })
+        }
+
+        genreDB = db.getCollection('genres')
+        if (genreDB === null) {
+          genreDB = db.addCollection('genres')
+        }
+
+        albumDB = db.getCollection('albums')
+        if (albumDB === null) {
+          albumDB = db.addCollection('albums')
+        }
+
+
+        //users.welcome('admin', 'password')
+        //locations.add(1, '/home/phill/Music', [1])
+
+        // users.add(1, { user: 'phill', pass: 'password', admin: true })
+        // locations.setUsers(1, '/home/phill/Music', [1, 2])
+        // locations.remove(1, '/home/phill/Music')
+        // tracks.add({ path: '/home/phill/Music/test1.flac', artist:'Bob', title:'This' })
+        // tracks.add({ path: '/home/phill/Music/test2.flac', artist:'Bob', title:'That' })
+        // console.log(tracks.getAll(1, 0, 4000))
+        // console.log(tracks.getAllPaths())
+        resolve()
       }
-
-      if (callBack != null) {
-        callBack()
-      }
-
-
-      //users.welcome('admin', 'password')
-      //locations.add(1, '/home/phill/Music', [1])
-
-      // users.add(1, { user: 'phill', pass: 'password', admin: true })
-      // locations.setUsers(1, '/home/phill/Music', [1, 2])
-      // locations.remove(1, '/home/phill/Music')
-      // tracks.add({ path: '/home/phill/Music/test1.flac', artist:'Bob', title:'This' })
-      // tracks.add({ path: '/home/phill/Music/test2.flac', artist:'Bob', title:'That' })
-      // console.log(tracks.getAll(1, 0, 4000))
-      // console.log(tracks.getAllPaths())
-    }
+    })
   })
 }
 
@@ -166,29 +196,12 @@ const library = {
   },
   artists: function () {
     return new Promise((resolve, reject) => {
-      //const artists = musicDB.chain().find().compoundsort([['info.artist.art', true], 'info.albumartist']).data()
-      //resolve(artists
-      //  .map(a => { return { title: a.info.albumartist, art: ((a.info.art.artist !== '') ? a.info.art.artist : ''), subtitle: '' } })
-      //  .filter((tag, index, array) => array.findIndex(t => t.title === tag.title) === index)
-      //)
       const artists = artistDB.chain().find().simplesort('name').data()
       resolve(artists)
     })
   },
   artist: function (artistName) {
     return new Promise((resolve, reject) => {
-      //const artistArt = musicDB.chain().find({ 'info.albumartist': artist }).compoundsort([['info.artist.art', true], 'info.albumartist']).limit(1).data()[0].info.art.artist
-      //const songs = musicDB.chain().find({ 'info.albumartist': artist }).simplesort('info.year').data()
-      //const albums = songs.map(e => {
-      //  return {
-      //    art: ((e.info.art.cover !== '') ? e.info.art.cover : ''),
-      //    artistart: ((artistArt !== '') ? artistArt : ''),
-      //    background: ((e.info.art.background !== '') ? e.info.art.background : ''),
-      //    title: e.info.album,
-      //    subtitle: e.info.year,
-      //  }
-      //}).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
-      //resolve({ albums: albums })
       let artist = artistDB.chain().find({ name: artistName }).data()
       if (artist.length > 0) {
         artist = artist[0]
@@ -238,6 +251,7 @@ const library = {
     })
   },
   genres: function () {
+    /*
     return new Promise((resolve, reject) => {
       const songs = musicDB.chain().find().simplesort('info.genre').data()
       const genres = songs.map(e => {
@@ -247,6 +261,11 @@ const library = {
           subtitle: '',
         }
       }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.title !== '') === index)
+      resolve(genres)
+    })
+    */
+    return new Promise((resolve, reject) => {
+      const genres = genreDB.chain().find().simplesort('name').data()
       resolve(genres)
     })
   },

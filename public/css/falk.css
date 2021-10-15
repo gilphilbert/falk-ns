@@ -4,6 +4,7 @@
   --blue: #4A6FA5;
   --blue-light: #C0D6DF;
   --blue-dark: #465b7a;
+  --blue-darkest: #3f4754;
   --white: #FFFFFF;
   --black: #000000;
   --green-dark: #53a08a;
@@ -22,6 +23,8 @@
   --danger-light: var(--red-light);
   --success: var(--green);
   --warning: var(--yellow);
+  --lighten-heavy: rgba(255,255,255,0.8);
+  --lighten: rgba(255,255,255,0.1);
   --darken: rgba(0,0,0,0.1);
   --gray-lighter: #F7F7F7;
   --gray-light: #f1f1f1;
@@ -2625,7 +2628,8 @@ figure {
     max-width: 100%; }
   figure.is-40x40 {
     width: 44px;
-    height: 44px; }
+    height: 44px;
+    margin: 0 0 0 4px; }
     @media (max-width: 768px) {
       figure.is-40x40 {
         width: 40px;
@@ -2881,7 +2885,7 @@ input:checked + .slider:before {
     position: absolute;
     left: 8px;
     top: 15px;
-    background-color: #696363;
+    background-color: var(--blue);
     min-width: 160px;
     border-radius: 4px;
     overflow: hidden;
@@ -2893,7 +2897,16 @@ input:checked + .slider:before {
       padding: 12px 16px;
       cursor: pointer; }
       .dropdown.is-active .dropdown-content span:hover {
-        background-color: #ffffff28; }
+        background-color: var(--lighten);
+        position: relative; }
+        .dropdown.is-active .dropdown-content span:hover:after {
+          content: '';
+          left: 0;
+          top: 0;
+          height: 100%;
+          width: 3px;
+          background: var(--yellow);
+          position: absolute; }
 
 .rotate {
   animation: rotation 2s infinite linear; }
@@ -2964,7 +2977,7 @@ input:checked + .slider:before {
   bottom: 10px; }
 
 table.songs tr:hover td {
-  background: var(--gray-darker); }
+  background: var(--darken); }
 
 table.songs td {
   vertical-align: middle;
@@ -3039,7 +3052,7 @@ table.songs td {
   display: none; }
 
 #queue-list {
-  background: var(--green);
+  background: var(--blue);
   color: var(--text-color);
   position: fixed;
   top: 0;
@@ -3069,30 +3082,30 @@ table.songs td {
   #queue-list #queue-header {
     padding: 25px 20px 25px 20px; }
   #queue-list #queue-items {
-    padding: 0 20px 0 20px;
+    padding: 0 15px 0 15px;
     height: calc(100% - 50px - 1.8rem - 100px);
     overflow-y: scroll; }
     #queue-list #queue-items .subtitle {
-      color: var(--green-lightest);
+      color: var(--lighten-heavy);
       margin-bottom: 0; }
     #queue-list #queue-items .row {
       cursor: pointer;
       vertical-align: middle;
       padding: 8px 0;
       margin: 4px 0;
-      border-radius: 15px; }
+      border-radius: 8px; }
       #queue-list #queue-items .row div {
         z-index: 2; }
         #queue-list #queue-items .row div.progress {
           z-index: 1;
           position: absolute;
-          top: 0;
           left: 0;
-          height: 100%;
+          bottom: 0;
+          height: 3px;
           width: 25%;
-          background: rgba(0, 0, 0, 0.1); }
+          background: var(--yellow); }
       #queue-list #queue-items .row.is-playing {
-        background-color: var(--green-dark);
+        background-color: var(--lighten);
         padding: 12px 0; }
         #queue-list #queue-items .row.is-playing figure {
           position: relative; }

@@ -32,7 +32,7 @@ OK, so this is a little complex.
   to the scanner start
 Told you it was complicated!
 */
-database.init(() => scanner.watch.start(database, sendEvent))
+database.init().then(() => scanner.watch.start(database, sendEvent))
 mpv.init(sendEvent)
 
 module.exports = app => {
