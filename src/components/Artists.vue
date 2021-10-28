@@ -16,10 +16,11 @@ export default {
       .then(data => {
         data = data.map(e => {
           return {
-            urlParams: { name: 'Artist', params: { 'artist': e.name } },
-            surlParams: false,
             title: e.name,
-            art: e.albums[0].art.artist
+            art: e.art,
+            subtitle: null,
+            urlParams: { name: 'Artist', params: { 'artist': e.name } },
+            surlParams: false
           }
         })
         this.artists = data

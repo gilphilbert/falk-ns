@@ -15,9 +15,13 @@ export default {
     this.$database.getGenres()
       .then(data => {
         data = data.map(e => {
-          e.urlParams = { name: 'Genre', params: { 'genre': e.title } }
-          e.surlParams = false
-          return e
+          return {
+            title: e.name,
+            subtitle: null,
+            art: e.art,
+            urlParams: { name: 'Genre', params: { 'genre': e.name } },
+            surlParams: false
+          }
         })
         this.genres = data
       })

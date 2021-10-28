@@ -105,16 +105,15 @@ async function sendQueue (save = false) {
     let paths = []
     for (i = 0; i < size; i++) {
       const path = await mpv.getProperty(`playlist/${i}/filename`)
-      const track = database.tracks.trackByPath(path)
+      const track = await database.tracks.trackByPath(path)
       items.push({
-        title: track.info.title,
-        artist: track.info.albumartist,
-        duration: track.info.duration,
-        album: track.info.album,
-        art: track.info.art,
-        id: track.id,
+        title: track.title,
+        artist: track.albumartist,
+        duration: track.duration,
+        album: track.album,
+        art: track.albumart,
         playing: ((i === plPos) ? true : false),
-        shortformat: (track.info.format.samplerate / 1000) + 'kHz ' + ((track.info.format.bits) ? track.info.format.bits + 'bit' : ''),
+        shortformat: (track.samplerate / 1000) + 'kHz ' + ((track.bits) ? track.bits + 'bit' : ''),
       })
       paths.push(path)
     }

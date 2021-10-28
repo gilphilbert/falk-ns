@@ -78,7 +78,7 @@ async function processFile(ffname) {
       }
   
   
-      database.tracks.add(song)
+      await database.tracks.add(song)
       console.log(`ADD :: ${song.title} [${ffname}]`)
       resolve()
     } catch (e) {
@@ -107,7 +107,7 @@ async function walkFunc (err, pathname, dirent) {
   }
 
   // check here to see if file exists in database
-  if (database.tracks.trackExists(path.dirname(pathname) + '/' + dirent.name)) {
+  if (await database.tracks.trackExists(path.dirname(pathname) + '/' + dirent.name)) {
     return Promise.resolve()
   }
   await processFile(path.dirname(pathname) + '/' + dirent.name)

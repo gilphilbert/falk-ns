@@ -1,13 +1,72 @@
 const Loki = require('lokijs')
+
+const knex = require('knex')({
+  client: 'sqlite3',
+  connection: {
+    filename: "./data/falk.sql"
+  }
+})
+
+knex.schema.createTable('tracks', function (table) {
+  table.string('path').primary()
+  table.string('type')
+  table.string('disc')
+  table.string('track')
+  table.string('title')
+  table.string('album')
+  table.string('artist')
+  table.string('albumartist')
+  table.string('genre')
+  table.integer('year')
+  table.integer('duration')
+  table.boolean('lossless')
+  table.float('samplerate')
+  table.integer('bits')
+  table.integer('channels')
+  table.string('codec')
+  table.string('artistart')
+  table.string('coverart')
+  table.string('discart')
+  table.string('backgroundart')
+  table.integer('playcount').defaultTo(0)
+  table.integer('lastplayed').defaultTo(0)
+  table.integer('added').defaultTo(Date.now())
+  table.boolean('favorite').defaultTo(false)
+})
+.then(() => {
+  console.log('[DB] Creating new library')
+})
+.catch(e => {
+  console.log('[DB] Opening existing lirary')
+  /*
+  knex.from('tracks').select('albumartist as name', 'album', 'year', 'artistart', 'backgroundart', 'coverart').groupBy('album').orderBy([{ column: 'name' }, { column: 'album' }])
+  .then((rows) => {
+    let albums = {}
+    for (row of rows) {
+      console.log(row);
+      let artist = row['name']
+      if (!Object.keys(artists).includes(artist)) {
+        artists[artist] = []
+      }
+      artists[artist].push({
+        name: row['album'],
+        art: row['art']
+      })
+    }
+    console.log(artists)
+  })
+  .catch(err => console.log(err))
+  */
+})
+
 const crypto = require('crypto')
 const { resolve } = require('path')
 const e = require('express')
+const { kStringMaxLength } = require('buffer')
 
 let musicDB = null
 let locDB = null
-let artistDB = null
-let albumDB = null
-let genreDB = null
+let plDB = null
 
 let db = false
 
@@ -23,41 +82,6 @@ function init () {
         }
         musicDB.on('insert', (doc) => {
           doc.id = doc.$loki
-          const artist = artistDB.findOne({ name: doc.info.albumartist })
-          if (!artist) {
-            artistDB.insert({ name: doc.info.albumartist, albums: [{ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art }] })
-          } else {
-            let found = false
-            artist.albums.forEach(album => {
-              if (album.name === doc.info.album)
-                found = true
-            })
-            if (!found) {
-              artist.albums.push({ 'name': doc.info.album, 'year': doc.info.year, art: doc.info.art })
-              artistDB.update(artist)
-            }
-          }
-
-          const album = albumDB.findOne({ name: doc.info.album, artist: doc.info.albumartist })
-          if (!album) {
-            albumDB.insert({ name: doc.info.album, artist: doc.info.albumartist, year: doc.info.year, art: doc.info.art.cover })
-          }
-
-          const genre = genreDB.findOne({ name: doc.info.genre })
-          if (!genre) {
-            console.log('inserting genre')
-            genreDB.insert({ name: doc.info.genre, artist: doc.info.albumartist, art: doc.info.art.cover, albums: [{ 'name': doc.info.album, artist: doc.info.albumartist, 'year': doc.info.year, art: doc.info.art }] })
-          } else {
-            let found = false
-            genre.albums.forEach(album => {
-              if (album.name === doc.info.album && album.artist === doc.info.albumartist)
-                found = true
-            })
-            if (!found) {
-              genre.albums.push({ 'name': doc.info.album, 'artist': doc.info.albumartist, 'year': doc.info.year, art: doc.info.art.cover })
-              genreDB.update(genre)
-            }
-          }
         })
         musicDB.on('delete', (doc) => {
           // check to see if other documents feature this album, delete them if they do
@@ -70,33 +94,6 @@ function init () {
         if (plDB === null) {
           plDB = db.addCollection('playlists', { unique: 'name' })
         }
-
-        artistDB = db.getCollection('artists')
-        if (artistDB === null) {
-          artistDB = db.addCollection('artists', { unique: 'name' })
-        }
-
-        genreDB = db.getCollection('genres')
-        if (genreDB === null) {
-          genreDB = db.addCollection('genres')
-        }
-
-        albumDB = db.getCollection('albums')
-        if (albumDB === null) {
-          albumDB = db.addCollection('albums')
-        }
-
-
-        //users.welcome('admin', 'password')
-        //locations.add(1, '/home/phill/Music', [1])
-
-        // users.add(1, { user: 'phill', pass: 'password', admin: true })
-        // locations.setUsers(1, '/home/phill/Music', [1, 2])
-        // locations.remove(1, '/home/phill/Music')
-        // tracks.add({ path: '/home/phill/Music/test1.flac', artist:'Bob', title:'This' })
-        // tracks.add({ path: '/home/phill/Music/test2.flac', artist:'Bob', title:'That' })
-        // console.log(tracks.getAll(1, 0, 4000))
-        // console.log(tracks.getAllPaths())
         resolve()
       }
     })
@@ -104,47 +101,56 @@ function init () {
 }
 
 const tracks = {
-  add: (info) => {
-    try {
-      musicDB.insert({
-        info: info,
-        path: info.path,
-        meta: { playCount: 0, favorite: false, lastPlayed: false },
-        added: Date.now(),
-      })
-    } catch {
-      tracks.update(info)
+  add: async (info) => {
+    const tr = {
+      path: info.path,
+      type: info.type,
+      disc: info.disc,
+      track: info.track,
+      title: info.title,
+      album: info.album,
+      artist: info.artists[0],
+      albumartist: info.albumartist,
+      genre: info.genre,
+      year: info.year,
+      duration: info.duration,
+      lossless: info.format.lossless,
+      samplerate: info.format.samplerate,
+      bits: info.format.bits,
+      channels: info.format.channels,
+      codec: info.format.codec,
+      artistart: info.art.artist,
+      coverart: info.art.cover,
+      discart: info.art.disc
     }
-  },
-  update: (info) => {
-    musicDB.chain()
-      .find({ path: info.path })
-      .update((doc) => doc.info = info)
+    knex('tracks').insert(tr)
+      .onConflict('path')
+      .merge()
+      .then(() => 
+        console.log("[DB] Data inserted")
+      )
+      .catch(err => {
+        console.log(err)
+      })
   },
   removeByPath: (path) => {
-    musicDB.chain()
-      .find({ path: path })
-      .remove()
+    knex('tracks').where('path', '=', path).delete()
   },
   trackByPath: (path) => {
-    let tr = JSON.parse(JSON.stringify(musicDB.findOne({ path: path })))
-    if ('info' in tr && 'art' in tr.info) {
-      if ('cover' in tr.info.art && tr.info.art.cover !== '')
-        tr.info.art.cover = tr.info.art.cover
-      if ('artist' in tr.info.art && tr.info.art.artist !== '')
-        tr.info.art.artist = tr.info.art.artist
-      if ('background' in tr.info.art && tr.info.art.background !== '')
-        tr.info.art.background = tr.info.art.background
-      if ('disc' in tr.info.art && tr.info.art.disc !== '')
-        tr.info.art.disc = tr.info.art.disc
-    }
-    return tr
+    return new Promise((resolve, reject) => {
+      knex.from('tracks').select('*').where('path', path)
+        .then(rows => resolve((rows.length > 0) ? rows[0] : false))
+        .catch(err => {
+          console.log(err)
+          resolve(false)
+        })
+    })
   },
   trackExists: (path) => {
-    if (!musicDB.findOne({ path: path })) {
-      return false
-    }
-    return true
+    return new Promise((resolve, reject) => {
+      knex.from('tracks').select('1').where('path', path)
+        .then(rows => resolve(rows.length > 0))
+    })
   },
   getAll: (offset = 0, limit = 0) => {
     const allSongs = musicDB.chain()
@@ -185,45 +191,60 @@ const tracks = {
 
 const library = {
   stats: function () {
-    return new Promise((resolve, reject) => {
-      const ret = { songs: 0, albums: 0, artists: 0 }
-      const allSongs = musicDB.find()
-      ret.songs = allSongs.length
-      ret.artists = [...new Set(allSongs.map(song => song.info.albumartist))].length
-      ret.albums = [...new Set(allSongs.map(song => song.info.album))].length
-      resolve(ret)
+    return new Promise(async (resolve, reject) => {
+      const artists = await knex('tracks').countDistinct('artist')
+      const albums = await knex('tracks').countDistinct('album')
+      const tracks = await knex('tracks').count()
+      resolve({
+        songs: tracks[0]['count(*)'],
+        artists: artists[0]['count(distinct `artist`)'],
+        albums: albums[0]['count(distinct `album`)']
+      })
     })
   },
   artists: function () {
     return new Promise((resolve, reject) => {
-      const artists = artistDB.chain().find().simplesort('name').data()
-      resolve(artists)
+      knex.from('tracks').select('artistart as art').distinct('albumartist as name').orderBy([{ column: 'name' }])
+        .then(rows => resolve(rows))
+        .catch(err => {
+          console.log(err)
+          resolve([])
+        })
     })
   },
   artist: function (artistName) {
     return new Promise((resolve, reject) => {
-      let artist = artistDB.chain().find({ name: artistName }).data()
-      if (artist.length > 0) {
-        artist = artist[0]
-        artist.albums.sort((a, b) => {
-          return a.year - b.year;
+      knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'name' }, { column: 'album' }])
+      .then((rows) => {
+        let background = '',  
+            artistart = '',
+            albums = []
+        for (row of rows) {
+          if (background === '' && row['backgroundart'] !== null) background = row['backgroundart']
+          if (artistart === '' && row['artistart'] !== null) artistart = row['artistart']
+          albums.push({
+            name: row['name'],
+            year: row['year'],
+            art: row['coverart']
+          })
+        }
+        resolve({
+          artist: artistName,
+          background,
+          artistart,
+          albums
         })
-        resolve(artist)
-      }
-      resolve(null)
+      })
+      .catch(err => console.log(err))
    })
   },
   albums: function () {
     return new Promise((resolve, reject) => {
-      const songs = musicDB.chain().find().simplesort('info.album').data()
-      const albums = songs.map(e => {
-        return {
-          art: ((e.info.art.cover !== '') ? e.info.art.cover : ''),
-          title: e.info.album,
-          subtitle: e.info.albumartist,
-        }
-      }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
-      resolve(albums)
+      knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album').orderBy('name')
+        .then((rows) => {
+          resolve(rows)
+        })
+        .catch(err => console.log(err))
     })
   },
   album: function (artist, album) {
@@ -251,35 +272,21 @@ const library = {
     })
   },
   genres: function () {
-    /*
     return new Promise((resolve, reject) => {
-      const songs = musicDB.chain().find().simplesort('info.genre').data()
-      const genres = songs.map(e => {
-        return {
-          art: ((e.info.art.cover) ? e.info.art.cover : ''),
-          title: e.info.genre,
-          subtitle: '',
-        }
-      }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.title !== '') === index)
-      resolve(genres)
-    })
-    */
-    return new Promise((resolve, reject) => {
-      const genres = genreDB.chain().find().simplesort('name').data()
-      resolve(genres)
+      knex.from('tracks').select('genre as name', 'coverart as art').groupBy('name').orderBy('name')
+      .then((rows) => {
+        resolve(rows)
+      })
+      .catch(err => console.log(err))
     })
   },
   genre: function (genre) {
     return new Promise((resolve, reject) => {
-      const songs = musicDB.chain().find({ 'info.genre': genre }).simplesort('info.album').data()
-      const albums = songs.map(e => {
-        return {
-          art: ((e.info.art.cover) ? e.info.art.cover : ''),
-          title: e.info.album,
-          subtitle: e.info.albumartist,
-        }
-      }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
-      resolve(albums)
+      knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').where('genre', '=', genre).groupBy('album').orderBy('name')
+        .then((rows) => {
+          resolve(rows)
+        })
+        .catch(err => console.log(err))
     })
   },
   popular: function () {
