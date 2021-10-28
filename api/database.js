@@ -60,7 +60,16 @@ function init () {
           }
         })
         musicDB.on('delete', (doc) => {
-          // check to see if other documents feature this album, delete them if they do
+          let res = musicDB.findOne({ 'info.albumartist': doc.info.albumartist, 'info.title': { $ne: doc.info.title } })
+          if (!res) {
+            console.log('[REMOVED][ARTIST]: ' + doc.info.albumartist)
+            artistDB.findAndRemove({ name: doc.info.albumartist })
+          }
+          let res = musicDB.findOne({ 'info.genre': doc.info.genre, 'info.title': { $ne: doc.info.title } })
+          if (!res) {
+            console.log('[REMOVED][GENRE]: ' + doc.info.genre)
+            genreDB.findAndRemove({ name: doc.info.genre })
+          }
         })
         locDB = db.getCollection('locations')
         if (locDB === null) {
@@ -214,6 +223,7 @@ const library = {
    })
   },
   albums: function () {
+    /*
     return new Promise((resolve, reject) => {
       const songs = musicDB.chain().find().simplesort('info.album').data()
       const albums = songs.map(e => {
@@ -223,6 +233,11 @@ const library = {
           subtitle: e.info.albumartist,
         }
       }).filter((tag, index, array) => array.findIndex(t => t.title === tag.title && t.subtitle === tag.subtitle) === index)
+      resolve(albums)
+    })
+    */
+    return new Promise((resolve, reject) => {
+      const albums = albumDB.chain().find().simplesort('name').data()
       resolve(albums)
     })
   },

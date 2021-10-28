@@ -15,9 +15,13 @@ export default {
     this.$database.getAlbums()
       .then(data => {
         data = data.map(e => {
-          e.urlParams = { name: 'Album', params: { 'album': e.title, 'artist': e.subtitle } }
-          e.surlParams = { name: 'Artist', params: { 'artist': e.subtitle } }
-          return e
+          return {
+            urlParams: { name: 'Album', params: { 'album': e.name, 'artist': e.artist } },
+            surlParams: { name: 'Artist', params: { 'artist': e.artist } },
+            title: e.name,
+            subtitle: e.artist,
+            art: e.art
+          }
         })
         this.albums = data
       })
