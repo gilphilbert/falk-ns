@@ -6,7 +6,7 @@
         <div class="row now-playing">
           <div class="col-xs is-narrow">
             <figure class="image is-70x70">
-              <img v-bind:src="((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : '/img/placeholder.png')">
+              <img v-bind:src="((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art : '/img/placeholder.png')">
             </figure>
           </div>
           <div class="col-xs">

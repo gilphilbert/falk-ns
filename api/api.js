@@ -93,12 +93,6 @@ module.exports = app => {
     const stats = await database.library.stats()
     res.json(stats)
   })
-  app.get('/api/songs/all/:offset?/:qty?', function (req, res) {
-    const offset = req.params.offset || 0
-    const limit = req.params.qty || 4000
-    const songs = database.tracks.getAll(offset, limit)
-    res.json(songs)
-  })
   app.get('/api/artists', async function( req, res ) {
     const artists = await database.library.artists()
     if (artists !== null) {
@@ -190,8 +184,8 @@ module.exports = app => {
     }
   })
 
-  app.get('/api/locations', function (req, res) {
-    const locations = database.locations.mappings()
+  app.get('/api/locations', async function (req, res) {
+    const locations = await database.locations.paths()
     if (locations !== null) {
       res.json(locations)
     } else {
@@ -213,10 +207,10 @@ module.exports = app => {
       res.status(400).send({ message: 'data missing' })
     }
   })
-  app.delete('/api/locations', function (req, res) {
+  app.delete('/api/locations', async function (req, res) {
     const dir = req.body.location || ''
     if (dir !== '') {
-      const data = database.locations.remove(dir)
+      const data = await database.locations.remove(dir)
       if (data) {
         res.send(data)
         scanner.watch.remove(dir)

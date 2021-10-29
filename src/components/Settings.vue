@@ -15,8 +15,8 @@
         <tr><th colspan="2">Path</th><th></th></tr>
       </thead>
       <tbody>
-        <tr v-for="location in locations" v-bind:key="location.path">
-          <td><p class="is-6">{{ location.path }}</p></td>
+        <tr v-for="location in locations" v-bind:key="location">
+          <td><p class="is-6">{{ location }}</p></td>
           <td class="is-narrow pointer" @click="removeLocation(location)"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
         </tr>
         <tr v-if="locations.length === 0" >
@@ -58,6 +58,7 @@ export default {
     window.fetch('/api/locations')
       .then(response => response.json())
       .then(data => {
+        console.log(data)
         this.setLocations(data)
         this.getDirectories('')
     })
@@ -87,7 +88,7 @@ export default {
         })
     },
     removeLocation (location) {
-      const body = JSON.stringify({ location: location.path })
+      const body = JSON.stringify({ location: location })
       window.fetch('/api/locations', { method: 'delete', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: body })
         .then(response => response.json())
         .then(data => {

@@ -141,7 +141,7 @@ async function getDirs (dir) {
 async function scan (dir) {
   console.log('Starting scan')
 
-  const allSongs = database.tracks.getAllPaths()
+  const allSongs = await database.tracks.getAllPaths()
   allSongs.forEach(track => {
     if (!fs.existsSync(track.path)) {
       console.log('DELETE ::', track.path)
@@ -173,8 +173,8 @@ function sendMessage(sendEvent) {
 const chokidar = require('chokidar')
 const wOptions = { ignoreInitial: true, awaitWriteFinish: true }
 let watcher = false
-function watch(database, sendEvent) {
-  const dirs = database.locations.paths()
+async function watch(database, sendEvent) {
+  const dirs = await database.locations.paths()
   console.log('WATCH :: WATCHING', dirs)
   watcher = chokidar.watch(dirs, wOptions)
   watcher.on('add', async (path, stats) => {

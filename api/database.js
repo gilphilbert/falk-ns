@@ -8,7 +8,8 @@ const knex = require('knex')({
 })
 
 knex.schema.createTable('tracks', function (table) {
-  table.string('path').primary()
+  table.increments('id')
+  table.string('path').unique()
   table.string('type')
   table.string('disc')
   table.string('track')
@@ -28,36 +29,22 @@ knex.schema.createTable('tracks', function (table) {
   table.string('coverart')
   table.string('discart')
   table.string('backgroundart')
-  table.integer('playcount').defaultTo(0)
-  table.integer('lastplayed').defaultTo(0)
-  table.integer('added').defaultTo(Date.now())
-  table.boolean('favorite').defaultTo(false)
+  table.integer('playcount')
+  table.integer('lastplayed')
+  table.integer('added')
+  table.boolean('favorite')
 })
 .then(() => {
   console.log('[DB] Creating new library')
 })
 .catch(e => {
+  console.log(e)
   console.log('[DB] Opening existing lirary')
-  /*
-  knex.from('tracks').select('albumartist as name', 'album', 'year', 'artistart', 'backgroundart', 'coverart').groupBy('album').orderBy([{ column: 'name' }, { column: 'album' }])
-  .then((rows) => {
-    let albums = {}
-    for (row of rows) {
-      console.log(row);
-      let artist = row['name']
-      if (!Object.keys(artists).includes(artist)) {
-        artists[artist] = []
-      }
-      artists[artist].push({
-        name: row['album'],
-        art: row['art']
-      })
-    }
-    console.log(artists)
-  })
-  .catch(err => console.log(err))
-  */
 })
+
+knex.schema.createTable('paths', function (table) {
+  table.string('path').primary()
+}).catch(e => {})
 
 const crypto = require('crypto')
 const { resolve } = require('path')
@@ -65,7 +52,6 @@ const e = require('express')
 const { kStringMaxLength } = require('buffer')
 
 let musicDB = null
-let locDB = null
 let plDB = null
 
 let db = false
@@ -86,10 +72,6 @@ function init () {
         musicDB.on('delete', (doc) => {
           // check to see if other documents feature this album, delete them if they do
         })
-        locDB = db.getCollection('locations')
-        if (locDB === null) {
-          locDB = db.addCollection('locations', { unique: 'path' })
-        }
         plDB = db.getCollection('playlists')
         if (plDB === null) {
           plDB = db.addCollection('playlists', { unique: 'name' })
@@ -102,39 +84,48 @@ function init () {
 
 const tracks = {
   add: async (info) => {
-    const tr = {
-      path: info.path,
-      type: info.type,
-      disc: info.disc,
-      track: info.track,
-      title: info.title,
-      album: info.album,
-      artist: info.artists[0],
-      albumartist: info.albumartist,
-      genre: info.genre,
-      year: info.year,
-      duration: info.duration,
-      lossless: info.format.lossless,
-      samplerate: info.format.samplerate,
-      bits: info.format.bits,
-      channels: info.format.channels,
-      codec: info.format.codec,
-      artistart: info.art.artist,
-      coverart: info.art.cover,
-      discart: info.art.disc
-    }
-    knex('tracks').insert(tr)
-      .onConflict('path')
-      .merge()
-      .then(() => 
-        console.log("[DB] Data inserted")
-      )
-      .catch(err => {
-        console.log(err)
-      })
+    return new Promise(async (resolve, reject) => {
+      const tr = {
+        path: info.path,
+        type: info.type || '',
+        disc: info.disc || 0,
+        track: info.track || 0,
+        title: info.title || 'Unknown Track',
+        album: info.album || '',
+        artist: info.artists[0] || 'Unknown Artist',
+        albumartist: info.albumartist || 'Unkown Artist',
+        genre: info.genre || 'Unknown',
+        year: info.year || 0,
+        duration: info.duration || 0,
+        lossless: info.format.lossless,
+        samplerate: info.format.samplerate || 0,
+        bits: info.format.bits || 0,
+        channels: info.format.channels || 0,
+        codec: info.format.codec || '',
+        artistart: info.art.artist || '',
+        coverart: info.art.cover || '',
+        discart: info.art.disc || '',
+        playcount: 0,
+        lastplayed: 0,
+        added: Date.now(),
+        favorite: false
+      }
+      knex('tracks').insert(tr)
+        .then(() => {
+          resolve()
+        })
+        .catch(err => {
+          console.log("[DB] Filepath exists, updating...")
+          // await tracks.update(info)
+          resolve()
+        })
+    })
   },
   removeByPath: (path) => {
+    return new Promise((resolve, reject) => {
     knex('tracks').where('path', '=', path).delete()
+      .then(r => resolve())
+    })
   },
   trackByPath: (path) => {
     return new Promise((resolve, reject) => {
@@ -148,44 +139,27 @@ const tracks = {
   },
   trackExists: (path) => {
     return new Promise((resolve, reject) => {
-      knex.from('tracks').select('1').where('path', path)
+      knex.from('tracks').select('id').where('path', path)
         .then(rows => resolve(rows.length > 0))
     })
   },
-  getAll: (offset = 0, limit = 0) => {
-    const allSongs = musicDB.chain()
-      .find()
-      .offset(offset)
-      .limit(limit)
-      .map(doc => { return {
-        info: doc.info,
-        added: doc.added,
-        id: doc.id,
-        md: doc.meta
-      } })
-      .data({ removeMeta: true })
-    return allSongs
-  },
   getPath: (id) => {
-    const track = musicDB.get(parseInt(id))
-    if (track) {
-      return track.path
-    } else {
-      return null
-    }
+    return new Promise((resolve, reject) => {
+      knex.from('tracks').select('path').where('id', id)
+        .then(rows => resolve(((rows.length > 0) ? rows[0].path : '')))
+    })
   },
   getAllPaths: () => {
-    return musicDB.chain()
-      .find()
-      .map(e => { return { path: e.path } })
-      .data({ removeMeta: true })
+    return new Promise((resolve, reject) => {
+      knex.from('tracks').select('path')
+        .then(rows => resolve(rows.map(r => r.path)))
+    })
   },
   incrementPlay: (path) => {
-    const track = musicDB.findOne({ path: path })
-    if (track) {
-      track.meta.playCount++
-      musicDB.update(track)
-    }
+    return new Promise((resolve, reject) => {
+      knex.from('tracks').where('path', path).increment('playcount', 1)
+        .then(r => resolve())
+    })
   }
 }
 
@@ -249,26 +223,25 @@ const library = {
   },
   album: function (artist, album) {
     return new Promise((resolve, reject) => {
-      const data = musicDB.chain().find({ 'info.albumartist': artist, 'info.album': album }).compoundsort(['info.disc', 'info.track']).data()
-      const info = data.map(s => {
-        let info = JSON.parse(JSON.stringify(s.info))
-        info.id = s.$loki
-        info.shortformat = (s.info.format.samplerate / 1000) + 'kHz ' + ((s.info.format.bits) ? s.info.format.bits + 'bit' : '')
-        info.shortestformat = (s.info.format.samplerate / 1000) + '/' + ((s.info.format.bits) ? s.info.format.bits : '')
-        info.artist = ((s.info.artists.length > 0) ? s.info.artists[0] : s.info.albumartist)
-        info.art.cover = ((s.info.art.cover !== '') ? s.info.art.cover : '')
-        return info
-      })
-      resolve({
-        title: info[0].album,
-        art: info[0].art.cover,
-        artist: info[0].albumartist,
-        year: info[0].year,
-        genre: info[0].genre,
-        shortformat: info[0].shortformat,
-        shortestformat: info[0].shortestformat,
-        tracks: info
-      })
+      knex.from('tracks').select('*').where('artist', artist).andWhere('album', album).orderBy('disc', 'track')
+        .then((rows) => {
+          rows.map(r => {
+            r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
+            r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')
+            return r
+          })
+          resolve({
+            title: rows[0].album,
+            art: rows[0].coverart,
+            artist: rows[0].albumartist,
+            year: rows[0].year,
+            genre: rows[0].genre,
+            shortformat: rows[0].shortformat,
+            shortestformat: rows[0].shortestformat,
+            tracks: rows
+          })
+        })
+        .catch(err => console.log(err))
     })
   },
   genres: function () {
@@ -411,27 +384,37 @@ const playlists = {
 }
 
 const locations = {
-  mappings: function () {
-    return locDB.chain()
-      .find()
-      .data({ removeMeta: true })
-  },
   add: function (path) {
-    locDB.insert({ path: path })
-    return locations.mappings()
+    return new Promise((resolve, reject) => {
+      knex('paths').insert({ path })
+      .then(() => 
+        console.log('[DB] Path added (' + path + ')')
+      )
+      .catch(err => {
+        console.log(err)
+      })
+    })
   },
   remove: function (path) {
-    // find and remove the location
-    locDB.remove(locDB.by('path', path))
+    return new Promise(async (resolve, reject) => {
+      // find and remove the location
+      await knex('paths').where('path', '=', path).delete()
 
-    // remove any associated tracks
-    musicDB.chain().where(doc => doc.path.startsWith(path)).remove()
+      // remove any associated tracks
+      await knex('tracks').where('path', 'like', path + '%').delete()
 
-    // return the new mappings
-    return locations.mappings()
+      // return the all paths
+      resolve(await locations.paths())
+    })
   },
   paths: function () {
-    return locDB.find().map(e => e.path)
+    return new Promise((resolve, reject) => {
+      knex.from('paths').select('*').orderBy('path')
+      .then((rows) => {
+        resolve(rows.map(r => r.path))
+      })
+      .catch(err => console.log(err))
+    })
   }
 }
 

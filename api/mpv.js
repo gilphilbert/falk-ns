@@ -106,12 +106,13 @@ async function sendQueue (save = false) {
     for (i = 0; i < size; i++) {
       const path = await mpv.getProperty(`playlist/${i}/filename`)
       const track = await database.tracks.trackByPath(path)
+      console.log(track)
       items.push({
         title: track.title,
         artist: track.albumartist,
         duration: track.duration,
         album: track.album,
-        art: track.albumart,
+        art: track.coverart,
         playing: ((i === plPos) ? true : false),
         shortformat: (track.samplerate / 1000) + 'kHz ' + ((track.bits) ? track.bits + 'bit' : ''),
       })
@@ -250,7 +251,7 @@ player = {
   },
   enqueue: async function (tracks) {
     for (i = 0; i < tracks.length; i++) {
-      await mpv.append(database.tracks.getPath(tracks[i]))
+      await mpv.append(await database.tracks.getPath(tracks[i]))
     }
     //sendEvent(await getQueue(), { event: 'playlist' })
     sendQueue()
@@ -267,7 +268,7 @@ player = {
     } catch (e) { console.log("[INFO] [Player] Can't get playlist size") }
     console.log('size :: ' + plSize)
     for (i = 0; i < tracks.length; i++) {
-      await mpv.append(database.tracks.getPath(tracks[i]))
+      await mpv.append(await database.tracks.getPath(tracks[i]))
       await mpv.playlistMove(plSize + i, plPos + i + 1)
     }
     //sendEvent(await getQueue(), { event: 'playlist' })
@@ -284,7 +285,7 @@ player = {
 
     for (i = 0; i < tracks.length; i++) {
       try {
-        await mpv.append(database.tracks.getPath(tracks[i]))
+        await mpv.append(await database.tracks.getPath(tracks[i]))
       } catch (e) { console.log(`[ERROR] [Player] Can't add track (${ tracks[i] })`) }
     }
     //sendEvent(await getQueue(), { event: 'playlist' })
