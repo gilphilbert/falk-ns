@@ -1,17 +1,8 @@
-const knex = require('knex')({
-  client: 'sqlite3',
-  connection: {
-    filename: "./data/falk.sql"
-  }
-})
+let knex = null
 
-knex.raw('PRAGMA foreign_keys = ON;').then(() => {
-  console.log('SQLite foreign keys enabled')
-})
+async function buildTables () {
 
-function buildTables () {
-
-  knex.schema.createTable('tracks', function (table) {
+  await knex.schema.createTable('tracks', function (table) {
     table.increments('id')
     table.string('path').unique()
     table.string('type')
@@ -39,18 +30,18 @@ function buildTables () {
     table.boolean('favorite')
   })
 
-  knex.schema.createTable('paths', function (table) {
+  await knex.schema.createTable('paths', function (table) {
     table.string('path').primary()
   })
 
-  knex.schema.createTable('playlists', function (table) {
+  await knex.schema.createTable('playlists', function (table) {
     table.increments('id')
     table.string('name').unique()
     table.string('coverart')
     table.integer('added')
   })
 
-  knex.schema.createTable('playlist_tracks', function (table) {
+  await knex.schema.createTable('playlist_tracks', function (table) {
     table.integer('playlist')
     table.integer('track')
     table.primary(['playlist', 'track'])
@@ -60,8 +51,19 @@ function buildTables () {
 }
 
 async function init () {
+  knex = require('knex')({
+    client: 'sqlite3',
+    connection: {
+      filename: "./data/falk.sql"
+    }
+  })
+
+  await knex.raw('PRAGMA foreign_keys = ON;').then(() => {
+    console.log('SQLite foreign keys enabled')
+  })
+
   if (! await knex.schema.hasTable('tracks')) {
-    buildTables()
+    await buildTables()
   }
 }
 
