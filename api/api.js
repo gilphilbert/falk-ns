@@ -4,9 +4,6 @@ const sharp = require('sharp')
 const fs = require('fs')
 const path = require('path')
 
-// for authentication
-const jwt = require('jsonwebtoken')
-
 // other modules (self explanatory)
 const scanner = require('./scanner')
 const database = require('./database')

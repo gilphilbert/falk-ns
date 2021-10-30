@@ -190,41 +190,7 @@ const library = {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').where('genre', '=', genre).groupBy('album').orderBy('name')
   },
   popular: function () {
-    /*
-    return new Promise((resolve, reject) => {
-      const songs = musicDB.chain().find().simplesort('meta.playCount', true).limit(100).data()
-      const tracks = songs.map(s => {
-        const i = s.info
-        return {
-          id: s.$loki,
-          track: i.track,
-          title: i.title,
-          album: i.album,
-          albumartist: i.albumartist,
-          artist: ((i.artists.length > 0) ? i.artists[0] : i.albumartist),
-          duration: i.duration,
-          genre: i.genre,
-          year: i.year,
-          disc: i.disc,
-          format: i.format,
-          shortformat: (i.format.samplerate / 1000) + 'kHz ' + ((i.format.bits) ? i.format.bits + 'bit' : ''),
-          shortestformat: (i.info.format.samplerate / 1000) + '/' + ((i.info.format.bits) ? i.info.format.bits : ''),
-          art: {
-            cover: ((i.art.cover !== '') ? i.art.cover : '')
-          },
-          count: s.meta.playCount
-        }
-      })
 
-      resolve({
-        id: 'mostplayed',
-        title: 'Most Played',
-        art: tracks.length > 0 ? tracks[0].art.cover : '',
-        playtime: tracks.reduce((p, c) => p.duration + c.duration),
-        tracks: tracks
-      })
-    })
-    */
   }
 }
 
