@@ -8,7 +8,7 @@
     <div class="dropdown-content" @click="isActive = false">
       <span class="dropdown-item">Play from here</span>
       <span class="dropdown-item">Enqueue</span>
-      <span class="dropdown-item" @click="$emit('removeTrack', this.index)">Remove from playlist</span>
+      <span class="dropdown-item" @click="$emit('removeTrack', this.trackID)">Remove from playlist</span>
     </div>
   </div>
 </template>

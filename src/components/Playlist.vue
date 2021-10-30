@@ -9,7 +9,7 @@
           <div class="col-md-8 col-md-offset-2 col-xs-8">
             <h1 class="album-title">{{ this.title }}</h1>
             <p class="subtitle is-1">{{ this.tracks.length }} track{{ this.tracks.length === 1 ? '' : 's' }}</p>
-            <h4>{{ this.playtime }}</h4>
+            <h4>{{ this.totalDuration }}</h4>
           </div>
         </div>
       </div>
@@ -71,25 +71,30 @@ export default {
 
       this.$database.getPlaylist(id)
         .then(data => {
-          this.art = data.art
-          this.title = data.title
+          this.art = data.coverart || '/img/placeholder.png'
+          this.title = data.name
           this.tracks = data.tracks.map(e => { e.dropdown = false; return e })
-          let pt = new Date(data.playtime * 1000).toISOString().substr(11, 8)
-          if (pt.substr(0, 3) === "00:") {
-            pt = pt.substr(3)
-          }
-          if (pt.substr(0, 1) === "0") {
-            pt = pt.substr(1)
-          }
-          this.playtime = pt
         })
     },
-    removeTrack (index) {
-      this.$database.removeFromPlaylist(this.plID, index)
-        .then(() => {
-          this.refreshPlaylist()
+    removeTrack (id) {
+      this.$database.removeFromPlaylist(this.plID, id)
+        .then((data) => {
+          this.tracks = data.tracks.map(e => { e.dropdown = false; return e })
         })
         .catch()
+    }
+  },
+  computed: {
+    totalDuration: function () {
+      const ds = Object.values(this.tracks).reduce((t, {duration}) => t + duration, 0)
+      let pt = new Date(ds * 1000).toISOString().substr(11, 8)
+      if (pt.substr(0, 3) === "00:") {
+        pt = pt.substr(3)
+      }
+      if (pt.substr(0, 1) === "0") {
+        pt = pt.substr(1)
+      }
+      return pt
     }
   }
 }

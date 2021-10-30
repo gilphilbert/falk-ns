@@ -3,8 +3,8 @@
     <div class="modal-content">
       <div class="box">
         <h1>Select Playlist</h1>
-        <label class="radio-container" v-for="playlist in playlists">
-          <p class="is-4">{{ playlist.title }}</p>
+        <label class="radio-container" v-for="playlist in playlists" :key="playlist.id">
+          <p class="is-4">{{ playlist.name }}</p>
           <input type="radio" name="radio" :value="playlist.id" v-model="selected">
           <span class="checkmark"></span>
         </label>
@@ -91,14 +91,15 @@ export default {
   border: 3px solid var(--text-color);
   border-radius: 50%;
 }
-
+/*
 .radio-container:hover input ~ .checkmark {
-  //background-color: var(--text-color);
+  background-color: var(--text-color);
 }
 
 .radio-container input:checked ~ .checkmark {
-  //border-color: var(--primary);
+  border-color: var(--primary);
 }
+*/
 
 .checkmark:after {
   content: "";
@@ -116,7 +117,7 @@ export default {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  //background: var(--primary);
+  /*background: var(--primary);*/
   background: var(--text-color);
 }
 </style>

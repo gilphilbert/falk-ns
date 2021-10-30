@@ -110,7 +110,8 @@ export class DatabaseHandler {
     return new Promise((resolve, reject) => {
       const body = JSON.stringify({ index: index })
       fetch(`/api/playlist/${plID}/${index}`, { method: 'delete' })
-        .then(() => resolve())
+        .then(data => data.json())
+        .then(data => resolve(data))
         .catch((e) => reject(e))
     })
   }

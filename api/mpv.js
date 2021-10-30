@@ -19,7 +19,6 @@ async function init (sendEvent) {
 
     plDataRaw = await readQueue()
     plData = JSON.parse(plDataRaw)
-    console.log(plData)
     
     for (let i = 0; i < plData.files.length; i++) {
       await mpv.append(plData.files[i])
@@ -106,7 +105,6 @@ async function sendQueue (save = false) {
     for (i = 0; i < size; i++) {
       const path = await mpv.getProperty(`playlist/${i}/filename`)
       const track = await database.tracks.trackByPath(path)
-      console.log(track)
       items.push({
         title: track.title,
         artist: track.albumartist,

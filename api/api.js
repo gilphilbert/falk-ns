@@ -126,28 +126,28 @@ module.exports = app => {
     res.json(genre)
   })
 
-  app.get('/api/playlist', function (req, res) {
-    const pls = database.playlists.list()
+  app.get('/api/playlist', async function (req, res) {
+    const pls = await database.playlists.list()
     res.json(pls)
   })
   app.get('/api/playlist/auto/mostplayed', function (req, res) {
-    database.library.popular()
-      .then(pls => {
-        res.json(pls)
-      })
+    //database.library.popular()
+    //  .then(pls => {
+    //    res.json(pls)
+    //  })
   })
-  app.get('/api/playlist/:id', function (req, res) {
+  app.get('/api/playlist/:id', async function (req, res) {
     if (!req.params.id) {
       res.status(400).json({ error: "id missing" })
     } else {
-      const pl = database.playlists.get(req.params.id)
+      const pl = await database.playlists.get(req.params.id)
       if (pl) 
         res.json(pl)
       else
         res.status(400).json({ error: 'invalid id' })
     }
   })
-  app.post('/api/playlist', function (req, res) {
+  app.post('/api/playlist', async function (req, res) {
     if (!req.body.name) {
       res.status(400).json({ error: "name missing" })
     } else {
@@ -155,11 +155,16 @@ module.exports = app => {
       if (req.body.tracks) {
         tracks = req.body.tracks
       }
-      const plId = database.playlists.add(req.body.name, tracks)
-      res.json({ id: plId })
+      database.playlists.add(req.body.name, tracks)
+        .then(() => {
+          res.status(200)
+        })
+        .catch((e) => {
+          res.status(400)
+        })
     }
   })
-  app.put('/api/playlist/:id', function (req, res) {
+  app.put('/api/playlist/:id', async function (req, res) {
     if (!req.params.id) {
       res.status(400).json({ error: "id missing" })
       return
@@ -168,19 +173,19 @@ module.exports = app => {
       res.status(400).json({ error: "invalid tracks" })
       return
     }
-    const status = database.playlists.addTracks(req.params.id, req.body.tracks)
-    if (status) {
+    try {
+      await database.playlists.addTracks(req.params.id, req.body.tracks)
       res.status(200).send()
-    } else {
-      res.status(500).json({ error: 'unknown error' })
+    } catch(e) {
+      res.status(500).json({ error: 'e' })
     }
   })
-  app.delete('/api/playlist/:id/:index', function (req, res) {
-    const status = database.playlists.removeTracks(req.params.id, [req.params.index])
-    if (status) {
-      res.status(200).send()
-    } else {
-      res.status(500).json({ error: 'unknown error' })
+  app.delete('/api/playlist/:playlist/:track', async function (req, res) {
+    try {
+      const status = await database.playlists.removeTracks(req.params.playlist, [req.params.track])
+      res.json(status)
+    } catch (e) {
+      res.status(500).json({ error: e })
     }
   })
 
@@ -192,10 +197,10 @@ module.exports = app => {
       res.status(403).send()
     }
   })
-  app.put('/api/locations', function (req, res) {
+  app.put('/api/locations', async function (req, res) {
     const dir = req.body.location || ''
     if (dir !== '') {
-      const data = database.locations.add(dir)
+      const data = await database.locations.add(dir)
       if (data) {
         res.send(data)
         scanner.scan([dir])

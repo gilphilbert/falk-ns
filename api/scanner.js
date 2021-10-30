@@ -188,7 +188,10 @@ async function watch(database, sendEvent) {
     setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })
   watcher.on('unlink', (path) => {
+    console.log('[SCANNER] Remove :: ' + path)
     database.tracks.removeByPath(path)
+      .then(() => {})
+    //  .catch(e => console.log(e))
     newFiles = true
     setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })

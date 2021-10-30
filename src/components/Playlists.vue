@@ -16,9 +16,13 @@ export default {
     this.$database.getPlaylists()
       .then(data => {
         data = data.map(e => {
-          e.urlParams = { name: 'Playlist', params: { 'id': e.id } }
-          e.surlParams = false
-          return e
+          return {
+            title: e.name,
+            subtitle: null,
+            art: e.coverart || '/img/placeholder.png',
+            urlParams: { name: 'Playlist', params: { 'id': e.id } },
+            surlParams: false
+          }
         })
         this.playlists = data
       })
