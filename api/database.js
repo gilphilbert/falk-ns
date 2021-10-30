@@ -38,23 +38,17 @@ function buildTables () {
     table.integer('added')
     table.boolean('favorite')
   })
-  .then(() => {
-    console.log('[DB] Creating new library')
-  })
-  .catch(e => {
-    console.log('[DB] Opening existing lirary')
-  })
 
   knex.schema.createTable('paths', function (table) {
     table.string('path').primary()
-  }).catch(e => {})
+  })
 
   knex.schema.createTable('playlists', function (table) {
     table.increments('id')
     table.string('name').unique()
     table.string('coverart')
     table.integer('added')
-  }).catch(e => {})
+  })
 
   knex.schema.createTable('playlist_tracks', function (table) {
     table.integer('playlist')
@@ -62,7 +56,7 @@ function buildTables () {
     table.primary(['playlist', 'track'])
     table.foreign('playlist').references('playlists.id').onDelete('cascade')
     table.foreign('track').references('tracks.id').onDelete('cascade')
-  }).catch(e => { console.log(e) })
+  })
 }
 
 async function init () {
