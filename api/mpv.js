@@ -116,6 +116,7 @@ async function sendQueue (save = false) {
       })
       paths.push(path)
     }
+
     sendEvent({ queue: items, state: await getState() }, { event: 'queue' })
     return items
   } catch (e) {

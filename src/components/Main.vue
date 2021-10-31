@@ -3,7 +3,7 @@
   <div id="content-container" v-touch:swipe.left="doHideMenu" v-touch:swipe.right="doShowMenu">
     <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" ></router-view>
   </div>
-  <Menu :isActive="showMenu" @hide="doHideMenu" />
+  <Menu :isActive="showMenu" @hide="doHideMenu" :scanPercent="scanPercent" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" :online="online" v-touch:swipe.top="unhideQueue" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
@@ -42,7 +42,6 @@ export default {
 
     events.addEventListener('queue', evt => {
       const data = JSON.parse(evt.data)
-      console.log(data)
 
       this.playback.queue = data.queue
 
@@ -65,6 +64,22 @@ export default {
       this.playback.elapsed = elapsed
       this.playback.isPlaying = ((data.position !== -1 && !data.paused) ? true : false)
     })
+
+    events.addEventListener('scanner', evt => {
+      const data = JSON.parse(evt.data)
+      const keys = Object.keys(data)
+      if (keys.includes('toScan')) {
+        this.scanPercent = Math.round((data.scanned / data.toScan) * 100)
+        this.stats.songs = data.scanned
+      }
+      if (keys.includes('status')) {
+        if (data.status === 'stopped') {
+          this.scanPercent = 0
+          this.$database.getStats()
+            .then(data => this.stats = data)
+        }
+      }
+    })
   },
   data () {
     return {
@@ -79,7 +94,8 @@ export default {
         queue: []
       },
       stats: {},
-      online: false
+      online: false,
+      scanPercent: 0
     }
   },
   props: [ 'isLoggedIn' ],

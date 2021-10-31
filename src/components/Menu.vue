@@ -18,12 +18,34 @@
     <li><router-link :to="{ name: 'Genres' }"><svg class="feather"><use href="/img/feather-sprite.svg#music"></use></svg><div class="detail">Genres</div></router-link></li>
     <li><router-link :to="{ name: 'Settings' }"><svg class="feather"><use href="/img/feather-sprite.svg#settings"></use></svg><div class="detail">Settings</div></router-link></li>
   </ul>
+
+  <ul class="menu-list right">
+    <li><router-link :to="{ name: 'Playlists' }"><svg class="feather"><use href="/img/feather-sprite.svg#search"></use></svg><div class="detail">Search</div></router-link></li>
+    <!--<li><a><svg class="feather spinner" style="display: block"><use href="/img/feather-sprite.svg#spinner"></use></svg></a></li>-->
+    <li v-if="scanPercent > 0">
+      <a>
+        <div class="progress-pie-chart" :class="{ 'gt-50': scanPercent > 50 }">
+          <div class="ppc-progress">
+            <div class="ppc-progress-fill" :style="{ 'transform': 'rotate('+ degrees + 'deg)' }"></div>
+          </div>
+          <div class="ppc-percents">
+          </div>
+        </div>
+      </a>
+    </li>
+  </ul>
+
 </aside>
 </template>
 <script>
 export default {
   name: 'Menu',
-  props: [ 'isActive' ],
+  props: [ 'isActive', 'scanPercent' ],
+  data () {
+    return {
+      //scanPercent: 25
+    }
+  },
   methods: {
     onSwipe(mouseEvent) {
       console.log(mouseEvent)
@@ -31,6 +53,13 @@ export default {
     hideMenu () {
       this.$emit('hide')
     }
+  },
+  computed: {
+    degrees: function () {
+      return 360 * this.scanPercent / 100
+    }
   }
 }
 </script>
+<style scoped>
+</style>

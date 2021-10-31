@@ -4,7 +4,13 @@ const path = require('path')
 const mm = require('music-metadata')
 const crypto = require('crypto')
 
+const util = require('util');
+const exec = util.promisify(require('child_process').exec)
+
 const database = require('./database')
+
+let totalFiles = 0,
+    filesScanned = 0
 
 async function processFile(ffname) {
   return new Promise(async (resolve, reject) => {
@@ -111,6 +117,8 @@ async function walkFunc (err, pathname, dirent) {
     return Promise.resolve()
   }
   await processFile(path.dirname(pathname) + '/' + dirent.name)
+  filesScanned++
+  sendEvent({ toScan: totalFiles, scanned: filesScanned }, { event: 'scanner' })
 }
 
 function getHome () {
@@ -141,6 +149,8 @@ async function getDirs (dir) {
 async function scan (dir) {
   console.log('Starting scan')
 
+  sendEvent({ status: 'started' }, { event: 'scanner' })
+
   const allSongs = await database.tracks.getAllPaths()
   allSongs.forEach(track => {
     if (!fs.existsSync(track.path)) {
@@ -149,7 +159,15 @@ async function scan (dir) {
     }
   })
 
-  const dirs = dir || database.locations.paths()
+  const dirs = dir || await database.locations.paths()
+  totalFiles = 0
+  for (let i = 0; i < dirs.length; i++) {
+    const { stdout, stderr } = await exec(`find ${dirs[i]} -type f|wc -l`)
+    totalFiles += parseInt(stdout)
+  }
+
+  sendEvent({ toScan: totalFiles, scanned: 0 }, { event: 'scanner' })
+
   for (let i = 0; i < dirs.length; i++) {
     console.log('Scanning', dirs[i])
     try {
@@ -159,41 +177,30 @@ async function scan (dir) {
     }
   }
   console.log('Scan complete')
-}
 
-let newFiles = false
-function sendMessage(sendEvent) {
-  if (newFiles) {
-    newFiles = false
-    sendEvent({ status: 'complete' }, { event: 'update' })
-    setTimeout(() => { sendMessage(sendEvent) }, 2000)
-  }
+  sendEvent({ status: 'stopped' }, { event: 'scanner' })
+  totalFiles = 0
+  filesScanned = 0
 }
 
 const chokidar = require('chokidar')
+const { doesNotReject } = require('assert')
 const wOptions = { ignoreInitial: true, awaitWriteFinish: true }
 let watcher = false
-async function watch(database, sendEvent) {
+async function watch(database) {
+  //console.log(sendEvent)
   const dirs = await database.locations.paths()
   console.log('WATCH :: WATCHING', dirs)
   watcher = chokidar.watch(dirs, wOptions)
   watcher.on('add', async (path, stats) => {
     await processFile(path)
-    newFiles = true
-    setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })
   watcher.on('change', (path) => {
     processFile(path)
-    newFiles = true
-    setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })
   watcher.on('unlink', (path) => {
     console.log('[SCANNER] Remove :: ' + path)
     database.tracks.removeByPath(path)
-      .then(() => {})
-    //  .catch(e => console.log(e))
-    newFiles = true
-    setTimeout(() => { sendMessage(sendEvent) }, 2000)
   })
 }
 function addToWatcher(dir) {

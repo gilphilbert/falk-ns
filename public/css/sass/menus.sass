@@ -49,51 +49,55 @@ aside.menu
     display: inline-flex
     flex-direction: row
     z-index: 2
+    &.right
+      margin-left: auto
+      a
+        padding: 18px 30px 18px 0px
 
-  .menu-list a
-    display: flex
-    width: 100%
-    padding: 18px 0 18px 30px
-    border-radius: 15px
-    background: transparent
-    transition: background 200ms linear
-    .detail
-      display: inline-block
-      font-size: 16px
-      transition: color 0.2s ease
-      &::after
-        content: ''
-        display: block
-        width: 100%
-        height: 3px
-        top: 2px
-        left: 0
-        background: transparent
-        transition: background 0.2s ease
-    &:focus
-      outline: none
-    &:hover
+    a
+      display: flex
+      width: 100%
+      padding: 18px 0 18px 30px
+      border-radius: 15px
+      background: transparent
+      transition: background 200ms linear
       .detail
-        color: var(--yellow)
-      //  position: relative
-      //  &:before
-      //    width: calc(100% + 10px)
-      //    transition: width ease 0.3s
-      text-decoration: none
-    &.router-link-active
-      .feather
-        stroke: var(--primary)
-        transition: stroke ease 0.3s
-      .detail
-        color: var(--white)
+        display: inline-block
+        font-size: 16px
+        transition: color 0.2s ease
         &::after
-          //content: ''
-          //display: block
-          //width: 100%
-          //height: 3px
-          //top: 2px
-          //left: 0
-          background: var(--yellow)
+          content: ''
+          display: block
+          width: 100%
+          height: 3px
+          top: 2px
+          left: 0
+          background: transparent
+          transition: background 0.2s ease
+      &:focus
+        outline: none
+      &:hover
+        .detail
+          color: var(--yellow)
+        //  position: relative
+        //  &:before
+        //    width: calc(100% + 10px)
+        //    transition: width ease 0.3s
+        text-decoration: none
+      &.router-link-active
+        .feather
+          stroke: var(--primary)
+          transition: stroke ease 0.3s
+        .detail
+          color: var(--white)
+          &::after
+            //content: ''
+            //display: block
+            //width: 100%
+            //height: 3px
+            //top: 2px
+            //left: 0
+            background: var(--yellow)
 
   @include media("≤tablet")
     height: 100%
@@ -129,3 +133,4 @@ html.light aside.menu .image.menu-brand svg
     fill: var(--primary)
   circle
     fill: var(--background-color)
+

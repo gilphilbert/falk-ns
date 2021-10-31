@@ -3405,39 +3405,43 @@ aside.menu {
     display: inline-flex;
     flex-direction: row;
     z-index: 2; }
-  aside.menu .menu-list a {
-    display: flex;
-    width: 100%;
-    padding: 18px 0 18px 30px;
-    border-radius: 15px;
-    background: transparent;
-    transition: background 200ms linear; }
-    aside.menu .menu-list a .detail {
-      display: inline-block;
-      font-size: 16px;
-      transition: color 0.2s ease; }
-      aside.menu .menu-list a .detail::after {
-        content: '';
-        display: block;
-        width: 100%;
-        height: 3px;
-        top: 2px;
-        left: 0;
-        background: transparent;
-        transition: background 0.2s ease; }
-    aside.menu .menu-list a:focus {
-      outline: none; }
-    aside.menu .menu-list a:hover {
-      text-decoration: none; }
-      aside.menu .menu-list a:hover .detail {
-        color: var(--yellow); }
-    aside.menu .menu-list a.router-link-active .feather {
-      stroke: var(--primary);
-      transition: stroke ease 0.3s; }
-    aside.menu .menu-list a.router-link-active .detail {
-      color: var(--white); }
-      aside.menu .menu-list a.router-link-active .detail::after {
-        background: var(--yellow); }
+    aside.menu .menu-list.right {
+      margin-left: auto; }
+      aside.menu .menu-list.right a {
+        padding: 18px 30px 18px 0px; }
+    aside.menu .menu-list a {
+      display: flex;
+      width: 100%;
+      padding: 18px 0 18px 30px;
+      border-radius: 15px;
+      background: transparent;
+      transition: background 200ms linear; }
+      aside.menu .menu-list a .detail {
+        display: inline-block;
+        font-size: 16px;
+        transition: color 0.2s ease; }
+        aside.menu .menu-list a .detail::after {
+          content: '';
+          display: block;
+          width: 100%;
+          height: 3px;
+          top: 2px;
+          left: 0;
+          background: transparent;
+          transition: background 0.2s ease; }
+      aside.menu .menu-list a:focus {
+        outline: none; }
+      aside.menu .menu-list a:hover {
+        text-decoration: none; }
+        aside.menu .menu-list a:hover .detail {
+          color: var(--yellow); }
+      aside.menu .menu-list a.router-link-active .feather {
+        stroke: var(--primary);
+        transition: stroke ease 0.3s; }
+      aside.menu .menu-list a.router-link-active .detail {
+        color: var(--white); }
+        aside.menu .menu-list a.router-link-active .detail::after {
+          background: var(--yellow); }
   @media (max-width: 768px) {
     aside.menu {
       height: 100%;
@@ -3544,3 +3548,48 @@ html.light aside.menu .image.menu-brand svg circle {
 @media (max-width: 1023px) {
   .hidden--to-desktop {
     display: none; } }
+
+.progress-pie-chart {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--blue);
+  position: relative; }
+  .progress-pie-chart.gt-50 {
+    background-color: var(--yellow); }
+
+.ppc-progress {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  left: calc(50% - 8px);
+  top: calc(50% - 8px);
+  width: 16px;
+  height: 16px;
+  clip: rect(0, 16px, 16px, 8px); }
+  .ppc-progress .ppc-progress-fill {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    left: calc(50% - 8px);
+    top: calc(50% - 8px);
+    width: 16px;
+    height: 16px;
+    clip: rect(0, 8px, 16px, 0);
+    background: var(--yellow);
+    transform: rotate(60deg); }
+  .gt-50 .ppc-progress {
+    clip: rect(0, 8px, 16px, 0); }
+    .gt-50 .ppc-progress .ppc-progress-fill {
+      clip: rect(0, 16px, 16px, 8px);
+      background: var(--blue); }
+
+.ppc-percents {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  left: calc(50% - 11.4285714286px/2);
+  top: calc(50% - 11.4285714286px/2);
+  width: 11.4285714286px;
+  height: 11.4285714286px;
+  background: var(--background-color); }

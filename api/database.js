@@ -28,6 +28,7 @@ async function buildTables () {
     table.integer('lastplayed')
     table.integer('added')
     table.boolean('favorite')
+    table.index(['album', 'artist'])
   })
 
   await knex.schema.createTable('paths', function (table) {

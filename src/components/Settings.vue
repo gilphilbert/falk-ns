@@ -58,7 +58,6 @@ export default {
     window.fetch('/api/locations')
       .then(response => response.json())
       .then(data => {
-        console.log(data)
         this.setLocations(data)
         this.getDirectories('')
     })
