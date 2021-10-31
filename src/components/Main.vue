@@ -70,6 +70,9 @@ export default {
       const keys = Object.keys(data)
       if (keys.includes('toScan')) {
         this.scanPercent = Math.round((data.scanned / data.toScan) * 100)
+        if (this.scanned > this.stats.songs) {
+          this.stats.songs = this.scanned
+        }
         this.stats.songs = data.scanned
       }
       if (keys.includes('status')) {

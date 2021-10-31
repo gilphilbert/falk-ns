@@ -153,9 +153,9 @@ async function scan (dir) {
 
   const allSongs = await database.tracks.getAllPaths()
   allSongs.forEach(track => {
-    if (!fs.existsSync(track.path)) {
-      console.log('DELETE ::', track.path)
-      database.tracks.removeByPath(track.path)
+    if (!fs.existsSync(track)) {
+      console.log('DELETE ::', track)
+      database.tracks.removeByPath(track)
     }
   })
 
