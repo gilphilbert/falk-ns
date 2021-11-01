@@ -102,6 +102,11 @@ async function walkFunc (err, pathname, dirent) {
     return Promise.resolve()
   }
 
+  // we should report this now, allows to track all files processed (even those skipped)
+  // this is important as the number of files to be scanned includes *all* files
+  filesScanned++
+  sendEvent({ toScan: totalFiles, scanned: filesScanned }, { event: 'scanner' })
+
   // skip directories
   if (dirent.isDirectory() || dirent.isSymbolicLink()) {
     return Promise.resolve()
@@ -118,8 +123,6 @@ async function walkFunc (err, pathname, dirent) {
     return Promise.resolve()
   }
   await processFile(path.dirname(pathname) + '/' + dirent.name)
-  filesScanned++
-  sendEvent({ toScan: totalFiles, scanned: filesScanned }, { event: 'scanner' })
 }
 
 function getHome () {
