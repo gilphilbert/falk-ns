@@ -8,8 +8,8 @@ async function buildTables () {
     table.increments('id')
     table.string('path').unique()
     table.string('type')
-    table.string('disc')
-    table.string('track')
+    table.integer('disc')
+    table.integer('track')
     table.string('title')
     table.string('album')
     table.string('artist')
@@ -107,19 +107,39 @@ const tracks = {
       added: Date.now(),
       favorite: false
     }
-    /*
-    const artist = knex('artists').select('id').where('name', info.artist)
-    if (artist.length > 0) {
-      tr.albumartist = artist[0].id
-    } else {
-      const rowid = await knex('artists').insert({ name: info.albumartist, thumb: info.art.artist, background: info.art.background, thumbs: JSON.stringify(['info.art.artist']), backgrounds: JSON.stringify(['info.art.background']) })
-      tr.albumartist = rowid[0]
-    }
-    */
     return knex('tracks').insert(tr)
   },
+  update: async (info) => {
+    const tr = {
+      path: info.path,
+      type: info.type || '',
+      disc: info.disc || 0,
+      track: info.track || 0,
+      title: info.title || 'unknown track',
+      album: info.album || 'unknown album',
+      artist: info.artists[0] || 'unknown artist',
+      albumartist: info.albumartist || 'unkown artist',
+      genre: info.genre || 'unknown',
+      year: info.year || 0,
+      duration: info.duration || 0,
+      lossless: info.format.lossless,
+      samplerate: info.format.samplerate || 0,
+      bits: info.format.bits || 0,
+      channels: info.format.channels || 0,
+      codec: info.format.codec || '',
+      artistart: info.art.artist || '',
+      coverart: info.art.cover || '',
+      discart: info.art.disc || '',
+      backgroundart: info.art.background || '',
+      playcount: 0,
+      lastplayed: 0,
+      added: Date.now(),
+      favorite: false
+    }
+    return knex('tracks').where('path', tr.path).update(tr)
+  },
   removeByPath: (path) => {
-    return knex('tracks').select('*').where('path', path).delete()
+    return knex('tracks').where('path', path).delete()
   },
   trackByPath: (path) => {
     return knex.from('tracks').select('*').where('path', path)
@@ -159,10 +179,9 @@ const library = {
   },
   artists: function () {
     return knex.raw('select `albumartist` as `name`, `artistart` as `art` from `tracks` group by LOWER(TRIM(`albumartist`)) order by `name`')
-    //return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album').orderBy('name')
   },
   artist: function (artistName) {
-    return knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'name' }, { column: 'album' }])
+    return knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'year' }, { column: 'album' }])
       .then((rows) => {
         let background = '',  
             artistart = '',
@@ -189,7 +208,7 @@ const library = {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('name')
   },
   album: function (artist, album) {
-    return knex.from('tracks').select('*').where('albumartist', artist).andWhere('album', album).orderBy('disc', 'track')
+    return knex.from('tracks').select('*').where('albumartist', artist).andWhere('album', album).orderBy('track', 'disc')
       .then((rows) => {
         rows.map(r => {
           r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')

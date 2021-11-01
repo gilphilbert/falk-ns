@@ -70,7 +70,8 @@ const router = new createRouter({
       component: { template: '<router-view></router-view>' },
       children: [
         { path: '', name: 'Artists', component: Artists, meta: { scrollToTop: true } },
-        { path: ':artist', name: 'Artist', component: Artist, props: true, meta: { scrollToTop: true } }
+        { path: ':artist', name: 'Artist', component: Artist, props: true, meta: { scrollToTop: true } },
+        { path: ':artist/:album', name: 'ArtistAlbum', component: Album, props: true, meta: { scrollToTop: true } }
       ]
     },
     {

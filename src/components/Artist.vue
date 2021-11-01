@@ -37,7 +37,7 @@ export default {
             title: e.name,
             subtitle: e.year,
             art: e.art,
-            urlParams: { name: 'Album', params: { 'album': e.name, 'artist': this.artist } },
+            urlParams: { name: 'ArtistAlbum', params: { 'album': e.name, 'artist': this.artist } },
             surlParams: false,
           }
         })

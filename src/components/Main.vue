@@ -105,7 +105,7 @@ export default {
       online: false,
       scanPercent: 0,
       scanning: false,
-      timeout: null
+      timer: null
     }
   },
   props: [ 'isLoggedIn' ],
@@ -122,23 +122,16 @@ export default {
     doHideMenu () {
       this.showMenu = false
     },
-    tick () {
-      if (this.timeout != null) {
-        clearTimeout(this.timeout)
-        this.timeout = null
-      }
-      this.timeout = setTimeout(() => {
-        if (this.playback.isPlaying) {
-          this.playback.elapsed += 100
-          this.tick()
-        }
-      }, 100)
-    }
   },
   watch: {
     'playback.isPlaying': function () {
-      if (this.playback.isPlaying)
-        this.tick()
+      if (this.playback.isPlaying) {
+        this.timer = setInterval(()=>{
+          this.playback.elapsed += 100
+        },100)
+      } else {
+        clearInterval(this.timer)
+      }
     }
   }
 }

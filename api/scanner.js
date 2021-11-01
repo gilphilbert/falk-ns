@@ -12,10 +12,9 @@ const database = require('./database')
 let totalFiles = 0,
     filesScanned = 0
 
-async function processFile(ffname) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const meta = await mm.parseFile(ffname)
+async function processFile(ffname, { overwrite } = {}) {
+  return mm.parseFile(ffname)
+    .then(async meta => {
       const song = {
         path: ffname,
         type: ffname.substr(ffname.lastIndexOf('.') + 1),
@@ -79,21 +78,19 @@ async function processFile(ffname) {
             })
           }
           if (ext === null) {
-            console.log('[PIC] Unsupported filetype: "' + pic.filetype + '"')
+            console.log('[SCAN][Pic] Unsupported filetype: "' + pic.filetype + '"')
           }
         })
       }
   
-  
-      await database.tracks.add(song)
-      console.log(`ADD :: ${song.title} [${ffname}]`)
-      resolve()
-    } catch (e) {
-      console.log('Metadata lookup failed for: ' + ffname)
-      console.log(e)
-      resolve()
-    }
-  })
+      if (overwrite) {
+        await database.tracks.update(song)
+        console.log(`[SCAN][Updated] :: ${song.title} [${ffname}]`)
+      } else {
+        await database.tracks.add(song)
+        console.log(`[SCAN][Added] :: ${song.title} [${ffname}]`)
+      }
+    })
 }
 
 async function walkFunc (err, pathname, dirent) {
@@ -156,10 +153,11 @@ async function scan (dir) {
   sendEvent({ status: 'started' }, { event: 'scanner' })
 
   const allSongs = await database.tracks.getAllPaths()
-  allSongs.forEach(track => {
+  console.log(allSongs)
+  allSongs.forEach(async track => {
     if (!fs.existsSync(track)) {
-      console.log('DELETE ::', track)
-      database.tracks.removeByPath(track)
+      console.log('[SCAN][Remove] ::', track)
+      await database.tracks.removeByPath(track)
     }
   })
 
@@ -194,25 +192,27 @@ let watcher = false
 async function watch(database) {
   //console.log(sendEvent)
   const dirs = await database.locations.paths()
-  console.log('WATCH :: WATCHING', dirs)
+  //console.log('[SCAN][Watch] :: ', dirs)
   watcher = chokidar.watch(dirs, wOptions)
   watcher.on('add', async (path, stats) => {
+    console.log('[WATCH][Add] :: ' + path)
     await processFile(path)
   })
-  watcher.on('change', (path) => {
-    processFile(path)
+  watcher.on('change', async (path) => {
+    console.log('[WATCH][Change] :: ' + path)
+    await processFile(path, { overwrite: true })
   })
-  watcher.on('unlink', (path) => {
-    console.log('[SCANNER] Remove :: ' + path)
-    database.tracks.removeByPath(path)
+  watcher.on('unlink', async (path) => {
+    console.log('[WATCH][Remove] :: ' + path)
+    await database.tracks.removeByPath(path)
   })
 }
 function addToWatcher(dir) {
-  console.log('WATCH :: ADDED', dir)
+  console.log('[WATCH][AddDir] :: ', dir)
   watcher.add(dir)
 }
 function delFromWatcher(dir) {
-  console.log('WATCH :: REMOVED', dir)
+  console.log('[WATCH][RemoveDir] :: ', dir)
   watcher.unwatch(dir)
 }
 
