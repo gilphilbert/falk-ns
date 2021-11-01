@@ -74,6 +74,7 @@ export default {
           this.stats.songs = this.scanned
         }
         this.stats.songs = data.scanned
+        this.scanning = true
       }
       if (keys.includes('status')) {
         if (data.status === 'started') {

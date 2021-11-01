@@ -21,7 +21,7 @@
 
   <ul class="menu-list right">
     <li><router-link :to="{ name: 'Playlists' }"><svg class="feather"><use href="/img/feather-sprite.svg#search"></use></svg><div class="detail">Search</div></router-link></li>
-    <li v-if="scanning || scanPercent > 0">
+    <li v-if="scanning">
       <a>
         <div class="progress-pie-chart" :class="{ 'gt-50': scanPercent > 50, 'fade': scanning && scanPercent === 0 }">
           <div class="ppc-progress">
