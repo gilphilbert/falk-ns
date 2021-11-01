@@ -103,7 +103,8 @@ export default {
       stats: {},
       online: false,
       scanPercent: 0,
-      scanning: false
+      scanning: false,
+      timeout: null
     }
   },
   props: [ 'isLoggedIn' ],
@@ -121,7 +122,11 @@ export default {
       this.showMenu = false
     },
     tick () {
-      setTimeout(() => {
+      if (this.timeout != null) {
+        clearTimeout(this.timeout)
+        this.timeout = null
+      }
+      this.timeout = setTimeout(() => {
         if (this.playback.isPlaying) {
           this.playback.elapsed += 100
           this.tick()

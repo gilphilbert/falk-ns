@@ -2614,7 +2614,7 @@ table {
   table th {
     text-align: left;
     font-size: 1.2rem;
-    border-bottom: 3px solid var(--gray-darker); }
+    border-bottom: 3px solid var(--lighten); }
   table td {
     vertical-align: middle; }
     table td.is-narrow {

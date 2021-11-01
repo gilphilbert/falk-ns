@@ -11,7 +11,7 @@
         </figure>
       </div>
       <div class="col-xs-12 col-md-6">
-        <h1>{{ this.artist }}</h1>
+        <h1 class="is-capitalized">{{ this.artist }}</h1>
       </div>
     </div>
     <Tiles :tiles="albums" />

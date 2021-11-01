@@ -6,8 +6,8 @@
     <div class="row">
       <div class="col-xs-10 col-md-4 col-md-offset-4 has-margin-auto-mobile">
         <div class="art">
-          <figure id="home-albumart" class="image is-1by1"><img :src="((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art.cover : '/img/placeholder.png') + '?size=600'" style="z-index: 1;"></figure>
-          <figure id="home-albumart" class="hidden-lg image is-1by1" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art.disc !== ''" style="margin-top: -100%; position: relative; left: 15%; border: none; background: transparent"><img :class="{ 'rotate': this.playback.isPlaying }" :src="this.playback.queue[this.playback.queuePos].art.disc + '?size=600'"></figure>
+          <figure id="home-albumart" class="image is-1by1"><img :src="((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art : '/img/placeholder.png') + '?size=600'" style="z-index: 1;"></figure>
+          <figure id="home-albumart" class="hidden-lg image is-1by1" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].discart !== ''" style="margin-top: -100%; position: relative; left: 15%; border: none; background: transparent"><img :class="{ 'rotate': this.playback.isPlaying }" :src="this.playback.queue[this.playback.queuePos].discart + '?size=600'"></figure>
         </div>
         <div id="mobile-toolbar" class="has-text-centered" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].album !== ''">
           <div>
@@ -19,11 +19,11 @@
         </div>
       </div>
       <div class="col-xs-10 col-xs-offset-1">
-        <h2 id="home-title" class="has-text-centered has-no-overflow is-1">{{ ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].title : 'Nothing playing') }}</h2>
-        <p class="has-text-centered subtitle is-3 has-no-overflow hidden--to-desktop" v-if="this.playback.queue[this.playback.queuePos]">
+        <h2 id="home-title" class="has-text-centered has-no-overflow is-1 is-capitalized">{{ ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].title : 'Nothing playing') }}</h2>
+        <p class="has-text-centered subtitle is-3 has-no-overflow hidden--to-desktop is-capitalized" v-if="this.playback.queue[this.playback.queuePos]">
           <router-link id="home-album" :to="{ name: 'Album', params: { artist: this.playback.queue[this.playback.queuePos].artist, album: this.playback.queue[this.playback.queuePos].album } }">{{ this.playback.queue[this.playback.queuePos].album }}</router-link>
         </p>
-        <p class="has-text-centered subtitle is-3 has-no-overflow" v-if="this.playback.queue[this.playback.queuePos]">
+        <p class="has-text-centered subtitle is-3 has-no-overflow is-capitalized" v-if="this.playback.queue[this.playback.queuePos]">
           <router-link id="home-artist" :to="{ name: 'Artist', params: { artist: this.playback.queue[this.playback.queuePos].artist } }">{{ this.playback.queue[this.playback.queuePos].artist }}</router-link>
         </p>
         <p class="has-text-centered" v-if="this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].shortformat !== ''">

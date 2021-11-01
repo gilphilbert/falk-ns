@@ -18,13 +18,13 @@ async function processFile(ffname) {
       const meta = await mm.parseFile(ffname)
       const song = {
         path: ffname,
-        type: ffname.substr(ffname.lastIndexOf('.') + 1),
-        title: meta.common.title,
-        album: meta.common.album,
-        albumartist: (('albumartist' in meta.common) ? meta.common.albumartist : meta.common.artist),
+        type: ffname.substr(ffname.lastIndexOf('.') + 1).toLowerCase(),
+        title: meta.common.title.toLowerCase(),
+        album: meta.common.album.toLowerCase(),
+        albumartist: (('albumartist' in meta.common) ? meta.common.albumartist.toLowerCase() : meta.common.artist.toLowerCase()),
         artists: meta.common.artists,
         duration: Math.round(meta.format.duration),
-        genre: (('genre' in meta.common) ? meta.common.genre[0] : ''),
+        genre: (('genre' in meta.common) ? meta.common.genre[0].toLowerCase() : ''),
         year: meta.common.year,
         track: meta.common.track.no,
         disc: meta.common.disk.no || 1,
@@ -33,12 +33,13 @@ async function processFile(ffname) {
           samplerate: meta.format.sampleRate,
           channels: meta.format.numberOfChannels,
           bits: meta.format.bitsPerSample,
-          codec: meta.format.codec
+          codec: meta.format.codec.toLowerCase()
         },
         art: {
           artist: '',
           cover: '',
-          disc: ''
+          disc: '',
+          background: ''
         }
       }
   

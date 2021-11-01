@@ -111,6 +111,7 @@ async function sendQueue (save = false) {
         duration: track.duration,
         album: track.album,
         art: track.coverart,
+        discart: track.discart,
         playing: ((i === plPos) ? true : false),
         shortformat: (track.samplerate / 1000) + 'kHz ' + ((track.bits) ? track.bits + 'bit' : ''),
       })

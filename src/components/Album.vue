@@ -7,10 +7,10 @@
             <figure class="image"><img :src="this.art + '?size=800'"></figure>
           </div>
           <div class="col-md-8 col-md-offset-2 col-xs-8">
-            <h2 class="album-title">{{ this.title }}</h2>
-            <p class="subtitle is-1"><router-link :to="{ name: 'Artist', params: { artist: this.$route.params.artist } }">{{ this.$route.params.artist }}</router-link></p>
+            <h2 class="album-title is-capitalized">{{ this.title }}</h2>
+            <p class="subtitle is-1 is-capitalized"><router-link :to="{ name: 'Artist', params: { artist: this.$route.params.artist } }">{{ this.$route.params.artist }}</router-link></p>
             <p class="is-4 detail">{{ this.year }}</p>
-            <p class="is-4"><router-link :to="{ name: 'Genre', params: { genre: this.genre } }">{{ this.genre }}</router-link></p>
+            <p class="is-4 is-capitalized"><router-link :to="{ name: 'Genre', params: { genre: this.genre } }">{{ this.genre }}</router-link></p>
             <p class="is-6 tag is-rounded detail">{{ shortestformat }}</p>
           </div>
         </div>
@@ -22,7 +22,7 @@
             <table class="table songs">
               <tbody>
                 <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track.id">
-                  <td class="pointer" @click="playAll(index)"><p class="is-5">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
+                  <td class="pointer" @click="playAll(index)"><p class="is-5 is-capitalized">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortestformat }}</span></td>
                   <td class="is-narrow">
                     <AlbumDropDown :index="index" :trackID="track.id" @addToPlaylist="addToPlaylist" />

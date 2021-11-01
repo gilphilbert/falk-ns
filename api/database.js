@@ -1,3 +1,5 @@
+const { jSXClosingElement } = require('@babel/types')
+
 let knex = null
 
 async function buildTables () {
@@ -30,7 +32,16 @@ async function buildTables () {
     table.boolean('favorite')
     table.index(['album', 'artist'])
   })
-
+  /*
+  await knex.schema.createTable('artists', function (table) {
+    table.increments('id')
+    table.string('name')
+    table.string('background')
+    table.string('thumb')
+    table.string('backgrounds')
+    table.string('thumbs')
+  })
+  */
   await knex.schema.createTable('paths', function (table) {
     table.string('path').primary()
   })
@@ -75,11 +86,11 @@ const tracks = {
       type: info.type || '',
       disc: info.disc || 0,
       track: info.track || 0,
-      title: info.title || 'Unknown Track',
-      album: info.album || '',
-      artist: info.artists[0] || 'Unknown Artist',
-      albumartist: info.albumartist || 'Unkown Artist',
-      genre: info.genre || 'Unknown',
+      title: info.title || 'unknown track',
+      album: info.album || 'unknown album',
+      artist: info.artists[0] || 'unknown artist',
+      albumartist: info.albumartist || 'unkown artist',
+      genre: info.genre || 'unknown',
       year: info.year || 0,
       duration: info.duration || 0,
       lossless: info.format.lossless,
@@ -90,11 +101,21 @@ const tracks = {
       artistart: info.art.artist || '',
       coverart: info.art.cover || '',
       discart: info.art.disc || '',
+      backgroundart: info.art.background || '',
       playcount: 0,
       lastplayed: 0,
       added: Date.now(),
       favorite: false
     }
+    /*
+    const artist = knex('artists').select('id').where('name', info.artist)
+    if (artist.length > 0) {
+      tr.albumartist = artist[0].id
+    } else {
+      const rowid = await knex('artists').insert({ name: info.albumartist, thumb: info.art.artist, background: info.art.background, thumbs: JSON.stringify(['info.art.artist']), backgrounds: JSON.stringify(['info.art.background']) })
+      tr.albumartist = rowid[0]
+    }
+    */
     return knex('tracks').insert(tr)
   },
   removeByPath: (path) => {
@@ -137,9 +158,8 @@ const library = {
      })
   },
   artists: function () {
-    //return knex.from('tracks').select('artistart as art').distinct('albumartist as name').orderBy([{ column: 'name' }])
-    //return knex.from('tracks').select('artistart as art', 'albumartist as name').groupBy('LOWER(TRIM(albumartist))').orderBy([{ column: 'name' }])
-    return knex.raw('select `artistart` as `art`, `albumartist` as `name` from `tracks` group by LOWER(TRIM(`albumartist`)) order by `name`')
+    return knex.raw('select `albumartist` as `name`, `artistart` as `art` from `tracks` group by LOWER(TRIM(`albumartist`)) order by `name`')
+    //return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album').orderBy('name')
   },
   artist: function (artistName) {
     return knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'name' }, { column: 'album' }])
@@ -169,7 +189,7 @@ const library = {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album').orderBy('name')
   },
   album: function (artist, album) {
-    return knex.from('tracks').select('*').where('artist', artist).andWhere('album', album).orderBy('disc', 'track')
+    return knex.from('tracks').select('*').where('albumartist', artist.toLowerCase()).andWhere('album', album.toLowerCase()).orderBy('disc', 'track')
       .then((rows) => {
         rows.map(r => {
           r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
@@ -189,7 +209,8 @@ const library = {
       })
   },
   genres: function () {
-    return knex.from('tracks').select('genre as name', 'coverart as art').groupBy('name').orderBy('name')
+    return knex.raw('select `genre` as `name`, `coverart` as `art` from `tracks` group by LOWER(TRIM(`genre`)) order by `name`')
+    //return knex.from('tracks').select('genre as name', 'coverart as art').groupBy('name').orderBy('name')
   },
   genre: function (genre) {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').where('genre', '=', genre).groupBy('album').orderBy('name')
