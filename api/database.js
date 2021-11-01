@@ -137,7 +137,9 @@ const library = {
      })
   },
   artists: function () {
-    return knex.from('tracks').select('artistart as art').distinct('albumartist as name').orderBy([{ column: 'name' }])
+    //return knex.from('tracks').select('artistart as art').distinct('albumartist as name').orderBy([{ column: 'name' }])
+    //return knex.from('tracks').select('artistart as art', 'albumartist as name').groupBy('LOWER(TRIM(albumartist))').orderBy([{ column: 'name' }])
+    return knex.raw('select `artistart` as `art`, `albumartist` as `name` from `tracks` group by LOWER(TRIM(`albumartist`)) order by `name`')
   },
   artist: function (artistName) {
     return knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'name' }, { column: 'album' }])

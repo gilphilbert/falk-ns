@@ -3,7 +3,7 @@
   <div id="content-container" v-touch:swipe.left="doHideMenu" v-touch:swipe.right="doShowMenu">
     <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" ></router-view>
   </div>
-  <Menu :isActive="showMenu" @hide="doHideMenu" :scanPercent="scanPercent" />
+  <Menu :isActive="showMenu" @hide="doHideMenu" :scanPercent="scanPercent" :scanning="scanning" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" :online="online" v-touch:swipe.top="unhideQueue" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
@@ -76,7 +76,11 @@ export default {
         this.stats.songs = data.scanned
       }
       if (keys.includes('status')) {
+        if (data.status === 'started') {
+          this.scanning = true
+        } else
         if (data.status === 'stopped') {
+          this.scanning = false
           this.scanPercent = 0
           this.$database.getStats()
             .then(data => this.stats = data)
@@ -98,7 +102,8 @@ export default {
       },
       stats: {},
       online: false,
-      scanPercent: 0
+      scanPercent: 0,
+      scanning: false
     }
   },
   props: [ 'isLoggedIn' ],

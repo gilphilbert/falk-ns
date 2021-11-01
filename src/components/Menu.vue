@@ -21,10 +21,9 @@
 
   <ul class="menu-list right">
     <li><router-link :to="{ name: 'Playlists' }"><svg class="feather"><use href="/img/feather-sprite.svg#search"></use></svg><div class="detail">Search</div></router-link></li>
-    <!--<li><a><svg class="feather spinner" style="display: block"><use href="/img/feather-sprite.svg#spinner"></use></svg></a></li>-->
-    <li v-if="scanPercent > 0">
+    <li v-if="scanning">
       <a>
-        <div class="progress-pie-chart" :class="{ 'gt-50': scanPercent > 50 }">
+        <div class="progress-pie-chart" :class="{ 'gt-50': scanPercent > 50, 'fade': scanning && scanPercent === 0 }">
           <div class="ppc-progress">
             <div class="ppc-progress-fill" :style="{ 'transform': 'rotate('+ degrees + 'deg)' }"></div>
           </div>
@@ -40,12 +39,7 @@
 <script>
 export default {
   name: 'Menu',
-  props: [ 'isActive', 'scanPercent' ],
-  data () {
-    return {
-      //scanPercent: 25
-    }
-  },
+  props: [ 'isActive', 'scanPercent', 'scanning' ],
   methods: {
     onSwipe(mouseEvent) {
       console.log(mouseEvent)
@@ -62,4 +56,19 @@ export default {
 }
 </script>
 <style scoped>
+.fade {
+    -webkit-animation: fadeinout 1s infinite;
+    animation: fadeinout 1s infinite;
+    background: var(--yellow)
+}
+
+@-webkit-keyframes fadeinout {
+  0%,100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes fadeinout {
+  0%,100% { opacity: 0; }
+  50% { opacity: 1; }
+}
 </style>
