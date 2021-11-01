@@ -3396,7 +3396,7 @@ aside.menu {
       aside.menu .image.menu-brand svg path {
         fill: var(--white); }
       aside.menu .image.menu-brand svg circle {
-        fill: var(--primary); }
+        fill: var(--blue-dark); }
   aside.menu .menu-label, aside.menu .menu-list a {
     color: var(--menu-text);
     letter-spacing: inherit;

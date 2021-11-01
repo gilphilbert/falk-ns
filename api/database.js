@@ -186,10 +186,10 @@ const library = {
       .catch(err => console.log(err))
   },
   albums: function () {
-    return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album').orderBy('name')
+    return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('name')
   },
   album: function (artist, album) {
-    return knex.from('tracks').select('*').where('albumartist', artist.toLowerCase()).andWhere('album', album.toLowerCase()).orderBy('disc', 'track')
+    return knex.from('tracks').select('*').where('albumartist', artist).andWhere('album', album).orderBy('disc', 'track')
       .then((rows) => {
         rows.map(r => {
           r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')

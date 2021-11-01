@@ -18,13 +18,13 @@ async function processFile(ffname) {
       const meta = await mm.parseFile(ffname)
       const song = {
         path: ffname,
-        type: ffname.substr(ffname.lastIndexOf('.') + 1).toLowerCase(),
-        title: meta.common.title.toLowerCase(),
-        album: meta.common.album.toLowerCase(),
-        albumartist: (('albumartist' in meta.common) ? meta.common.albumartist.toLowerCase() : meta.common.artist.toLowerCase()),
+        type: ffname.substr(ffname.lastIndexOf('.') + 1),
+        title: meta.common.title,
+        album: meta.common.album,
+        albumartist: (('albumartist' in meta.common) ? meta.common.albumartist : meta.common.artist),
         artists: meta.common.artists,
         duration: Math.round(meta.format.duration),
-        genre: (('genre' in meta.common) ? meta.common.genre[0].toLowerCase() : ''),
+        genre: (('genre' in meta.common) ? meta.common.genre[0] : ''),
         year: meta.common.year,
         track: meta.common.track.no,
         disc: meta.common.disk.no || 1,
@@ -33,7 +33,7 @@ async function processFile(ffname) {
           samplerate: meta.format.sampleRate,
           channels: meta.format.numberOfChannels,
           bits: meta.format.bitsPerSample,
-          codec: meta.format.codec.toLowerCase()
+          codec: meta.format.codec
         },
         art: {
           artist: '',
@@ -56,19 +56,19 @@ async function processFile(ffname) {
   
           switch (pic.type) {
             case 'Cover (front)':
-              fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-cover.' + ext
+              fn = crypto.createHash('sha1').update(song.album + song.albumartist).digest('hex') + '-cover.' + ext
               song.art.cover = '/art/' + fn
               break
             case 'Media (e.g. label side of CD)':
-              fn = crypto.createHash('sha1').update(song.album.toLowerCase() + song.albumartist.toLowerCase()).digest('hex') + '-disc.' + ext
+              fn = crypto.createHash('sha1').update(song.album + song.albumartist).digest('hex') + '-disc.' + ext
               song.art.disc = '/art/' + fn
               break
             case 'Artist/performer':
-              fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '.' + ext
+              fn = crypto.createHash('sha1').update(song.albumartist).digest('hex') + '.' + ext
               song.art.artist = '/art/' + fn
               break
             case 'Illustration':
-              fn = crypto.createHash('sha1').update(song.albumartist.toLowerCase()).digest('hex') + '-bg.' + ext
+              fn = crypto.createHash('sha1').update(song.albumartist).digest('hex') + '-bg.' + ext
               song.art.background = '/art/' + fn
               break
           }
