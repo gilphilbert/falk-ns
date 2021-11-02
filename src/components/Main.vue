@@ -124,14 +124,15 @@ export default {
       this.showMenu = false
     },
     tick () {
-      const newTime = new Date.getTime()
-      this.playback.elapsed += newTime - this.lastTimeUpdate
+      const newTime = new Date().getTime()
+      this.playback.elapsed += (newTime - this.lastTimeUpdate)
       this.lastTimeUpdate = newTime
     }
   },
   watch: {
     'playback.isPlaying': function () {
       if (this.playback.isPlaying) {
+        this.lastTimeUpdate = new Date().getTime()
         this.timer = setInterval(()=>{
           this.tick()
         },100)
