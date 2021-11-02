@@ -227,6 +227,9 @@ player = {
   jump: async function (pos) {
     try {
       await mpv.jump(pos)
+      const pau = await mpv.isPaused()
+      if (pau)
+        await mpv.play()
     } catch (e) { console.log("[INFO] [Player] Error jumping") }
   },
   clear: async function () {
