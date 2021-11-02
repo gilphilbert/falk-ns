@@ -338,6 +338,7 @@ player = {
 function shutdown() {
   console.log("[INFO] [Player] Shutting down...")
   //writeQueue()
+  mpv.quit()
   console.log("Done.")
 }
 

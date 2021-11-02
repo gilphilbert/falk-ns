@@ -105,7 +105,8 @@ export default {
       online: false,
       scanPercent: 0,
       scanning: false,
-      timer: null
+      timer: null,
+      lastTimeUpdate: 0
     }
   },
   props: [ 'isLoggedIn' ],
@@ -122,12 +123,17 @@ export default {
     doHideMenu () {
       this.showMenu = false
     },
+    tick () {
+      const newTime = new Date.getTime()
+      this.playback.elapsed += newTime - this.lastTimeUpdate
+      this.lastTimeUpdate = newTime
+    }
   },
   watch: {
     'playback.isPlaying': function () {
       if (this.playback.isPlaying) {
         this.timer = setInterval(()=>{
-          this.playback.elapsed += 100
+          this.tick()
         },100)
       } else {
         clearInterval(this.timer)
