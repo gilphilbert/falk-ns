@@ -51,9 +51,12 @@ export default {
 
       if (this.selected === 'new') {
         this.$database.newPlaylist(this.newName, this.selectedId)
+          .then(data => this.playlists = data)
       } else {
         this.$database.addToPlaylist(this.selected, this.selectedId)
       }
+
+      this.selected = ''
 
       this.$emit('close')
     }
@@ -91,15 +94,6 @@ export default {
   border: 3px solid var(--text-color);
   border-radius: 50%;
 }
-/*
-.radio-container:hover input ~ .checkmark {
-  background-color: var(--text-color);
-}
-
-.radio-container input:checked ~ .checkmark {
-  border-color: var(--primary);
-}
-*/
 
 .checkmark:after {
   content: "";

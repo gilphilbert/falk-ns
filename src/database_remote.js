@@ -2,117 +2,75 @@ export class DatabaseHandler {
   constructor () { }
 
   async getStats () {
-    return new Promise((resolve, reject) => {
-      fetch('/api/stats')
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+      return fetch('/api/stats')
+      .then(data => data.json())
   }
 
-  getArtists () {
-    return new Promise((resolve, reject) => {
-      fetch('/api/artists')
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+  async getArtists () {
+    return fetch('/api/artists')
+      .then(data => data.json())
   }
 
-  getArtist (artist) {
-    return new Promise((resolve, reject) => {
-      fetch(`/api/artist/${artist}`)
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+  async getArtist (artist) {
+    return fetch(`/api/artist/${artist}`)
+      .then(data => data.json())
   }
 
-  getAlbums () {
-    return new Promise((resolve, reject) => {
-      fetch(`/api/albums`)
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+  async getAlbums () {
+    return fetch(`/api/albums`)
+      .then(data => data.json())
   }
 
-  getAlbum (artist, album) {
-    return new Promise((resolve, reject) => {
-      fetch(`/api/album/${artist}/${album}`)
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+  async getAlbum (artist, album) {
+    return fetch(`/api/album/${artist}/${album}`)
+      .then(data => data.json())
   }
 
-  getGenres () {
-    return new Promise((resolve, reject) => {
-      fetch(`/api/genres`)
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+  async getGenres () {
+    return fetch(`/api/genres`)
+      .then(data => data.json())
   }
 
-  getGenre (genre) {
-    return new Promise((resolve, reject) => {
-      fetch(`/api/genre/${genre}`)
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+  async getGenre (genre) {
+    return fetch(`/api/genre/${genre}`)
+      .then(data => data.json())
   }
 
-  getPlaylists () {
-    return new Promise((resolve, reject) => {
-      fetch(`/api/playlist`)
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+  async getPlaylists () {
+    return fetch(`/api/playlist`)
+      .then(data => data.json())
   }
 
-  getPlaylist (id) {
-    return new Promise((resolve, reject) => {
-      fetch(`/api/playlist/${id}`)
-        .then(data => data.json())
-        .then(data => resolve(data))
-    })
+  async getPlaylist (id) {
+    return fetch(`/api/playlist/${id}`)
+      .then(data => data.json())
   }
 
-  newPlaylist (name, track) {
-    return new Promise((resolve, reject) => {
-      const body = JSON.stringify({ name: name, tracks: [ track ]})
-      fetch(`/api/playlist`, {
-        method: 'post',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: body
-      })
-        .then(() => resolve())
-        .catch((e) => reject(e))
+  async newPlaylist (name, track) {
+    return fetch(`/api/playlist`, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name: name, tracks: [ track ]})
     })
+      .then(data => data.json())
   }
 
-  addToPlaylist (id, track) {
-    return new Promise((resolve, reject) => {
-      const body = JSON.stringify({ tracks: [ track ]})
-      fetch(`/api/playlist/${id}`, {
+  async addToPlaylist (id, track) {
+    return fetch(`/api/playlist/${id}`, {
         method: 'put',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
-        body: body
+        body: JSON.stringify({ tracks: [ track ]})
       })
-        .then(() => resolve())
-        .catch((e) => reject(e))
-    })
   }
 
-  removeFromPlaylist (plID, index) {
-    console.log(index)
-    return new Promise((resolve, reject) => {
-      const body = JSON.stringify({ index: index })
-      fetch(`/api/playlist/${plID}/${index}`, { method: 'delete' })
-        .then(data => data.json())
-        .then(data => resolve(data))
-        .catch((e) => reject(e))
-    })
+  async removeFromPlaylist (plID, index) {
+    return fetch(`/api/playlist/${plID}/${index}`, { method: 'delete' })
+      .then(data => data.json())
   }
 }

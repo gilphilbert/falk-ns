@@ -153,8 +153,9 @@ module.exports = app => {
         tracks = req.body.tracks
       }
       database.playlists.add(req.body.name, tracks)
-        .then(() => {
-          res.status(200)
+        .then(async () => {
+          const pls = await database.playlists.list()
+          res.json(pls)
         })
         .catch((e) => {
           res.status(400)
