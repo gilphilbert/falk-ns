@@ -69,6 +69,7 @@ export default {
       const data = JSON.parse(evt.data)
       const keys = Object.keys(data)
       if (keys.includes('toScan')) {
+        console.log(data)
         this.scanPercent = Math.round((data.scanned / data.toScan) * 100)
         if (this.scanned > this.stats.songs) {
           this.stats.songs = this.scanned

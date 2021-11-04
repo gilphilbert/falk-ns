@@ -99,10 +99,6 @@ async function walkFunc (err, pathname, dirent) {
     return Promise.resolve()
   }
 
-  // we should report this now, allows to track all files processed (even those skipped)
-  // this is important as the number of files to be scanned includes *all* files
-  filesScanned++
-  sendEvent({ toScan: totalFiles, scanned: filesScanned }, { event: 'scanner' })
 
   // skip directories
   if (dirent.isDirectory() || dirent.isSymbolicLink()) {
@@ -114,6 +110,11 @@ async function walkFunc (err, pathname, dirent) {
   if (!allowedExt.includes(ext)) {
     return Promise.resolve()
   }
+
+  // we should report this now, allows to track all files processed (even those skipped)
+  // this is important as the number of files to be scanned includes *all* files
+  filesScanned++
+  sendEvent({ toScan: totalFiles, scanned: filesScanned }, { event: 'scanner' })
 
   // check here to see if file exists in database
   if (await database.tracks.trackExists(path.dirname(pathname) + '/' + dirent.name)) {
@@ -153,7 +154,6 @@ async function scan (dir) {
   sendEvent({ status: 'started' }, { event: 'scanner' })
 
   const allSongs = await database.tracks.getAllPaths()
-  console.log(allSongs)
   allSongs.forEach(async track => {
     if (!fs.existsSync(track)) {
       console.log('[SCAN][Remove] ::', track)
@@ -164,7 +164,7 @@ async function scan (dir) {
   const dirs = dir || await database.locations.paths()
   totalFiles = 0
   for (let i = 0; i < dirs.length; i++) {
-    const { stdout, stderr } = await exec(`find ${dirs[i]} -type f|wc -l`)
+    const { stdout, stderr } = await exec(`find ${dirs[i]} f \\( -name "*.mp3" -o -name "*.flac" -o -name "*.wav" -o -name "*.ogg" \\)|wc -l`)
     totalFiles += parseInt(stdout)
   }
 
@@ -186,7 +186,6 @@ async function scan (dir) {
 }
 
 const chokidar = require('chokidar')
-const { doesNotReject } = require('assert')
 const wOptions = { ignoreInitial: true, awaitWriteFinish: true }
 let watcher = false
 async function watch(database) {
