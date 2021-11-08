@@ -306,6 +306,14 @@ module.exports = app => {
     // this needs to be non-blocking...
   })
 
+  // both currently do the same thing... rescan needs to check for dead files
+  app.get('/api/rescan', async function (req, res) {
+    res.send({ status: 'started' })
+    await scanner.rescan()
+    sendEvent({ status: 'complete' }, { event: 'update' })
+    // this needs to be non-blocking...
+  })
+
   // endpoint, use whatever name you wish
   app.get('/events', (req, res, next) => {
     // set correct headers to keep connection open

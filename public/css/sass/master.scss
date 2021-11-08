@@ -14,6 +14,7 @@
 
 :root {
   --blue: #4A6FA5;
+  --blue-highlight: #5982c0;
   --blue-light: #C0D6DF;
   --blue-dark: #465b7a; //#405678;
   --blue-darkest: #3f4754; //#405678;
@@ -26,19 +27,22 @@
   --red: #F87060;
   --red-light: #c01a27;
   --yellow: #EFCB68; // not used
+  --yellow-highlight: #f5d57e; // not used
   --yellow-light: #e7dfca;
   --yellow-dark: #AC9969;
   --yellow-darkest: #9b895d;
 
   --primary: var(--blue);
-  --primary-light: var(--blue-light);
+  --primary-highlight: var(--blue-highlight);
+  --secondary: var(--yellow);
+  --secondary-highlight: var(--yellow-highlight);
   --danger: var(--red);
   --danger-light: var(--red-light);
   --success: var(--green); //not used
   --warning: var(--yellow); //not used
 
   --lighten-heavy: rgba(255,255,255,0.8);
-  --lighten: rgba(255,255,255,0.1);
+  --lighten: rgba(255,255,255,0.15);
   --darken: rgba(0,0,0,0.1);
 
   --gray-lighter: #F7F7F7;

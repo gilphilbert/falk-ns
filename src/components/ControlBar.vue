@@ -6,7 +6,7 @@
         <div class="row now-playing">
           <div class="col-xs is-narrow">
             <figure class="image is-70x70">
-              <img v-bind:src="((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].art : '/img/placeholder.png')">
+              <img v-bind:src="art">
             </figure>
           </div>
           <div class="col-xs">
@@ -47,6 +47,15 @@ export default {
   methods: {
     toggleQueue () {
       this.$emit('toggleQueue')
+    }
+  },
+  computed: {
+    art () {
+      if (this.playback.queue[this.playback.queuePos] && this.playback.queue[this.playback.queuePos].art) {
+        return this.playback.queue[this.playback.queuePos].art
+      } else {
+        return '/img/placeholder.png'
+      }
     }
   }
 }

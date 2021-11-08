@@ -8,6 +8,8 @@
     <div class="dropdown-content" @click="isActive = false">
       <span class="dropdown-item" @click="$player.enqueue([this.trackID])">Enqueue</span>
       <span class="dropdown-item" @click="$player.playNext([this.trackID])">Play next</span>
+      <!--<span class="dropdown-item" @click="$player.playFromHere([this.trackID])">Play from here</span>-->
+      <span class="dropdown-item" @click="$emit('playFromHere', index)">Play from here</span>
       <span class="dropdown-item" @click="$emit('addToPlaylist', this.trackID)">Add to playlist</span>
     </div>
   </div>

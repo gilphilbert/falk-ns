@@ -109,7 +109,7 @@ fieldset
 
 .button
   border: none
-  background: var(--gray)
+  background: transparent
   padding: 7px 19px
   margin: 0 0.5rem 0.5rem 0
   color: var(--white)
@@ -119,11 +119,16 @@ fieldset
   &:focus
     outline: none
   &:hover
-    background: var(--gray-hover)
+    background-color: var(--lighten)
   &.is-primary
-    background-color: var(--primary)
+    background-color: transparent
+    border: 2px solid var(--secondary)
     &:hover
-      background-color: var(--primary-light)
+      background-color: var(--lighten)
+  &.is-secondary
+    background-color: var(--secondary)
+    &:hover
+      background-color: var(--secondary-highlight)
   &.is-danger
     background-color: var(--danger)
     &:hover

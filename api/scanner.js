@@ -148,7 +148,7 @@ async function getDirs (dir) {
   return promise
 }
 
-async function scan (dir) {
+async function scan (dir, rescan = false) {
   console.log('Starting scan')
 
   sendEvent({ status: 'started' }, { event: 'scanner' })
@@ -185,6 +185,10 @@ async function scan (dir) {
   filesScanned = 0
 }
 
+function rescan () {
+  scan(null, true)
+}
+
 const chokidar = require('chokidar')
 const wOptions = { ignoreInitial: true, awaitWriteFinish: true }
 let watcher = false
@@ -217,6 +221,7 @@ function delFromWatcher(dir) {
 
 module.exports = {
   scan: scan,
+  rescan,
   getDirs: getDirs,
   watch: {
     start: watch,

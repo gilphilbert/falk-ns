@@ -17,15 +17,23 @@
       </div>
       <div class="col-xs-12 col-md-7">
         <div class="col-xs-12 col-md-11">
-          <div class="row album-detail">
-            <h2 class="hidden--to-tablet">Album Tracks</h2>
+          <div class="album-detail">
+            <div class="row">
+              <div class="col-xs">
+                <h2 class="hidden--to-tablet">Album Tracks</h2>
+              </div>
+              <div class="col-xs end-xs">
+                <button @click="playFromHere(0)" class="button no-v is-rounded is-primary">Play All</button>
+              </div>
+            </div>
+
             <table class="table songs">
               <tbody>
                 <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track.id">
-                  <td class="pointer" @click="playAll(index)"><p class="is-5 is-capitalized">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
+                  <td class="pointer" @click="$player.replaceAndPlay([track.id])"><p class="is-5 is-capitalized">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortestformat }}</span></td>
                   <td class="is-narrow">
-                    <AlbumDropDown :index="index" :trackID="track.id" @addToPlaylist="addToPlaylist" />
+                    <AlbumDropDown :index="index" :trackID="track.id" @addToPlaylist="addToPlaylist" @playFromHere="playFromHere" />
                   </td>
                 </tr>
               </tbody>
@@ -75,7 +83,7 @@ export default {
     }
   },
   methods: {
-    playAll(index) {
+    playFromHere(index) {
       const tr = this.tracks.map(e => e.id)
       this.$player.replaceAndPlay(tr, index)
     },

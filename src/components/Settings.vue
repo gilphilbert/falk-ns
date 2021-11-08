@@ -25,8 +25,9 @@
       </tbody>
     </table>
     <div style="display: flex; align-items: center; margin-top: 15px">
-      <button class="button no-v is-rounded is-primary" @click="directories.show = true">Add Path</button>
+      <button class="button no-v is-primary is-rounded" @click="directories.show = true">Add Path</button>
       <button class="button no-v is-primary is-rounded" @click="updateLibrary()">Update Library</button>
+      <button class="button no-v is-primary is-rounded" @click="rescanLibrary()">Rescan Library</button>
     </div>
   </div>
 
@@ -128,6 +129,12 @@ export default {
     },
     updateLibrary () {
       window.fetch('/api/update')
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    rescanLibrary () {
+      window.fetch('/api/rescan')
         .catch(err => {
           console.log(err)
         })
