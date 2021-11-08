@@ -12,7 +12,7 @@ export class DatabaseHandler {
   }
 
   async getArtist (artist) {
-    return fetch(`/api/artist/${artist}`)
+    return fetch(`/api/artist/${encodeURIComponent(artist)}`)
       .then(data => data.json())
   }
 
@@ -22,7 +22,7 @@ export class DatabaseHandler {
   }
 
   async getAlbum (artist, album) {
-    return fetch(`/api/album/${artist}/${album}`)
+    return fetch(`/api/album/${encodeURIComponent(artist)}/${encodeURIComponent(album)}`)
       .then(data => data.json())
   }
 
@@ -32,7 +32,7 @@ export class DatabaseHandler {
   }
 
   async getGenre (genre) {
-    return fetch(`/api/genre/${genre}`)
+    return fetch(`/api/genre/${encodeURIComponent(genre)}`)
       .then(data => data.json())
   }
 
