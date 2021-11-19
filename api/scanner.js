@@ -105,7 +105,7 @@ async function walkFunc (err, pathname, dirent) {
     return Promise.resolve()
   }
 
-  const allowedExt = ['mp3', 'flac', 'wav', 'ogg']
+  const allowedExt = ['mp3', 'flac', 'wav', 'ogg', 'm4a']
   const ext = dirent.name.substr(dirent.name.lastIndexOf('.') + 1)
   if (!allowedExt.includes(ext)) {
     return Promise.resolve()
@@ -164,7 +164,7 @@ async function scan (dir, rescan = false) {
   const dirs = dir || await database.locations.paths()
   totalFiles = 0
   for (let i = 0; i < dirs.length; i++) {
-    const { stdout, stderr } = await exec(`find ${dirs[i]} f \\( -name "*.mp3" -o -name "*.flac" -o -name "*.wav" -o -name "*.ogg" \\)|wc -l`)
+    const { stdout, stderr } = await exec(`find ${dirs[i]} f \\( -name "*.mp3"  -name "*.m4a" -o -name "*.flac" -o -name "*.wav" -o -name "*.ogg" \\)|wc -l`)
     totalFiles += parseInt(stdout)
   }
 

@@ -1,7 +1,7 @@
 <template>
 <div class="container-fluid">
   <h1 class="is-capitalized">Albums</h1>
-  <Tiles :tiles="albums" />
+  <Tiles :tiles="fAlbums" />
 </div>
 </template>
 <script>
@@ -29,6 +29,12 @@ export default {
   data () {
     return {
       albums: []
+    }
+  },
+  computed: {
+    fAlbums () {
+      const q = "and"
+      return this.albums.filter(v => v.title.toLowerCase().includes(q) || v.subtitle.toLowerCase().includes(q))
     }
   }
 }
