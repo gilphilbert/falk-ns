@@ -50,6 +50,7 @@ async function init (sendEvent) {
       case 'playlist-pos':
       case 'pause':
         _sendState()
+        console.log(data)
         break
       case 'playlist-count': // handled when we add/remove items
       case 'filename':
