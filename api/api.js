@@ -7,7 +7,7 @@ const path = require('path')
 // other modules (self explanatory)
 const scanner = require('./scanner')
 const database = require('./database')
-const mpv = require('./mpv')
+const mpd = require('./mpd')
 
 
 // track connected clients
@@ -30,58 +30,58 @@ OK, so this is a little complex.
 Told you it was complicated!
 */
 database.init().then(() => scanner.watch.start(database))
-mpv.init(sendEvent)
+mpd.init(sendEvent)
 
 module.exports = app => {
   app.get('/api/play', async function( req, res ) {
-    await mpv.player.play()
+    await mpd.player.play()
     res.status(200).send()
   })
   app.get('/api/pause', async function( req, res ) {
-    await mpv.player.pause()
+    await mpd.player.pause()
     res.status(200).send()
   })
   app.get('/api/toggle', async function( req, res ) {
-    await mpv.player.toggle()
+    await mpd.player.toggle()
     res.status(200).send()
   })
   app.get('/api/prev', async function( req, res ) {
-    await mpv.player.prev()
+    await mpd.player.prev()
     res.status(200).send()
   })
   app.get('/api/next', async function( req, res ) {
-    await mpv.player.next()
+    await mpd.player.next()
     res.status(200).send()
   })
   app.get('/api/stop', async function( req, res ) {
-    await mpv.player.stop()
+    await mpd.player.stop()
     res.status(200).send()
   })
   app.get('/api/jump/:position', async function( req, res ) {
-    await mpv.player.jump(req.params.position)
+    await mpd.player.jump(req.params.position)
     res.status(200).send()
   })
   app.get('/api/clear', async function( req, res ) {
-    await mpv.player.clear()
+    await mpd.player.clear()
     res.status(200).send()
   })
   app.post('/api/enqueue', async function( req, res ) {
-    await mpv.player.enqueue(req.body.tracks)
+    await mpd.player.enqueue(req.body.tracks)
     res.status(200).send()
   })
   app.post('/api/playNext', async function( req, res ) {
-    await mpv.player.playNext(req.body.tracks)
+    await mpd.player.playNext(req.body.tracks)
     res.status(200).send()
   })
   app.post('/api/replaceAndPlay', async function( req, res ) {
-    await mpv.player.replaceAndPlay(req.body.tracks, req.body.index)
+    await mpd.player.replaceAndPlay(req.body.tracks, req.body.index)
     res.status(200).send()
   })
   app.delete('/api/queue/:id', async function( req, res ) {
     if (!req.params.id) {
       res.status(400).json({ error: "id missing" })
     } else {
-      await mpv.player.remove(req.params.id)
+      await mpd.player.remove(req.params.id)
       res.status(200).send()
     }
   })
@@ -234,7 +234,7 @@ module.exports = app => {
   })
 
   app.get('/api/audio/devices', function (req, res) {
-    mpv.player.devices()
+    mpd.player.devices()
       .then((data) => {
         res.send(data)
       })
@@ -337,6 +337,6 @@ module.exports = app => {
       eventClients = eventClients.filter(c => c.id !== clientID)
     })
 
-    mpv.player.sendState()
+    mpd.player.sendState()
   })
 }
