@@ -208,7 +208,7 @@ const library = {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('name')
   },
   album: function (artist, album) {
-    return knex.from('tracks').select('*').where('albumartist', artist).andWhere('album', album).orderBy('track', 'disc')
+    return knex.from('tracks').select('*').where('albumartist', artist).andWhere('album', album).orderBy('disc', 'track')
       .then((rows) => {
         rows.map(r => {
           r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
@@ -235,7 +235,19 @@ const library = {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').where('genre', '=', genre).groupBy('album').orderBy('name')
   },
   popular: function () {
-
+    return knex.from('tracks').select('*').orderBy('playcount', 'desc').limit(100)
+      .then((tracks) => {
+        return {
+          id: '_mostplayed',
+          name: 'Most Played',
+          coverart: ((tracks.length > 0) ? tracks[0].coverart : ''),
+          tracks: tracks.map(r => {
+            r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
+            r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')
+            return r
+          })
+        }
+      })
   }
 }
 

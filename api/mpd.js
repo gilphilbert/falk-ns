@@ -2,8 +2,8 @@ const mpdapi = require('mpd-api')
 const database = require('./database')
 
 const config = {
-  //path: '/run/mpd/socket',
-  path: '/home/phill/.config/mpd/socket',
+  path: '/run/mpd/socket',
+  //path: '/home/phill/.config/mpd/socket',
 }
 
 let client = false
@@ -12,32 +12,21 @@ function init (sendEvent) {
   return mpdapi.connect(config)
   .then(con => {
     client = con
-    client.on('system', (e) => {
-      console.log(e)
+    client.on('system', async (e) => {
       switch (e) {
         case 'playlist':
           sendQueue()
-          /*
-          mpdc.api.queue.info()
-            .then((d) => {
-              d.forEach((i) => {
-                //i.albumart = '/art/album/' + encodeURIComponent(i.artist) + '/' + encodeURIComponent(i.album) + '.jpg'
-                //i.thumb = '/art/album/thumb/' + encodeURIComponent(i.artist) + '/' + encodeURIComponent(i.album) + '.jpg'
-                //i = getSongArt(i)
-              })
-              
-              //broadcast('pushQueue', d)
-            })
-            */
           break
         case 'player':
-          //incrementTrack()
           _sendState()
-        case 'options':
-          //getStatus().then(status => broadcast('pushStatus', status))
+          const st = await client.api.status.get()
+          if (st.elapsed && st.elapsed <= 1) {
+            const q = await client.api.queue.info()
+            const ret = await database.tracks.incrementPlay(q[st.song].file)
+          }
           break
         default:
-          console.log('[MPD] Unknown State Change:' + e)
+          console.log('[INFO] [MPD] Unregistered State Change:' + e)
       }
     })
     return true
@@ -67,14 +56,11 @@ function getState() {
 
 async function sendQueue (save = false) {
   let items = []
-  let paths = []
   const q = await client.api.queue.info()
   const st = await client.api.status.get()
   const cur = st.song
   for (const tr of q) {
-    console.log(tr.file)
     const track = await database.tracks.trackByPath(tr.file)
-    console.log(track)
     items.push({
       title: track.title,
       artist: track.albumartist,
@@ -89,9 +75,9 @@ async function sendQueue (save = false) {
   sendEvent({ queue: items, state: await getState() }, { event: 'queue' })
 }
 
-async function _sendState(send) {
-  data = await getState()
-  sendEvent(data, { event: 'status' })
+async function _sendState() {
+  const st = await getState()
+  sendEvent(st, { event: 'status' })
 }
 
 player = {
@@ -114,83 +100,56 @@ player = {
     }
   },
   prev: async function () {
-    /*
     try {
-      await mpv.prev()
-    } catch (e) { console.log("[INFO] [Player] Error skipping back") }
-    */
+      await client.api.playback.previous()
+    } catch (e) { console.log("[INFO] [Player] Error skipping backward") }
   },
   next: async function () {
-    /*
     try {
-      await mpv.next()
+      await client.api.playback.next()
     } catch (e) { console.log("[INFO] [Player] Error skipping forward") }
-    */
   },
   jump: async function (pos) {
-    /*
     try {
-      await mpv.jump(pos)
-      const pau = await mpv.isPaused()
-      if (pau)
-        await mpv.play()
-    } catch (e) { console.log("[INFO] [Player] Error jumping") }
-    */
+      await client.api.playback.play(pos)
+    } catch (e) { console.log(`[ERROR] [Player] Can't change to track ${ pos }`); console.log(e) }
+    sendQueue()
   },
   clear: async function () {
-    /*
     try {
-      await mpv.clearPlaylist()
-      sendEvent(await getQueue(), { event: 'playlist' })
-    } catch (e) { console.log("[INFO] [Player] Error clearing playlist") }
-    */
+      await client.api.queue.clear()
+    } catch (e) { console.log(`[ERROR] [Player] Can't clear queue`); console.log(e) }
+    sendQueue()
   },
   shuffle: async function () {
-    /*
     try {
-      await mpv.shuffle()
-      //sendEvent(await getQueue(), { event: 'playlist' })
+      await client.api.queue.shuffle()
       sendQueue()
-    } catch (e) { console.log("[INFO] [Player] Error shuffling") }
-    */
+    } catch (e) { console.log("[INFO] [Player] Error setting shuffle") }
   },
   remove: async function (pos) {
-    /*
     try {
-      await mpv.playlistRemove(pos)
-      //sendEvent(await getQueue(), { event: 'playlist' })
-      sendQueue()
-    } catch (e) {}
-    */
+      await client.api.queue.delete(pos)
+    } catch (e) { console.log(`[ERROR] [Player] Can't remove track (${ pos })`); console.log(e) }
+    sendQueue()
   },
   enqueue: async function (tracks) {
-    /*
     for (i = 0; i < tracks.length; i++) {
-      await mpv.append(await database.tracks.getPath(tracks[i]))
+      try {
+        await client.api.queue.add(await database.tracks.getPath(tracks[i]))
+      } catch (e) { console.log(`[ERROR] [Player] Can't add track (${ tracks[i] })`); console.log(e) }
     }
-    //sendEvent(await getQueue(), { event: 'playlist' })
     sendQueue()
-    */
   },
   playNext: async function (tracks) {
-    /*
-    let plPos = -1
-    try {
-      plPos = await mpv.getPlaylistPosition()
-    } catch (e) { console.log("[INFO] [Player] Can't get playlist position") }
-
-    let plSize = -1
-    try {
-      plSize = await mpv.getPlaylistSize()
-    } catch (e) { console.log("[INFO] [Player] Can't get playlist size") }
-    console.log('size :: ' + plSize)
+    const st = await client.api.status.get()
+    const plPos = st.song || -1
     for (i = 0; i < tracks.length; i++) {
-      await mpv.append(await database.tracks.getPath(tracks[i]))
-      await mpv.playlistMove(plSize + i, plPos + i + 1)
+      try {
+        await client.api.queue.add(await database.tracks.getPath(tracks[i]), plPos + i + 1)
+      } catch (e) { console.log(`[ERROR] [Player] Can't add track (${ tracks[i] })`); console.log(e) }
     }
-    //sendEvent(await getQueue(), { event: 'playlist' })
     sendQueue()
-    */
   },
   replaceAndPlay: async function (tracks, index) {
     try {
@@ -203,13 +162,10 @@ player = {
 
     for (i = 0; i < tracks.length; i++) {
       const path = await database.tracks.getPath(tracks[i])
-      console.log(path)
-      //const path = "/var/lib/mpd/music/12.flac"
       try {
         await client.api.queue.add(path)
       } catch (e) { console.log(`[ERROR] [Player] Can't add track (${ tracks[i] })`); console.log(e) }
     }
-    //sendEvent(await getQueue(), { event: 'playlist' })
     try {
       await client.api.playback.play(index)
     } catch (e) { console.log("[INFO] [Player] Can't play at index (invalid)") }

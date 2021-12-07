@@ -33,7 +33,7 @@ export default {
   },
   computed: {
     fAlbums () {
-      const q = "and"
+      const q = ""
       return this.albums.filter(v => v.title.toLowerCase().includes(q) || v.subtitle.toLowerCase().includes(q))
     }
   }

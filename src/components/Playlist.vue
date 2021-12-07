@@ -71,6 +71,7 @@ export default {
 
       this.$database.getPlaylist(id)
         .then(data => {
+        console.log(data)
           this.art = data.coverart || '/img/placeholder.png'
           this.title = data.name
           this.tracks = data.tracks.map(e => { e.dropdown = false; return e })

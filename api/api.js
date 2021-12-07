@@ -128,10 +128,10 @@ module.exports = app => {
     res.json(pls)
   })
   app.get('/api/playlist/auto/mostplayed', function (req, res) {
-    //database.library.popular()
-    //  .then(pls => {
-    //    res.json(pls)
-    //  })
+    database.library.popular()
+      .then(pls => {
+        res.json(pls)
+      })
   })
   app.get('/api/playlist/:id', async function (req, res) {
     if (!req.params.id) {
