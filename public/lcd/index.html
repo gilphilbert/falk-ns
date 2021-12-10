@@ -568,7 +568,7 @@
       window.clearInterval(Clock)
       if (State.queue.length > 0) {
         curTrack = State.queue[State.state.position]
-        document.querySelector('#albumart').setAttribute('src', window.location.origin + '/art/' + curTrack.art.cover)
+        document.querySelector('#albumart').setAttribute('src', window.location.origin + curTrack.art)
         document.getElementById('title').innerText = curTrack.title
         document.getElementById('artist').innerText = curTrack.artist
         document.getElementById('album').innerText = curTrack.album
@@ -576,7 +576,6 @@
         document.getElementById('duration').innerText = formatTime(curTrack.duration)
         Elapsed = State.state.elapsed * 1000
         Duration = curTrack.duration * 1000
-        //Duration = State.state.duration * 1000
         setProgress()
         if (State.state.paused) {
           document.getElementById("state-play").classList.add('hidden')
