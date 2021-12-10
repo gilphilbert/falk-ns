@@ -575,7 +575,8 @@
         document.getElementById('quality').innerText = curTrack.shortformat
         document.getElementById('duration').innerText = formatTime(curTrack.duration)
         Elapsed = State.state.elapsed * 1000
-        Duration = State.state.duration * 1000
+        Duration = curTrack.duration * 1000
+        //Duration = State.state.duration * 1000
         setProgress()
         if (State.state.paused) {
           document.getElementById("state-play").classList.add('hidden')

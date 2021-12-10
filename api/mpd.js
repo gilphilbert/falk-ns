@@ -2,8 +2,8 @@ const mpdapi = require('mpd-api')
 const database = require('./database')
 
 const config = {
-  path: '/run/mpd/socket',
-  //path: '/home/phill/.config/mpd/socket',
+  //path: '/run/mpd/socket',
+  path: '/home/phill/.config/mpd/socket',
 }
 
 let client = false
