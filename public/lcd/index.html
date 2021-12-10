@@ -609,9 +609,9 @@
         songs = State.queue.slice(start, start + 4)
         for (let i = 0; i < 4; i++) {
           if (i<State.queue.length) {
-          els[i].querySelector('.title').innerText = songs[i].title
+            els[i].querySelector('.title').innerText = songs[i].title
             els[i].querySelector('.artist').innerText = songs[i].artist
-            if (songs[i].pos == p) {
+            if (i === p) {
               els[i].classList.add('active')
             } else {
               els[i].classList.remove('active')
