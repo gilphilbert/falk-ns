@@ -5,12 +5,11 @@
         <use xlink:href="/img/feather-sprite.svg#more-vertical"></use>
       </svg>
     </span>
-    <div class="dropdown-content" @click="isActive = false">
-      <span class="dropdown-item" @click="$player.enqueue([this.trackID])">Enqueue</span>
-      <span class="dropdown-item" @click="$player.playNext([this.trackID])">Play next</span>
-      <!--<span class="dropdown-item" @click="$player.playFromHere([this.trackID])">Play from here</span>-->
-      <span class="dropdown-item" @click="$emit('playFromHere', index)">Play from here</span>
-      <span class="dropdown-item" @click="$emit('addToPlaylist', this.trackID)">Add to playlist</span>
+    <div class="dropdown-content">
+      <span class="dropdown-item" v-on:touchstart="enqueue" @click="enqueue">Enqueue</span>
+      <span class="dropdown-item" v-on:touchstart="playNext" @click="playNext">Play next</span>
+      <span class="dropdown-item" v-on:touchstart="playFromHere" @click="playFromHere">Play from here</span>
+      <span class="dropdown-item" v-on:touchstart="addToPlaylist" @click="addToPlaylist">Add to playlist</span>
     </div>
   </div>
 </template>
@@ -28,6 +27,22 @@ export default {
   methods: {
     clickedAway() {
       this.isActive = false
+    },
+    enqueue() {
+      this.$player.enqueue([this.trackID])
+      //this.isActive = false
+    },
+    playNext() {
+      $player.playNext([this.trackID])
+      //this.isActive = false
+    },
+    playFromHere() {
+      $emit('playFromHere', index)
+      //this.isActive = false
+    },
+    addToPlaylist() {
+      $emit('addToPlaylist', this.trackID)
+      //this.isActive = false
     }
   }
 }
