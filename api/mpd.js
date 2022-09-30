@@ -2,7 +2,7 @@ const mpdapi = require('mpd-api')
 const database = require('./database')
 
 const config = {
-  path: '/run/mpd/socket',
+  path: '/home/phill/mpdsocket',
   //path: '/home/phill/.config/mpd/socket',
 }
 
