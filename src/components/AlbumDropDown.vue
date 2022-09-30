@@ -5,7 +5,7 @@
         <use xlink:href="/img/feather-sprite.svg#more-vertical"></use>
       </svg>
     </span>
-    <div class="dropdown-content">
+    <div class="dropdown-content" >
       <span class="dropdown-item" v-on:touchend="enqueue" @click="enqueue">Enqueue</span>
       <span class="dropdown-item" v-on:touchend="playNext" @click="playNext">Play next</span>
       <span class="dropdown-item" v-on:touchend="playFromHere" @click="playFromHere">Play from here</span>
@@ -30,19 +30,19 @@ export default {
     },
     enqueue() {
       this.$player.enqueue([this.trackID])
-      //this.isActive = false
+      this.isActive = false
     },
     playNext() {
       $player.playNext([this.trackID])
-      //this.isActive = false
+      this.isActive = false
     },
     playFromHere() {
       $emit('playFromHere', index)
-      //this.isActive = false
+      this.isActive = false
     },
     addToPlaylist() {
       $emit('addToPlaylist', this.trackID)
-      //this.isActive = false
+      this.isActive = false
     }
   }
 }

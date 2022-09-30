@@ -93,6 +93,11 @@ export default {
     },
     modalHide() {
       this.modalShow = false
+    },
+    setDropdown(track) {
+      return function () {
+        track.dropdown = true
+      }
     }
   }
 }
