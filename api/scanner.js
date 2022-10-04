@@ -193,21 +193,30 @@ const chokidar = require('chokidar')
 const wOptions = { ignoreInitial: true, awaitWriteFinish: true }
 let watcher = false
 async function watch(database) {
+  const allowedExt = ['mp3', 'flac', 'wav', 'ogg', 'm4a']
+  
   //console.log(sendEvent)
   const dirs = await database.locations.paths()
   //console.log('[SCAN][Watch] :: ', dirs)
   watcher = chokidar.watch(dirs, wOptions)
   watcher.on('add', async (path, stats) => {
+    const ext = path.substr(path.lastIndexOf('.') + 1)
     console.log('[WATCH][Add] :: ' + path)
-    await processFile(path)
+    if (ext in allowedExt)
+      await processFile(path)
   })
   watcher.on('change', async (path) => {
+    const ext = path.substr(path.lastIndexOf('.') + 1)
     console.log('[WATCH][Change] :: ' + path)
+    if (ext in allowedExt)
+      await processFile(path)
     await processFile(path, { overwrite: true })
   })
   watcher.on('unlink', async (path) => {
+    const ext = path.substr(path.lastIndexOf('.') + 1)
     console.log('[WATCH][Remove] :: ' + path)
-    await database.tracks.removeByPath(path)
+    if (ext in allowedExt)
+      await database.tracks.removeByPath(path)
   })
 }
 function addToWatcher(dir) {

@@ -2,7 +2,8 @@ const mpdapi = require('mpd-api')
 const database = require('./database')
 
 const config = {
-  path: '/home/phill/mpdsocket',
+  path: '/var/run/mpd/socket'
+  //path: '/home/phill/mpdsocket',
   //path: '/home/phill/.config/mpd/socket',
 }
 
@@ -101,7 +102,7 @@ player = {
   },
   prev: async function () {
     try {
-      await client.api.playback.previous()
+      await client.api.playback.prev()
     } catch (e) { console.log("[INFO] [Player] Error skipping backward") }
   },
   next: async function () {

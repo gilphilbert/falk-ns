@@ -33,15 +33,15 @@ export default {
       this.isActive = false
     },
     playNext() {
-      $player.playNext([this.trackID])
+      this.$player.playNext([this.trackID])
       this.isActive = false
     },
     playFromHere() {
-      $emit('playFromHere', index)
+      this.$emit('playFromHere', this.index)
       this.isActive = false
     },
     addToPlaylist() {
-      $emit('addToPlaylist', this.trackID)
+      this.$emit('addToPlaylist', this.trackID)
       this.isActive = false
     }
   }

@@ -84,6 +84,7 @@ export default {
   },
   methods: {
     playFromHere(index) {
+      console.log(index)
       const tr = this.tracks.map(e => e.id)
       this.$player.replaceAndPlay(tr, index)
     },
