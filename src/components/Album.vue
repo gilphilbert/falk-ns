@@ -103,3 +103,9 @@ export default {
   }
 }
 </script>
+
+<style type="css">
+  table.songs:has(.dropdown.is-active) tr td.pointer {
+    pointer-events: none;
+  }
+</style>
