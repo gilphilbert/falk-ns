@@ -6,10 +6,10 @@
       </svg>
     </span>
     <div class="dropdown-content" >
-      <span class="dropdown-item" v-on:touchend="enqueue" @click="enqueue">Enqueue</span>
-      <span class="dropdown-item" v-on:touchend="playNext" @click="playNext">Play next</span>
-      <span class="dropdown-item" v-on:touchend="playFromHere" @click="playFromHere">Play from here</span>
-      <span class="dropdown-item" v-on:touchend="addToPlaylist" @click="addToPlaylist">Add to playlist</span>
+      <span class="dropdown-item" v-on:touchend.stop="enqueue" @click.stop="enqueue">Enqueue</span>
+      <span class="dropdown-item" v-on:touchend.stop="playNext" @click.stop="playNext">Play next</span>
+      <span class="dropdown-item" v-on:touchend.stop="playFromHere" @click.stop="playFromHere">Play from here</span>
+      <span class="dropdown-item" v-on:touchend.stop="addToPlaylist" @click.stop="addToPlaylist">Add to playlist</span>
     </div>
   </div>
 </template>
