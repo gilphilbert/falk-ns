@@ -1,11 +1,11 @@
 <template>
   <div class="dropdown is-right" :class="{ 'is-active': this.isActive }">
-    <span @click="isActive = !isActive" v-click-away="clickedAway">
+    <span @click="isActive = !isActive">
       <svg class="feather">
         <use xlink:href="/img/feather-sprite.svg#more-vertical"></use>
       </svg>
     </span>
-    <div class="dropdown-content" >
+    <div class="dropdown-content" v-click-away="clickedAway">
       <span class="dropdown-item" @click.stop="enqueue">Enqueue</span> <!-- v-on:touchend.stop="enqueue" -->
       <span class="dropdown-item" @click.stop="playNext">Play next</span> <!-- v-on:touchend.stop="playNext" -->
       <span class="dropdown-item" @click.stop="playFromHere">Play from here</span>

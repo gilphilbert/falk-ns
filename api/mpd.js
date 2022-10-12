@@ -4,7 +4,6 @@ const database = require('./database')
 const config = {
   path: '/var/run/mpd/socket'
   //path: '/home/phill/mpdsocket',
-  //path: '/home/phill/.config/mpd/socket',
 }
 
 let client = false
