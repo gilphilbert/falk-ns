@@ -30,7 +30,7 @@ export default {
     //set up the event listener
     const events = new EventSource('/events')
     events.onmessage = function(e) {
-      console.log(e)
+      //console.log(e)
     }
     events.addEventListener('open', evt => {
       this.online = true
@@ -42,7 +42,7 @@ export default {
 
     events.addEventListener('queue', evt => {
       const data = JSON.parse(evt.data)
-      console.log(data)
+      //console.log(data)
 
       this.playback.queue = data.queue
 

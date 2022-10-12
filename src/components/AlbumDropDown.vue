@@ -1,15 +1,15 @@
 <template>
-  <div class="dropdown is-right" :class="{ 'is-active': this.isActive }">
+  <div class="dropdown is-right" :class="{ 'is-active': this.isActive }" v-click-away="clickedAway">
     <span @click="isActive = !isActive">
       <svg class="feather">
         <use xlink:href="/img/feather-sprite.svg#more-vertical"></use>
       </svg>
     </span>
-    <div class="dropdown-content" v-click-away="clickedAway">
-      <span class="dropdown-item" v-on:touchend.stop="enqueue" @click.stop="enqueue">Enqueue</span> <!-- -->
-      <span class="dropdown-item" v-on:touchend.stop="playNext" @click.stop="playNext">Play next</span> <!-- -->
-      <span class="dropdown-item" v-on:touchend.stop="playFromHere" @click.stop="playFromHere">Play from here</span>
-      <span class="dropdown-item" v-on:touchend.stop="addToPlaylist" @click.stop="addToPlaylist">Add to playlist</span>
+    <div class="dropdown-content">
+      <span class="dropdown-item" @click="enqueue">Enqueue</span> <!-- -->
+      <span class="dropdown-item" @click="playNext">Play next</span> <!-- -->
+      <span class="dropdown-item" @click="playFromHere">Play from here</span>
+      <span class="dropdown-item" @click="addToPlaylist">Add to playlist</span>
     </div>
   </div>
 </template>
@@ -25,8 +25,11 @@ export default {
     }
   },
   methods: {
-    clickedAway() {
-      this.isActive = false
+    clickedAway(event) {
+      let node = event.target
+      if (! node.classList.contains('dropdown-item') && ! node.classList.contains('dropdown-content')) {
+        this.isActive = false
+      }
     },
     enqueue() {
       this.$player.enqueue([this.trackID])
