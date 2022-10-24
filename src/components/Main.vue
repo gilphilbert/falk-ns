@@ -48,6 +48,8 @@ export default {
 
       this.playback.queuePos = data.state.position
 
+      this.playback.random = data.state.random
+
       let elapsed = data.state.elapsed * 1000
       if (elapsed < 0)
         elapsed = 0
@@ -57,7 +59,10 @@ export default {
 
     events.addEventListener('status', evt => {
       const data = JSON.parse(evt.data)
+      console.log(data)
       this.playback.queuePos = data.position
+
+      this.playback.random = data.random
 
       let elapsed = data.elapsed * 1000
       if (elapsed < 0)
@@ -101,7 +106,8 @@ export default {
         isPlaying: false,
         queuePos: 0,
         elapsed: 0,
-        queue: []
+        queue: [],
+        random: false
       },
       stats: {},
       online: false,

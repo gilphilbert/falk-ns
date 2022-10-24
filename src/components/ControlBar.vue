@@ -10,7 +10,9 @@
             </figure>
           </div>
           <div class="col-xs">
-            <p class="is-5 is-capitalized">{{ ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].title : 'Not playing') }}</p>
+            <p class="is-5 is-capitalized">
+              {{ ((this.playback.queue[this.playback.queuePos]) ? this.playback.queue[this.playback.queuePos].title : 'Not playing') }}
+            </p>
             <p class="subtitle is-5 is-capitalized" v-if="this.playback.queue[this.playback.queuePos]">
               <router-link :to="{ name: 'Artist', params: { artist: this.playback.queue[this.playback.queuePos].artist } }">{{ this.playback.queue[this.playback.queuePos].artist }}</router-link>
             </p>
@@ -18,7 +20,7 @@
         </div>
       </div>
       <div class="col-xs no-grow col-md playing-controls misc-controls">
-        <svg class="random feather hidden--to-desktop" @click="this.$player.random"><use href="/img/feather-sprite.svg#shuffle"></use></svg>
+        <svg class="random feather hidden--to-desktop" :class="{ 'active': playback.random }" @click="this.$player.random"><use href="/img/feather-sprite.svg#shuffle"></use></svg>
         <svg class="feather prev" @click="this.$player.prev"><use href="/img/feather-sprite.svg#skip-back"></use></svg>
         <span class="play-button pointer" @click="this.$player.toggle">
           <svg class="feather" :class="{ 'is-hidden': playback.isPlaying }"><use href="/img/feather-sprite.svg#play"></use></svg>
@@ -60,3 +62,9 @@ export default {
   }
 }
 </script>
+
+<style type="css">
+#control-bar .playing-controls > .feather.active {
+  stroke: var(--yellow);
+}
+</style>

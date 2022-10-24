@@ -57,6 +57,22 @@ module.exports = app => {
     await mpd.player.stop()
     res.status(200).send()
   })
+  app.get('/api/random', async function (req, res) {
+    try {
+    await mpd.player.random()
+      res.status(200).send()
+    } catch (e) {
+      res.status(500).send()
+    }
+  })
+  app.get('/api/shuffle', async function (req, res) {
+    try {
+    await mpd.player.shuffle()
+      res.status(200).send()
+    } catch (e) {
+      res.status(500).send()
+    }
+  })
   app.get('/api/jump/:position', async function( req, res ) {
     await mpd.player.jump(req.params.position)
     res.status(200).send()

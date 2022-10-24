@@ -43,6 +43,7 @@ function getState() {
         paused: data.state !== 'play',
         position: data.song || 0,
         elapsed: ((data.elapsed !== undefined) ? Math.round(data.elapsed) : 0),
+        random: data.random
       }
     })
     .catch(e => {
@@ -50,6 +51,7 @@ function getState() {
         paused: false,
         position: -1,
         elapsed: 0,
+        random: false
       }
     })
 }
@@ -126,6 +128,13 @@ player = {
       await client.api.queue.shuffle()
       sendQueue()
     } catch (e) { console.log("[INFO] [Player] Error setting shuffle") }
+  },
+  random: async function random () {
+    try {
+      const status = await client.api.status.get()
+      await client.api.playback.random(!status.random)
+      sendQueue()
+    } catch (e) { console.log("[INFO] [Player] Error setting random") }
   },
   remove: async function (pos) {
     try {
