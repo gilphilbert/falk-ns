@@ -36,14 +36,14 @@
         </div>
       </div>
       <div id="mobile-controls" class="col-xs-12 mobile-controls hidden--for-desktop">
-        <span><svg class="feather random is-small"><use xlink:href="/img/feather-sprite.svg#shuffle"></use></svg></span>
-        <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-back"></use></svg></span>
-        <button class="button is-primary is-rounded has-no-margin">
+        <span @click="this.$player.random"><svg class="feather random is-small" :class="{ 'active': playback.random }"><use xlink:href="/img/feather-sprite.svg#shuffle"></use></svg></span>
+        <span @click="this.$player.prev"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-back"></use></svg></span>
+        <button @click="this.$player.toggle" class="button is-primary is-rounded has-no-margin">
           <svg class="feather" :class="{ 'is-hidden': this.playback.isPlaying }" ><use href="/img/feather-sprite.svg#play"></use></svg>
           <svg class="feather" :class="{ 'is-hidden': !this.playback.isPlaying }"><use href="/img/feather-sprite.svg#pause"></use></svg>
         </button>
-        <span><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-forward"></use></svg></span>
-        <span><svg class="feather repeat is-small"><use xlink:href="/img/feather-sprite.svg#repeat"></use></svg></span>
+        <span @click="this.$player.skip"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#skip-forward"></use></svg></span>
+        <span @click="this.$player.random"><svg class="feather repeat is-small"><use xlink:href="/img/feather-sprite.svg#repeat"></use></svg></span>
       </div>
     </div>
     <div class="hidden--for-desktop" id="swipe-up-queue" @click="showQueue"><svg class="feather"><use xlink:href="/img/feather-sprite.svg#chevron-up"></use></svg></div>
@@ -75,3 +75,9 @@ export default {
   }
 }
 </script>
+
+<style type="css">
+#mobile-controls .feather.active {
+  stroke: var(--yellow);
+}
+</style>
