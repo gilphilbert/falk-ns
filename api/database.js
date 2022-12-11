@@ -265,14 +265,16 @@ const playlists = {
   },
   get: function (id) {
     return Promise.all([
-      knex('playlists').select('id', 'name', 'coverart').where('id', id),
+      knex('playlists').select('id', 'name', 'coverart', 'added').where('id', id),
       knex('playlist_tracks').leftJoin('tracks', 'playlist_tracks.track', 'tracks.id').select('tracks.*').where('playlist_tracks.playlist', id)
     ])
     .then(([playlist, tracks]) => {
+      const pl = playlist[0]
       return {
         id,
-        name: playlist.name,
-        coverart: playlist.coverart,
+        name: pl.name,
+        coverart: pl.coverart,
+        added: pl.added,
         tracks: tracks.map(r => {
           r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
           r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')

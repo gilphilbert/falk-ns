@@ -2,8 +2,8 @@ const mpdapi = require('mpd-api')
 const database = require('./database')
 
 const config = {
-  path: '/var/run/mpd/socket'
-  //path: '/home/phill/mpdsocket',
+  //path: '/var/run/mpd/socket'
+  path: '/home/phill/mpdsocket',
 }
 
 let client = false
@@ -62,6 +62,7 @@ async function sendQueue (save = false) {
   const st = await client.api.status.get()
   const cur = st.song
   for (const tr of q) {
+    console.log(tr) 
     const track = await database.tracks.trackByPath(tr.file)
     items.push({
       title: track.title,
@@ -171,6 +172,7 @@ player = {
 
     for (i = 0; i < tracks.length; i++) {
       const path = await database.tracks.getPath(tracks[i])
+      console.log(path)
       try {
         await client.api.queue.add(path)
       } catch (e) { console.log(`[ERROR] [Player] Can't add track (${ tracks[i] })`); console.log(e) }

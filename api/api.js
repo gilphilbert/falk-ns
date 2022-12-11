@@ -281,6 +281,10 @@ module.exports = app => {
     return val
   }
 
+  app.get('/art/playlist/:id', function (req, res) {
+
+  })
+
   app.get('/art/:filename?', function (req, res) {
     const filename = req.params.filename || null
     const size = req.query.size || null
