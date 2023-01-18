@@ -291,6 +291,7 @@ module.exports = app => {
     if (filename !== null && filename.indexOf('/') === -1) {
       const fn = path.resolve(__dirname, '../art/' + filename)
       if (fs.existsSync(fn)) {
+        res.set('Cache-Control', 'public, max-age=604800');
         const image = sharp(fn)
         image
           .metadata()
@@ -307,10 +308,11 @@ module.exports = app => {
                 sharp(fn).resize(600).pipe(res)
                 break
               default:
-                sharp(fn).resize(350).pipe(res)
+                sharp(fn).resize(300).pipe(res)
             }
           })
       } else {
+        res.set('Cache-Control', 'public, max-age=31536000');
         res.sendFile(path.resolve(__dirname, '../public/img/placeholder.png'))
       }
     } else {

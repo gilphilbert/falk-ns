@@ -1,10 +1,17 @@
 const mpdapi = require('mpd-api')
 const database = require('./database')
 
+const fs = require('fs')
+
+const socketLocations = [ '/home/phill/.mpd/socket', '/run/mpd/socket' ]
+
 const config = {
-  //path: '/var/run/mpd/socket'
-  path: '/home/phill/mpdsocket',
+  path: (() => {
+    return socketLocations.filter(value => fs.existsSync(value))[0]
+  })()
 }
+
+console.log(config)
 
 let client = false
 
