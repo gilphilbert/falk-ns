@@ -202,6 +202,10 @@ module.exports = app => {
       res.status(500).json({ error: e })
     }
   })
+  app.get('/api/search/:query', async function (req, res) {
+    const result = await database.library.search(req.params.query)
+    res.json(result)
+  })
 
   app.get('/api/locations', async function (req, res) {
     const locations = await database.locations.paths()

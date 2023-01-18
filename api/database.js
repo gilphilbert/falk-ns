@@ -246,6 +246,20 @@ const library = {
           })
         }
       })
+  },
+  search: function (query) {
+    return Promise.all([
+      knex('tracks').select('albumartist as name', 'artistart as art').groupByRaw('LOWER(TRIM(albumartist))').orderBy('name').whereRaw("LOWER(name) LIKE '%' || LOWER(?) || '%' ", query).limit(20),
+      knex('tracks').select('album as title', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('album').whereRaw("LOWER(album) LIKE '%' || LOWER(?) || '%' ", query).limit(20),
+      knex('tracks').select('id', 'title', 'album', 'artist', 'albumartist', 'duration', 'coverart as art', 'playcount').whereRaw("LOWER(title) LIKE '%' || LOWER(?) || '%' ", query).limit(20),
+    ])
+    .then(([artists, albums, tracks]) => { 
+      return {
+        artists,
+        albums,
+        tracks
+      }
+     })
   }
 }
 
