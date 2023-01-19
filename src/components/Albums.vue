@@ -11,6 +11,7 @@ export default {
   components: {
     Tiles
   },
+  props: [ 'query' ],
   created() {
     this.$database.getAlbums()
       .then(data => {
@@ -20,7 +21,8 @@ export default {
             subtitle: e.artist,
             art: e.art,
             urlParams: { name: 'Album', params: { 'album': e.name, 'artist': e.artist } },
-            surlParams:   { name: 'Artist', params: { 'artist': e.artist } }
+            surlParams:   { name: 'Artist', params: { 'artist': e.artist } },
+            filter: false
           }
         })
         this.albums = data
@@ -29,6 +31,13 @@ export default {
   data () {
     return {
       albums: []
+    }
+  },
+  watch: {
+    query(query) {
+      this.albums.forEach(el => {
+        el.filter = query === '' ? false : el.title.toLowerCase().includes(query.toLowerCase()) ? false : true 
+      })
     }
   },
   computed: {

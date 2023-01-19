@@ -1,6 +1,6 @@
 <template>
 <div class="row art-container">
-  <div class="col-lg-2 col-xs-4 art has-text-centered item-tile" v-for="tile in tiles" :key="tile" :class="{ 'artist': tile.urlParams.name == 'Artist' }">
+  <div class="col-lg-2 col-xs-4 art has-text-centered item-tile" v-for="tile in tiles" :key="tile" v-show="tile.filter === false" :class="{ 'artist': tile.urlParams.name == 'Artist' }">
     <router-link :to="{ name: tile.urlParams.name, params: tile.urlParams.params }">
       <figure class="image is-1by1">
         <img v-lazy="((tile.art !== '') ? tile.art : '/img/placeholder.png')"/>
@@ -19,10 +19,6 @@ export default {
   name: 'Tiles',
   props: [ 'tiles' ]
 }
-
-
-
-
 </script>
 <style scoped></style>
 

@@ -11,6 +11,7 @@ export default {
   components: {
     Tiles
   },
+  props: [ 'query' ],
   created() {
     this.$database.getArtists()
       .then(data => {
@@ -20,7 +21,8 @@ export default {
             art: e.art,
             subtitle: null,
             urlParams: { name: 'Artist', params: { 'artist': e.name } },
-            surlParams: false
+            surlParams: false,
+            filter: false
           }
         })
         this.artists = data
@@ -29,6 +31,13 @@ export default {
   data () {
     return {
       artists: []
+    }
+  },
+  watch: {
+    query(query) {
+      this.artists.forEach(el => {
+        el.filter = query === '' ? false : el.title.toLowerCase().includes(query.toLowerCase()) ? false : true 
+      })
     }
   }
 }

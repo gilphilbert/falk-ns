@@ -12,6 +12,7 @@ export default {
   components: {
     Tiles
   },
+  props: [ 'query' ],
   created() {
     this.$database.getPlaylists()
       .then(data => {
@@ -21,7 +22,8 @@ export default {
             subtitle: null,
             art: e.coverart || '/img/placeholder.png',
             urlParams: { name: 'Playlist', params: { 'id': e.id } },
-            surlParams: false
+            surlParams: false,
+            filter: false
           }
         })
         this.playlists = data
@@ -40,6 +42,13 @@ export default {
     return {
       autoplaylists: [],
       playlists: []
+    }
+  },
+  watch: {
+    query(query) {
+      this.playlists.forEach(el => {
+        el.filter = query === '' ? false : el.title.toLowerCase().includes(query.toLowerCase()) ? false : true 
+      })
     }
   }
 }

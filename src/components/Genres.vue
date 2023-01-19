@@ -11,6 +11,7 @@ export default {
   components: {
     Tiles
   },
+  props: [ 'query' ],
   created() {
     this.$database.getGenres()
       .then(data => {
@@ -20,7 +21,8 @@ export default {
             subtitle: null,
             art: e.art,
             urlParams: { name: 'Genre', params: { 'genre': e.name } },
-            surlParams: false
+            surlParams: false,
+            filter: false
           }
         })
         this.genres = data
@@ -29,6 +31,13 @@ export default {
   data () {
     return {
       genres: []
+    }
+  },
+  watch: {
+    query(query) {
+      this.genres.forEach(el => {
+        el.filter = query === '' ? false : el.title.toLowerCase().includes(query.toLowerCase()) ? false : true 
+      })
     }
   }
 }

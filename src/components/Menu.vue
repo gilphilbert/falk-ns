@@ -19,8 +19,14 @@
     <li><router-link :to="{ name: 'Settings' }"><svg class="feather"><use href="/img/feather-sprite.svg#settings"></use></svg><div class="detail">Settings</div></router-link></li>
   </ul>
 
-  <ul class="menu-list right">
-    <li><router-link :to="{ name: 'Playlists' }"><svg class="feather"><use href="/img/feather-sprite.svg#search"></use></svg><div class="detail">Search</div></router-link></li>
+  <ul class="menu-list right" style="margin-right: 10px">
+    <li>
+      <!--<router-link :to="{ name: 'Playlists' }"><svg class="feather"><use href="/img/feather-sprite.svg#search"></use></svg><div class="detail">Search</div></router-link>-->
+      <div style="position: relative">
+        <input class="input" type="text" v-model="searchQuery" @change="fullSearch" />
+        <svg class="feather" style="display: block; position: absolute; top: 6px; right: 6px; pointer-events: none"><use href="/img/feather-sprite.svg#search"></use></svg>
+      </div>
+    </li>
     <li v-if="scanning">
       <a>
         <div class="progress-pie-chart" :class="{ 'gt-50': scanPercent > 50, 'fade': scanning && scanPercent === 0 }">
@@ -37,20 +43,35 @@
 </aside>
 </template>
 <script>
+import { emit } from 'process'
+
 export default {
   name: 'Menu',
   props: [ 'isActive', 'scanPercent', 'scanning' ],
+  data () {
+    return {
+      searchQuery: ''
+    }
+  },
   methods: {
     onSwipe(mouseEvent) {
       console.log(mouseEvent)
     },
     hideMenu () {
       this.$emit('hide')
+    },
+    fullSearch () {
+      console.log(this.searchQuery)
     }
   },
   computed: {
     degrees: function () {
       return 360 * this.scanPercent / 100
+    }
+  },
+  watch: {
+    searchQuery(query) {
+      this.$emit('query', query)
     }
   }
 }
@@ -70,5 +91,15 @@ export default {
 @keyframes fadeinout {
   0%,100% { opacity: 0; }
   50% { opacity: 1; }
+}
+
+input {
+  background: transparent;
+  border-color: transparent;
+  transition: all 0.3s
+}
+
+input:focus {
+  background: var(--blue);
 }
 </style>

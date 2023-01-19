@@ -73,4 +73,9 @@ export class DatabaseHandler {
     return fetch(`/api/playlist/${plID}/${index}`, { method: 'delete' })
       .then(data => data.json())
   }
+
+  async quickSearch(query) {
+    return fetch('/api/search/' + query)
+      .then(data => data.json())
+  }
 }

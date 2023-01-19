@@ -1,9 +1,9 @@
 <template>
 <div :class="{ 'no-controls': this.$route.path==='/' }">
   <div id="content-container" v-touch:swipe.left="doHideMenu" v-touch:swipe.right="doShowMenu">
-    <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" ></router-view>
+    <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" :query="query" ></router-view>
   </div>
-  <Menu :isActive="showMenu" @hide="doHideMenu" :scanPercent="scanPercent" :scanning="scanning" />
+  <Menu :isActive="showMenu" @hide="doHideMenu" :scanPercent="scanPercent" :scanning="scanning" @query="setQuery" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" :online="online" v-touch:swipe.top="unhideQueue" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
@@ -114,7 +114,8 @@ export default {
       scanPercent: 0,
       scanning: false,
       timer: null,
-      lastTimeUpdate: 0
+      lastTimeUpdate: 0,
+      query: ''
     }
   },
   props: [ 'isLoggedIn' ],
@@ -135,8 +136,11 @@ export default {
       const newTime = new Date().getTime()
       this.playback.elapsed += (newTime - this.lastTimeUpdate)
       this.lastTimeUpdate = newTime
+    },
+    setQuery (query) {
+      this.query = query
     }
-  },
+   },
   watch: {
     'playback.isPlaying': function () {
       if (this.playback.isPlaying) {
