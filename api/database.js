@@ -65,7 +65,8 @@ async function init () {
     client: 'sqlite3',
     connection: {
       filename: "./data/falk.sql"
-    }
+    },
+    useNullAsDefault: true
   })
 
   await knex.raw('PRAGMA foreign_keys = ON;').then(() => {
