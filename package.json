@@ -1,7 +1,7 @@
 {
-  "name": "falk-ns",
+  "name": "falk-dp01",
   "version": "0.0.1",
-  "description": "Web Music Streamer",
+  "description": "FALK Digital Player",
   "author": "gilphilbert",
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -19,7 +19,6 @@
     "knex": "^0.95.12",
     "mpd-api": "^1.1.0",
     "music-metadata": "^7.8.1",
-    "node-mpv": "^2.0.0-beta.2",
     "npm": "^7.8.0",
     "sharp": "^0.28.1",
     "sqlite3": "^5.0.2",

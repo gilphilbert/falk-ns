@@ -11,8 +11,6 @@ const config = {
   })()
 }
 
-console.log(config)
-
 let client = false
 
 function init (sendEvent) {
