@@ -18,8 +18,8 @@ import Genres from './components/Genres.vue'
 import Genre from './components/Genre.vue'
 import Settings from './components/Settings.vue'
 
-import { DatabaseHandler } from './database_remote.js'
-import * as player from './player_remote.js'
+import { DatabaseHandler } from './database.js'
+import * as player from './player.js'
 
 const scrollBehavior = (to, from, savedPosition) => {
   if (savedPosition) {
