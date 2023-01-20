@@ -250,15 +250,19 @@ const library = {
   },
   search: function (query) {
     return Promise.all([
-      knex('tracks').select('albumartist as name', 'artistart as art').groupByRaw('LOWER(TRIM(albumartist))').orderBy('name').whereRaw("LOWER(name) LIKE '%' || LOWER(?) || '%' ", query).limit(20),
-      knex('tracks').select('album as title', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('album').whereRaw("LOWER(album) LIKE '%' || LOWER(?) || '%' ", query).limit(20),
-      knex('tracks').select('id', 'title', 'album', 'artist', 'albumartist', 'duration', 'coverart as art', 'playcount').whereRaw("LOWER(title) LIKE '%' || LOWER(?) || '%' ", query).limit(20),
+      knex('tracks').select('albumartist as name', 'artistart as art').groupByRaw('LOWER(TRIM(albumartist))').orderBy('name').whereRaw("LOWER(name) LIKE '%' || LOWER(?) || '%' ", query).limit(12),
+      knex('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('album').whereRaw("LOWER(album) LIKE '%' || LOWER(?) || '%' ", query).orWhereRaw("LOWER(albumartist) LIKE '%' || LOWER(?) || '%' ", query).limit(12),
+      knex('tracks').select('id', 'title', 'album', 'albumartist as artist', 'duration', 'coverart as art', 'playcount', 'samplerate', 'bits').whereRaw("LOWER(title) LIKE '%' || LOWER(?) || '%' ", query).orWhereRaw("LOWER(albumartist) LIKE '%' || LOWER(?) || '%' ", query).orWhereRaw("LOWER(artist) LIKE '%' || LOWER(?) || '%' ", query).limit(12),
     ])
     .then(([artists, albums, tracks]) => { 
       return {
         artists,
         albums,
-        tracks
+        tracks: tracks.map(r => {
+          r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
+          r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')
+          return r
+        })
       }
      })
   }

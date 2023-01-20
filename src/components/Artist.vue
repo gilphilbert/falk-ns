@@ -39,6 +39,7 @@ export default {
             art: e.art,
             urlParams: { name: 'ArtistAlbum', params: { 'album': e.name, 'artist': this.artist } },
             surlParams: false,
+            filter: false
           }
         })
         this.albums = data.albums

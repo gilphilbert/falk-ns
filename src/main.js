@@ -16,6 +16,7 @@ import Artist from './components/Artist.vue'
 import Album from './components/Album.vue'
 import Genres from './components/Genres.vue'
 import Genre from './components/Genre.vue'
+import Search from './components/Search.vue'
 import Settings from './components/Settings.vue'
 
 import { DatabaseHandler } from './database.js'
@@ -92,6 +93,11 @@ const router = new createRouter({
         { path: '', name: 'Genres', component: Genres, meta: { scrollToTop: true } },
         { path: ':genre', name: 'Genre', component: Genre, meta: { scrollToTop: true } }
       ]
+    },
+    {
+      path: '/search/:query',
+      name: 'search',
+      component: Search,
     },
     { path: '/settings', name: 'Settings', component: Settings, meta: { scrollToTop: true } }
   ]

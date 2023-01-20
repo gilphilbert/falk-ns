@@ -20,7 +20,8 @@ export default {
             subtitle: e.artist,
             art: e.art,
             urlParams: { name: 'Album', params: { album: e.name, artist: e.artist } },
-            surlParams: { name: 'Artist', params: { artist: e.artist } }
+            surlParams: { name: 'Artist', params: { artist: e.artist } },
+            filter: false
           }
         })
         this.albums = data
