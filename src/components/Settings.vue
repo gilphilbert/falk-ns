@@ -2,7 +2,7 @@
 <div class="container-fluid">
   <h1>Settings</h1>
   <p class="is-1">Library Stats</p>
-  <div class="box row has-text-centered">
+  <div class="box darken row has-text-centered">
     <div class="col-xs-4"><h1>{{ this.stats.songs }}</h1><p class="subtitle is-3">Songs</p></div>
     <div class="col-xs-4"><h1>{{ this.stats.artists }}</h1><p class="subtitle is-3">Artists</p></div>
     <div class="col-xs-4"><h1>{{ this.stats.albums }}</h1><p class="subtitle is-3">Albums</p></div>

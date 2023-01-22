@@ -1,17 +1,17 @@
 <template>
   <div class="container-fluid">
     <h1 class="is-capitalized">Search</h1>
-    <div class="box" style="padding: 8px 20px 20px 20px" v-if="artists.length > 0">
+    <div class="box darken" style="padding: 8px 20px 20px 20px" v-if="artists.length > 0">
       <h2 style="margin-bottom: 0">Artists</h2>
       <Tiles :tiles="artists" />
       <button class="button no-v is-primary is-rounded">View All ></button>
     </div>
-    <div class="box" style="padding: 8px 20px 20px 20px" v-if="albums.length > 0">
+    <div class="box darken" style="padding: 8px 20px 20px 20px" v-if="albums.length > 0">
       <h2 style="margin-bottom: 0">Albums</h2>
       <Tiles :tiles="albums" />
       <button class="button no-v is-primary is-rounded">View All ></button>
     </div>
-    <div class="box" style="padding: 8px 20px 20px 20px" v-if="tracks.length > 0">
+    <div class="box darken" style="padding: 8px 20px 20px 20px" v-if="tracks.length > 0">
       <h2 style="margin-bottom: 5px">Tracks</h2>
       <table class="table songs">
         <tbody>
@@ -108,12 +108,8 @@ export default {
 }
 </script>
 
-<style>
+<style lang="css">
   table.songs:has(.dropdown.is-active) tr td.pointer {
     pointer-events: none;
-  }
-
-  .box {
-    background-color: var(--darken)
   }
 </style>

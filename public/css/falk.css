@@ -46,7 +46,7 @@
   --menu-text: var(--white);
   --icon-background: var(--gray-darkest);
   --highlight-background: var(--gray-darker);
-  --input-background: var(--gray-quite-dark);
+  --input-background: var(--darken);
   --control-bar: var(--blue);
   --brand-logo: var(--primary);
   --brand-inner: var(--white); }
@@ -2682,10 +2682,12 @@ fieldset {
     background-color: var(--red); }
 
 .box {
-  background: var(--green);
+  background: var(--blue-dark);
   border-radius: 7px;
   padding: 20px 0;
   margin: 10px 0; }
+  .box.darken {
+    background: var(--darken); }
 
 .centered {
   margin: 0 auto; }
@@ -2747,7 +2749,7 @@ span.message-danger.is-hidden {
 
 .select select, .textarea, .input {
   background: var(--input-background);
-  border: 2px solid var(--input-background);
+  border: none;
   border-radius: 7px;
   color: var(--text-color);
   padding: 6px 8px;

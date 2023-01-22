@@ -21,7 +21,6 @@
 
   <ul class="menu-list right" style="margin-right: 10px">
     <li>
-      <!--<router-link :to="{ name: 'Playlists' }"><svg class="feather"><use href="/img/feather-sprite.svg#search"></use></svg><div class="detail">Search</div></router-link>-->
       <div style="position: relative">
         <input class="input" type="text" v-model="searchQuery" @keyup.enter="fullSearch" />
         <svg class="feather" style="display: block; position: absolute; top: 6px; right: 6px; pointer-events: none"><use href="/img/feather-sprite.svg#search"></use></svg>
