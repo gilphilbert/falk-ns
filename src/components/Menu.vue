@@ -19,7 +19,7 @@
     <li><router-link :to="{ name: 'Settings' }"><svg class="feather"><use href="/img/feather-sprite.svg#settings"></use></svg><div class="detail">Settings</div></router-link></li>
   </ul>
 
-  <ul class="menu-list right" style="margin-right: 10px">
+  <ul class="menu-list right">
     <li>
       <div style="position: relative">
         <input class="input" type="text" v-model="searchQuery" @keyup.enter="fullSearch" />

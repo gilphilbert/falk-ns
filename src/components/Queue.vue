@@ -2,6 +2,7 @@
   <div id="queue-list" :class="{ 'is-active': isActive }">
     <div id="queue-header" @click="hideQueue" v-touch:swipe.bottom="hideQueue">
       <h1>Play Queue</h1>
+      <button class="button no-v is-primary is-rounded" @click="this.$player.clearQueue()">Clear</button>
     </div>
     <div id="queue-items">
       <div class="row middle-xs" v-for="(item, index) in playback.queue" :key="index" :class="{ 'is-playing': index === playback.queuePos }" style="position: relative; overflow: hidden">
@@ -20,6 +21,9 @@ export default {
   methods: {
     hideQueue () {
       this.$emit('hideQueue')
+    },
+    clearQueue() {
+
     }
   }
 }

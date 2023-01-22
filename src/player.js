@@ -104,6 +104,10 @@ function remove (index) {
   fetch('/api/queue/' + index, { method: 'delete' })
 }
 
+function clearQueue () {
+  fetch('/api/queue', { method: 'delete' })
+}
+
 module.exports = {
   on,
   toggle,
@@ -116,4 +120,5 @@ module.exports = {
   repeat,
   changePos,
   remove,
+  clearQueue
 }

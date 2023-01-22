@@ -77,10 +77,6 @@ module.exports = app => {
     await mpd.player.jump(req.params.position)
     res.status(200).send()
   })
-  app.get('/api/clear', async function( req, res ) {
-    await mpd.player.clear()
-    res.status(200).send()
-  })
   app.post('/api/enqueue', async function( req, res ) {
     await mpd.player.enqueue(req.body.tracks)
     res.status(200).send()
@@ -100,6 +96,10 @@ module.exports = app => {
       await mpd.player.remove(req.params.id)
       res.status(200).send()
     }
+  })
+  app.delete('/api/queue', async function( req, res ) {
+    await mpd.player.clear()
+    res.status(200).send()
   })
 
   app.get('/api/stats', async function( req, res ) {
