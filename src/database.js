@@ -74,8 +74,8 @@ export class DatabaseHandler {
       .then(data => data.json())
   }
 
-  async quickSearch(query) {
-    return fetch('/api/search/' + encodeURIComponent(query))
+  async search(query, searchType) {
+    return fetch('/api/search/' + encodeURIComponent(query) + (searchType ? '/' + searchType : ''))
       .then(data => data.json())
   }
 }

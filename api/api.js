@@ -202,9 +202,14 @@ module.exports = app => {
       res.status(500).json({ error: e })
     }
   })
-  app.get('/api/search/:query', async function (req, res) {
-    const result = await database.library.search(req.params.query)
-    res.json(result)
+  app.get('/api/search/:query/:type?', async function (req, res) {
+    if (req.params.type) {
+      const result = await database.library.fullSearch(req.params.query, req.params.type)
+      res.json(result)
+    } else {
+      const result = await database.library.search(req.params.query)
+      res.json(result)
+    }
   })
 
   app.get('/api/locations', async function (req, res) {

@@ -94,10 +94,19 @@ const router = new createRouter({
         { path: ':genre', name: 'Genre', component: Genre, meta: { scrollToTop: true } }
       ]
     },
+    //{
+    //  path: '/search/:query/:type',
+    //  name: 'search',
+    //  component: Search,
+    //},
     {
-      path: '/search/:query',
-      name: 'search',
-      component: Search,
+      path: '/search',
+      name: 'search-container',
+      component: { template: '<router-view></router-view>' },
+      children: [
+        { path: ':query', name: 'Search', component: Search, meta: { scrollToTop: true } },
+        { path: ':query/:type', name: 'SearchType', component: Search, meta: { scrollToTop: true } }
+      ]
     },
     { path: '/settings', name: 'Settings', component: Settings, meta: { scrollToTop: true } }
   ]

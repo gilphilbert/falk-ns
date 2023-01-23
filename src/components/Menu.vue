@@ -60,7 +60,7 @@ export default {
       this.$emit('hide')
     },
     fullSearch () {
-      this.$router.push({ name: 'search', params: { query: this.searchQuery } })
+      this.$router.push({ name: 'Search', params: { query: this.searchQuery } })
     }
   },
   computed: {

@@ -11,9 +11,6 @@
   <div>
     <p class="is-2">Music Libraries</p>
     <table class="table">
-      <thead>
-        <tr><th colspan="2">Path</th><th></th></tr>
-      </thead>
       <tbody>
         <tr v-for="location in locations" v-bind:key="location">
           <td><p class="is-6">{{ location }}</p></td>

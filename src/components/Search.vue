@@ -1,15 +1,19 @@
 <template>
   <div class="container-fluid">
-    <h1 class="is-capitalized">Search</h1>
+    <h1 class="is-capitalized">Search {{ searchType !== '' ? ' > ' + searchType.slice(0, 1).toUpperCase() + searchType.slice(1) : '' }}</h1>
     <div class="box darken" style="padding: 8px 20px 20px 20px" v-if="artists.length > 0">
       <h2 style="margin-bottom: 0">Artists</h2>
       <Tiles :tiles="artists" />
-      <button class="button no-v is-primary is-rounded">View All ></button>
+      <router-link :to="{ name: 'SearchType', params: { query: $route.params.query, type: 'artists' }}" v-if="this.searchType === ''">
+        <button class="button no-v is-primary is-rounded">View All ></button>      
+      </router-link>
     </div>
     <div class="box darken" style="padding: 8px 20px 20px 20px" v-if="albums.length > 0">
       <h2 style="margin-bottom: 0">Albums</h2>
       <Tiles :tiles="albums" />
-      <button class="button no-v is-primary is-rounded">View All ></button>
+      <router-link :to="{ name: 'SearchType', params: { query: $route.params.query, type: 'albums' }}" v-if="this.searchType === ''">
+        <button class="button no-v is-primary is-rounded">View All ></button>      
+      </router-link>
     </div>
     <div class="box darken" style="padding: 8px 20px 20px 20px" v-if="tracks.length > 0">
       <h2 style="margin-bottom: 5px">Tracks</h2>
@@ -24,7 +28,9 @@
           </tr>
         </tbody>
       </table>
-      <button class="button no-v is-primary is-rounded">View All ></button>
+      <router-link :to="{ name: 'SearchType', params: { query: $route.params.query, type: 'tracks' }}" v-if="this.searchType === ''">
+        <button class="button no-v is-primary is-rounded">View All ></button>      
+      </router-link>
     </div>
     <PlaylistModal :show="modalShow" :selectedId="selectedId" @close="modalHide" />
   </div>
@@ -42,17 +48,24 @@ export default {
     PlaylistModal
   },
   created() {
+    this.searchType = this.$route.params.type || ''
     this.doSearch(this.$route.params.query)
 
     this.$watch(
-      () => this.$route.params.query,
-      (toParams) => {
-        this.doSearch(toParams)
+      () => this.$route.params.query, (newQuery) => {
+        this.doSearch(newQuery)
+      }
+    )
+    this.$watch(
+      () => this.$route.params.type, (newType) => {
+        this.searchType = newType || ''
+        this.doSearch(this.$route.params.query)
       }
     )
   },
   data () {
     return {
+      searchType: '',
       artists: [],
       albums: [],
       tracks: [],
@@ -78,30 +91,36 @@ export default {
       }
     },
     doSearch(query) {
-      this.$database.quickSearch(query)
+      this.$database.search(query, this.searchType)
       .then(data => {
 
-        this.artists = data.artists.map(e => {
-          return {
-            title: e.name,
-            art: e.art,
-            subtitle: null,
-            urlParams: { name: 'Artist', params: { 'artist': e.name } },
-            surlParams: false,
-            filter: false
-          }
-        })
-        this.albums = data.albums.map(e => {
-          return {
-            title: e.name,
-            subtitle: e.artist,
-            art: e.art,
-            urlParams: { name: 'Album', params: { 'album': e.name, 'artist': e.artist } },
-            surlParams:   { name: 'Artist', params: { 'artist': e.artist } },
-            filter: false
-          }
-        })
-        this.tracks = data.tracks.map(e => { e.dropdown = false; return e })
+        this.artists = (this.searchType === '' || this.searchType === 'artists') ?
+          data.artists.map(e => {
+            return {
+              title: e.name,
+              art: e.art,
+              subtitle: null,
+              urlParams: { name: 'Artist', params: { 'artist': e.name } },
+              surlParams: false,
+              filter: false
+            }
+          })
+          : []
+        this.albums = (this.searchType === '' || this.searchType === 'albums') ?
+          data.albums.map(e => {
+            return {
+              title: e.name,
+              subtitle: e.artist,
+              art: e.art,
+              urlParams: { name: 'Album', params: { 'album': e.name, 'artist': e.artist } },
+              surlParams:   { name: 'Artist', params: { 'artist': e.artist } },
+              filter: false
+            }
+          })
+          : []
+        this.tracks = (this.searchType === '' || this.searchType === 'tracks') ?
+          this.tracks = data.tracks.map(e => { e.dropdown = false; return e })
+          : []
       })
     }
   }
