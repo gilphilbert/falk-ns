@@ -2646,6 +2646,20 @@ table {
       padding-right: 0;
       border-top-right-radius: 5px;
       border-bottom-right-radius: 5px; }
+  table.paths td {
+    background: rgba(255, 255, 255, 0.1); }
+    table.paths td:first-child {
+      padding: 5px 2px 5px 10px; }
+    table.paths td:last-child {
+      padding: 5px 10px 5px 2px; }
+  table.paths tr:first-child td:first-child {
+    border-top-left-radius: 5px; }
+  table.paths tr:first-child td:last-child {
+    border-top-right-radius: 5px; }
+  table.paths tr:last-child td:first-child {
+    border-bottom-left-radius: 5px; }
+  table.paths tr:last-child td:last-child {
+    border-bottom-right-radius: 5px; }
 
 figure {
   display: flex;

@@ -134,10 +134,6 @@ const tracks = {
       coverart: info.art.cover || '',
       discart: info.art.disc || '',
       backgroundart: info.art.background || '',
-      playcount: 0,
-      lastplayed: 0,
-      added: Date.now(),
-      favorite: false
     }
     return knex('tracks').where('path', tr.path).update(tr)
   },

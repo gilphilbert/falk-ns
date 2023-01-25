@@ -1,32 +1,34 @@
 <template>
 <div class="container-fluid">
   <h1>Settings</h1>
+  <div>
+    <p class="is-2">Music Folders</p>
+    <table class="is-half paths">
+      <tbody>
+        <tr v-for="location in locations" v-bind:key="location" style="">
+          <td><p class="is-6">{{ location }}</p></td>
+          <td class="is-narrow pointer" @click="removeLocation(location)"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
+        </tr>
+        <tr v-if="locations.length === 0" >
+          <td class="is-narrow" style="padding-top: 7px">No paths set yet, click 'Add Path' below'</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="display: flex; align-items: center; margin-top: 15px">
+      <button class="button no-v is-primary is-rounded" @click="directories.show = true">Add Folder</button>
+    </div>
+  </div>
+
+  <br/>
+
   <p class="is-1">Library Stats</p>
   <div class="box darken row has-text-centered">
     <div class="col-xs-4"><h1>{{ this.stats.songs }}</h1><p class="subtitle is-3">Songs</p></div>
     <div class="col-xs-4"><h1>{{ this.stats.artists }}</h1><p class="subtitle is-3">Artists</p></div>
     <div class="col-xs-4"><h1>{{ this.stats.albums }}</h1><p class="subtitle is-3">Albums</p></div>
   </div>
-  <br/>
-  <div>
-    <p class="is-2">Music Libraries</p>
-    <table class="is-half">
-      <tbody>
-        <tr v-for="location in locations" v-bind:key="location">
-          <td><p class="is-6">{{ location }}</p></td>
-          <td class="is-narrow pointer" @click="removeLocation(location)"><span class="delete"><svg class="feather delete"><use xlink:href="/img/feather-sprite.svg#x-circle"></use></svg></span></td>
-        </tr>
-        <tr v-if="locations.length === 0" >
-          <td class="is-narrow" style="padding-top: 7px;">No paths set yet, click 'Add Path' below'</td>
-        </tr>
-      </tbody>
-    </table>
-    <div style="display: flex; align-items: center; margin-top: 15px">
-      <button class="button no-v is-primary is-rounded" @click="directories.show = true">Add Path</button>
-      <button class="button no-v is-primary is-rounded" @click="updateLibrary()">Update Library</button>
-      <button class="button no-v is-primary is-rounded" @click="rescanLibrary()">Rescan Library</button>
-    </div>
-  </div>
+  <button class="button no-v is-primary is-rounded" @click="updateLibrary()">Update Library</button>
+  <button class="button no-v is-primary is-rounded" @click="rescanLibrary()">Rescan Library</button>
 
   <div id="dir-modal" class="modal is-sm modal-fx-fadeInScale" :class="{ 'is-active': this.directories.show }">
     <div class="modal-content">
@@ -60,8 +62,9 @@ export default {
         this.getDirectories('')
     })
 
-    this.enqueueOnClick = this.$settings.get('enqueueOnClick', true)
+    this.enqueueOnClick = this.$settings.get('enqueueOnClick')
   },
+  props: [ 'stats' ],
   data () {
     return {
       locations: [],
@@ -73,7 +76,11 @@ export default {
       enqueueOnClick: true
     }
   },
-  props: [ 'stats' ],
+  watch: {
+    enqueueOnClick: (newValue) => {
+      console.log(newValue)
+    }
+  },
   methods: {
     setLocations (locs) {
       this.locations = locs

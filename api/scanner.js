@@ -10,7 +10,8 @@ const exec = util.promisify(require('child_process').exec)
 const database = require('./database')
 
 let totalFiles = 0,
-    filesScanned = 0
+    filesScanned = 0,
+    skipExisting = true
 
 async function processFile(ffname, { overwrite } = {}) {
   return mm.parseFile(ffname)
@@ -117,10 +118,11 @@ async function walkFunc (err, pathname, dirent) {
   sendEvent({ toScan: totalFiles, scanned: filesScanned }, { event: 'scanner' })
 
   // check here to see if file exists in database
-  if (await database.tracks.trackExists(path.dirname(pathname) + '/' + dirent.name)) {
+  const trackExists = await database.tracks.trackExists(path.dirname(pathname) + '/' + dirent.name)
+  if (trackExists && skipExisting) {
     return Promise.resolve()
   }
-  await processFile(path.dirname(pathname) + '/' + dirent.name)
+  await processFile(path.dirname(pathname) + '/' + dirent.name, { overwrite: trackExists })
 }
 
 function getHome () {
@@ -148,7 +150,7 @@ async function getDirs (dir) {
   return promise
 }
 
-async function scan (dir, rescan = false) {
+async function scan (dir) {
   console.log('Starting scan')
 
   sendEvent({ status: 'started' }, { event: 'scanner' })
@@ -183,10 +185,12 @@ async function scan (dir, rescan = false) {
   sendEvent({ status: 'stopped' }, { event: 'scanner' })
   totalFiles = 0
   filesScanned = 0
+  skipExisting = true
 }
 
 function rescan () {
-  scan(null, true)
+  skipExisting = false
+  scan(null)
 }
 
 const chokidar = require('chokidar')
