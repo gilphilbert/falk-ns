@@ -9,7 +9,7 @@ const defaultSettings = {
 function get(name) {
     if (Object.keys(defaultSettings).includes(name)) {
         const val = JSON.parse(localStorage.getItem(name))
-        return val ? val : defaultSettings[name]
+        return val === null ? defaultSettings[name] : val
     } else {
         return null
     }

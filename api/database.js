@@ -1,5 +1,5 @@
 let knex = null
-const trackFields = ['id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration']
+const trackFields = ['id', 'track', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration']
 
 
 async function buildTables () {

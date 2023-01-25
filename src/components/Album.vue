@@ -30,7 +30,7 @@
             <table class="table songs">
               <tbody>
                 <tr v-for="(track, index) in this.tracks" :key="index" v-bind:data-id="track.id">
-                  <td class="pointer" @click="$player.replaceAndPlay([track.id])"><p class="is-5 is-capitalized">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
+                  <td class="pointer" @click="defaultClick([track.id])"><p class="is-5 is-capitalized">{{ track.track + '. ' + track.title }}</p><p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p></td>
                   <td class="hidden--to-tablet"><span class="tag">{{ track.shortestformat }}</span></td>
                   <td class="is-narrow">
                     <AlbumDropDown :index="index" :trackID="track.id" @addToPlaylist="addToPlaylist" @playFromHere="playFromHere" />
@@ -83,6 +83,13 @@ export default {
     }
   },
   methods: {
+    defaultClick(tracks) {
+      if(this.$settings.get('enqueueOnClick')) {
+        this.$player.enqueue(tracks)
+      } else {
+        this.$player.replaceAndPlay(tracks)
+      }
+    },
     playFromHere(index) {
       console.log(index)
       const tr = this.tracks.map(e => e.id)

@@ -30,6 +30,13 @@
   <button class="button no-v is-primary is-rounded" @click="updateLibrary()">Update Library</button>
   <button class="button no-v is-primary is-rounded" @click="rescanLibrary()">Rescan Library</button>
 
+  <br/>
+  <label>
+  Play on click
+  <input type="checkbox" v-model="enqueueOnClick">
+  Enqueue On click
+  </label>
+
   <div id="dir-modal" class="modal is-sm modal-fx-fadeInScale" :class="{ 'is-active': this.directories.show }">
     <div class="modal-content">
       <div class="box">
@@ -63,6 +70,7 @@ export default {
     })
 
     this.enqueueOnClick = this.$settings.get('enqueueOnClick')
+    console.log(this.enqueueOnClick)
   },
   props: [ 'stats' ],
   data () {
@@ -77,8 +85,9 @@ export default {
     }
   },
   watch: {
-    enqueueOnClick: (newValue) => {
+    enqueueOnClick: function (newValue) {
       console.log(newValue)
+      this.$settings.set('enqueueOnClick', newValue)
     }
   },
   methods: {
