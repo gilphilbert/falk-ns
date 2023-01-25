@@ -1,4 +1,6 @@
 let knex = null
+const trackFields = ['id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration']
+
 
 async function buildTables () {
 
@@ -71,9 +73,7 @@ async function init () {
     useNullAsDefault: true
   })
 
-  await knex.raw('PRAGMA foreign_keys = ON;')//.then(() => {
-    //console.log('SQLite foreign keys enabled')
-  //})
+  await knex.raw('PRAGMA foreign_keys = ON;')
 
   if (! await knex.schema.hasTable('tracks')) {
     await buildTables()
@@ -180,7 +180,7 @@ const library = {
      })
   },
   artists: function () {
-    return knex.raw('select `albumartist` as `name`, `artistart` as `art` from `tracks` group by LOWER(TRIM(`albumartist`)) order by `name`')
+    return knex('tracks').select('albumartist as name', 'artistart as art').groupByRaw('LOWER(TRIM(albumartist))').orderBy('name')
   },
   artist: function (artistName) {
     return knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'year' }, { column: 'album' }])
@@ -210,7 +210,7 @@ const library = {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('name')
   },
   album: function (artist, album) {
-    return knex.from('tracks').select('*').where('albumartist', artist).andWhere('album', album).orderBy('track', 'disc')
+    return knex.from('tracks').select(...trackFields).where('albumartist', artist).andWhere('album', album).orderBy('track', 'disc')
       .then((tracks) => {
         return {
           title: tracks[0].album,
@@ -225,8 +225,7 @@ const library = {
       })
   },
   genres: function () {
-    return knex.raw('select `genre` as `name`, `coverart` as `art` from `tracks` group by LOWER(TRIM(`genre`)) order by `name`')
-    //return knex.from('tracks').select('genre as name', 'coverart as art').groupBy('name').orderBy('name')
+    return knex.from('tracks').select('genre as name', 'coverart as art').groupByRaw('LOWER(TRIM(genre))').orderBy('name')
   },
   genre: function (genre) {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').where('genre', '=', genre).groupBy('album').orderBy('name')
@@ -240,7 +239,8 @@ const library = {
     .then(([artists, albums, tracks]) => { 
       return {
         artists,
-        albums
+        albums,
+        tracks
       }
      })
   },
@@ -266,7 +266,7 @@ const library = {
         })
     } else {
       return knex('tracks')
-        .select('id', 'title', 'album', 'albumartist as artist', 'duration', 'coverart as art', 'playcount', 'samplerate', 'bits', 'shortformat', 'shortestformat')
+        .select(...trackFields)
         .whereRaw("LOWER(title) LIKE '%' || LOWER(?) || '%' ", query)
         .orWhereRaw("LOWER(albumartist) LIKE '%' || LOWER(?) || '%' ", query)
         .orWhereRaw("LOWER(album) LIKE '%' || LOWER(?) || '%' ", query)
@@ -302,7 +302,7 @@ const playlists = {
   get: function (id) {
     return Promise.all([
       knex('playlists').select('id', 'name', 'coverart', 'added').where('id', id),
-      knex('playlist_tracks').leftJoin('tracks', 'playlist_tracks.track', 'tracks.id').select('id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration').where('playlist_tracks.playlist', id)
+      knex('playlist_tracks').leftJoin('tracks', 'playlist_tracks.track', 'tracks.id').select(...trackFields).where('playlist_tracks.playlist', id)
     ])
     .then(([playlist, tracks]) => {
       const pl = playlist[0]
@@ -323,7 +323,7 @@ const playlists = {
       .then(() => playlists.get(playlist))
   },
   popular: function () {
-    return knex('tracks').select('id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration').where('playcount', '>', 0).orderBy('playcount', 'desc').limit(100)
+    return knex('tracks').select(...trackFields).where('playcount', '>', 0).orderBy('playcount', 'desc').limit(100)
       .then((tracks) => {
         return {
           id: 'mostplayed',
@@ -334,7 +334,7 @@ const playlists = {
       })
   },
   recentlyAdded: function () {
-    return knex('tracks').select('id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration').orderBy('added', 'desc').limit(100)
+    return knex('tracks').select(...trackFields).orderBy('added', 'desc').limit(100)
       .then((tracks) => {
         return {
           id: 'recentlyadded',
@@ -345,7 +345,7 @@ const playlists = {
       })
   },
   recentlyPlayed: function () {
-    return knex('tracks').select('id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration').where('lastplayed', '>', 0).orderBy('lastplayed', 'desc').limit(100)
+    return knex('tracks').select(...trackFields).where('lastplayed', '>', 0).orderBy('lastplayed', 'desc').limit(100)
       .then((tracks) => {
         return {
           id: 'recentlyplayed',
@@ -356,7 +356,6 @@ const playlists = {
     })
   },
   favorites: function () {
-    trackFields = ['id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration']
     return knex('tracks').select(...trackFields).where('favorite', true).orderBy('title', 'desc')
       .then((tracks) => {
         return {
