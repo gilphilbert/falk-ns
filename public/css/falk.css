@@ -2615,15 +2615,37 @@ p {
 
 table {
   width: 100%; }
+  table.is-half {
+    width: 50%; }
   table th {
     text-align: left;
     font-size: 1.2rem;
     border-bottom: 3px solid var(--lighten); }
   table td {
-    vertical-align: middle; }
+    vertical-align: middle;
+    padding: 2px 0; }
     table td.is-narrow {
       width: 1%;
       white-space: nowrap; }
+  table.songs tr:hover td {
+    background: var(--darken); }
+  table.songs td {
+    vertical-align: middle;
+    padding: 5px 0 2px 0; }
+    table.songs td:not(:first-child) {
+      width: 1%;
+      white-space: nowrap;
+      padding-left: 4px;
+      padding-right: 4px; }
+    table.songs td:first-child {
+      padding-left: 10px;
+      border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px; }
+    table.songs td:last-child {
+      padding-left: 0;
+      padding-right: 0;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px; }
 
 figure {
   display: flex;
@@ -2676,7 +2698,7 @@ fieldset {
   display: inline-block;
   padding: 7px 10px;
   background-color: var(--green); }
-  .tag.is-grey {
+  .tag.is-gray {
     background-color: var(--gray); }
   .tag.is-danger {
     background-color: var(--red); }
@@ -2684,7 +2706,7 @@ fieldset {
 .box {
   background: var(--blue-dark);
   border-radius: 7px;
-  padding: 20px 0;
+  padding: 20px 30px;
   margin: 10px 0; }
   .box.darken {
     background: var(--darken); }
@@ -2732,7 +2754,7 @@ span.message-danger.is-hidden {
 .has-no-overflow {
   overflow: hidden; }
 
-.has-background-darker-grey {
+.has-background-darker-gray {
   background-color: var(--gray-darker); }
 
 .is-hidden {
@@ -2853,17 +2875,6 @@ input:checked + .slider:before {
     @media (max-width: 768px) {
       .modal.is-lg .modal-content, .modal.is-lg .modal-card {
         width: 100vw; } }
-  .modal .box {
-    padding: 3rem; }
-  .modal .title-icon {
-    margin-bottom: 1em; }
-  .modal .title {
-    color: var(--text-color); }
-  .modal .buttons {
-    margin-top: 1em; }
-  .modal .select select option {
-    color: var(--primary); }
-
 .feather {
   width: 24px;
   height: 24px;
@@ -2900,7 +2911,7 @@ input:checked + .slider:before {
     min-width: 160px;
     border-radius: 4px;
     overflow: hidden;
-    z-index: 1; }
+    z-index: 4; }
   .dropdown.is-active .dropdown-content {
     display: block; }
     .dropdown.is-active .dropdown-content span {
@@ -2986,27 +2997,6 @@ input:checked + .slider:before {
   width: 100%;
   text-align: center;
   bottom: 10px; }
-
-table.songs tr:hover td {
-  background: var(--darken); }
-
-table.songs td {
-  vertical-align: middle;
-  padding: 5px 0 2px 0; }
-  table.songs td:not(:first-child) {
-    width: 1%;
-    white-space: nowrap;
-    padding-left: 4px;
-    padding-right: 4px; }
-  table.songs td:first-child {
-    padding-left: 10px;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px; }
-  table.songs td:last-child {
-    padding-left: 0;
-    padding-right: 0;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px; }
 
 .art-container .col-lg-2 {
   padding: 27px; }

@@ -18,6 +18,8 @@ async function buildTables () {
     table.boolean('lossless')
     table.float('samplerate')
     table.integer('bits')
+    table.string('shortformat')
+    table.string('shortestformat')
     table.integer('channels')
     table.string('codec')
     table.string('artistart')
@@ -69,9 +71,9 @@ async function init () {
     useNullAsDefault: true
   })
 
-  await knex.raw('PRAGMA foreign_keys = ON;').then(() => {
-    console.log('SQLite foreign keys enabled')
-  })
+  await knex.raw('PRAGMA foreign_keys = ON;')//.then(() => {
+    //console.log('SQLite foreign keys enabled')
+  //})
 
   if (! await knex.schema.hasTable('tracks')) {
     await buildTables()
@@ -95,6 +97,8 @@ const tracks = {
       lossless: info.format.lossless,
       samplerate: info.format.samplerate || 0,
       bits: info.format.bits || 0,
+      shortformat: (info.format.samplerate / 1000) + 'kHz ' + ((info.format.bits) ? info.format.bits + 'bit' : ''),
+      shortestformat: (info.format.samplerate / 1000) + '/' + ((info.format.bits) ? info.format.bits : ''),
       channels: info.format.channels || 0,
       codec: info.format.codec || '',
       artistart: info.art.artist || '',
@@ -157,7 +161,10 @@ const tracks = {
       .then(rows => rows.map(r => r.path))
   },
   incrementPlay: (path) => {
-    return knex.from('tracks').where('path', path).increment('playcount', 1)
+    return knex.from('tracks').where('path', path).increment('playcount', 1).then(el => {
+      return knex('tracks').update('lastplayed', 'date()').where('path', path)
+    })
+
   }
 }
 
@@ -208,21 +215,16 @@ const library = {
   },
   album: function (artist, album) {
     return knex.from('tracks').select('*').where('albumartist', artist).andWhere('album', album).orderBy('track', 'disc')
-      .then((rows) => {
-        rows.map(r => {
-          r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
-          r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')
-          return r
-        })
+      .then((tracks) => {
         return {
-          title: rows[0].album,
-          art: rows[0].coverart,
-          artist: rows[0].albumartist,
-          year: rows[0].year,
-          genre: rows[0].genre,
-          shortformat: rows[0].shortformat,
-          shortestformat: rows[0].shortestformat,
-          tracks: rows
+          title: tracks[0].album,
+          art: tracks[0].coverart,
+          artist: tracks[0].albumartist,
+          year: tracks[0].year,
+          genre: tracks[0].genre,
+          shortformat: tracks[0].shortformat,
+          shortestformat: tracks[0].shortestformat,
+          tracks: tracks
         }
       })
   },
@@ -233,36 +235,16 @@ const library = {
   genre: function (genre) {
     return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').where('genre', '=', genre).groupBy('album').orderBy('name')
   },
-  popular: function () {
-    return knex.from('tracks').select('*').orderBy('playcount', 'desc').limit(100)
-      .then((tracks) => {
-        return {
-          id: '_mostplayed',
-          name: 'Most Played',
-          coverart: ((tracks.length > 0) ? tracks[0].coverart : ''),
-          tracks: tracks.map(r => {
-            r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
-            r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')
-            return r
-          })
-        }
-      })
-  },
   search: function (query) {
     return Promise.all([
       knex('tracks').select('albumartist as name', 'artistart as art').groupByRaw('LOWER(TRIM(albumartist))').orderBy('name').whereRaw("LOWER(name) LIKE '%' || LOWER(?) || '%' ", query).limit(12),
       knex('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('album').whereRaw("LOWER(album) LIKE '%' || LOWER(?) || '%' ", query).orWhereRaw("LOWER(albumartist) LIKE '%' || LOWER(?) || '%' ", query).limit(12),
-      knex('tracks').select('id', 'title', 'album', 'albumartist as artist', 'duration', 'coverart as art', 'playcount', 'samplerate', 'bits').whereRaw("LOWER(title) LIKE '%' || LOWER(?) || '%' ", query).orWhereRaw("LOWER(albumartist) LIKE '%' || LOWER(?) || '%' ", query).orWhereRaw("LOWER(album) LIKE '%' || LOWER(?) || '%' ", query).limit(12),
+      knex('tracks').select('id', 'title', 'album', 'albumartist as artist', 'duration', 'coverart as art', 'playcount', 'samplerate', 'bits', 'shortformat', 'shortestformat').whereRaw("LOWER(title) LIKE '%' || LOWER(?) || '%' ", query).orWhereRaw("LOWER(albumartist) LIKE '%' || LOWER(?) || '%' ", query).orWhereRaw("LOWER(album) LIKE '%' || LOWER(?) || '%' ", query).limit(12),
     ])
     .then(([artists, albums, tracks]) => { 
       return {
         artists,
-        albums,
-        tracks: tracks.map(r => {
-          r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
-          r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')
-          return r
-        })
+        albums
       }
      })
   },
@@ -288,17 +270,10 @@ const library = {
         })
     } else {
       return knex('tracks')
-        .select('id', 'title', 'album', 'albumartist as artist', 'duration', 'coverart as art', 'playcount', 'samplerate', 'bits')
+        .select('id', 'title', 'album', 'albumartist as artist', 'duration', 'coverart as art', 'playcount', 'samplerate', 'bits', 'shortformat', 'shortestformat')
         .whereRaw("LOWER(title) LIKE '%' || LOWER(?) || '%' ", query)
         .orWhereRaw("LOWER(albumartist) LIKE '%' || LOWER(?) || '%' ", query)
         .orWhereRaw("LOWER(album) LIKE '%' || LOWER(?) || '%' ", query)
-        .then(tracks => {
-          return tracks.map(r => {
-            r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
-            r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')
-            return r
-          })
-        })
         .then(tracks => {
           return { artists: [], albums: [], tracks: tracks }
         })
@@ -317,13 +292,21 @@ const playlists = {
         return knex('playlist_tracks').insert(trs)
       })
   },
-  list: function () {
-    return knex('playlists').select('id', 'name', 'coverart').orderBy('name')
+  list: function (userOnly = false) {
+    return knex('playlists').select('id', 'name', 'coverart').orderBy('name').then(async playlists => {
+      if (!userOnly) {
+        playlists.unshift({ id: 'recentlyplayed', name: 'Recently Played', coverart: await knex('tracks').select('coverart').orderBy('lastplayed', 'desc').first().then(el => el ? el.coverart : '') })
+        playlists.unshift({ id: 'recentlyadded', name: 'Recently Added', coverart: await knex('tracks').select('coverart').orderBy('added', 'desc').first().then(el => el ? el.coverart : '') })
+        playlists.unshift({ id: 'mostplayed', name: 'Most Played', coverart: await knex('tracks').select('coverart').orderBy('playcount', 'desc').first().then(el => el ? el.coverart : '') })
+        playlists.unshift({ id: 'favorites', name: 'Favorites', coverart: await knex('tracks').select('coverart').where('favorite', true).orderBy('title').first().then(el => el ? el.coverart : '' ) })
+      }
+      return playlists
+    })
   },
   get: function (id) {
     return Promise.all([
       knex('playlists').select('id', 'name', 'coverart', 'added').where('id', id),
-      knex('playlist_tracks').leftJoin('tracks', 'playlist_tracks.track', 'tracks.id').select('tracks.*').where('playlist_tracks.playlist', id)
+      knex('playlist_tracks').leftJoin('tracks', 'playlist_tracks.track', 'tracks.id').select('id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration').where('playlist_tracks.playlist', id)
     ])
     .then(([playlist, tracks]) => {
       const pl = playlist[0]
@@ -332,11 +315,7 @@ const playlists = {
         name: pl.name,
         coverart: pl.coverart,
         added: pl.added,
-        tracks: tracks.map(r => {
-          r.shortformat = (r.samplerate / 1000) + 'kHz ' + ((r.bits) ? r.bits + 'bit' : '')
-          r.shortestformat = (r.samplerate / 1000) + '/' + ((r.bits) ? r.bits : '')
-          return r
-        })
+        tracks: tracks
       }
     })
   },
@@ -346,6 +325,51 @@ const playlists = {
   removeTracks: function (playlist, track) {
     return knex('playlist_tracks').select().where('playlist', playlist).andWhere('track', track).delete()
       .then(() => playlists.get(playlist))
+  },
+  popular: function () {
+    return knex('tracks').select('id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration').where('playcount', '>', 0).orderBy('playcount', 'desc').limit(100)
+      .then((tracks) => {
+        return {
+          id: 'mostplayed',
+          name: 'Most Played',
+          coverart: ((tracks.length > 0) ? tracks[0].coverart : ''),
+          tracks
+        }
+      })
+  },
+  recentlyAdded: function () {
+    return knex('tracks').select('id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration').orderBy('added', 'desc').limit(100)
+      .then((tracks) => {
+        return {
+          id: 'recentlyadded',
+          name: 'Recently Added',
+          coverart: ((tracks.length > 0) ? tracks[0].coverart : ''),
+          tracks
+        }
+      })
+  },
+  recentlyPlayed: function () {
+    return knex('tracks').select('id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration').where('lastplayed', '>', 0).orderBy('lastplayed', 'desc').limit(100)
+      .then((tracks) => {
+        return {
+          id: 'recentlyplayed',
+          name: 'Recently Played',
+          coverart: ((tracks.length > 0) ? tracks[0].coverart : ''),
+          tracks
+        }
+    })
+  },
+  favorites: function () {
+    trackFields = ['id', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration']
+    return knex('tracks').select(...trackFields).where('favorite', true).orderBy('title', 'desc')
+      .then((tracks) => {
+        return {
+          id: 'favorites',
+          name: 'Favorites',
+          coverart: ((tracks.length > 0) ? tracks[0].coverart : ''),
+          tracks
+        }
+    })
   }
 }
 

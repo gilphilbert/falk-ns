@@ -139,21 +139,38 @@ module.exports = app => {
     res.json(genre)
   })
 
-  app.get('/api/playlist', async function (req, res) {
+  // doesn't show 'auto' playlists
+  app.get('/api/playlists/user', async function (req, res) {
+    const pls = await database.playlists.list(true)
+    res.json(pls)
+  })
+
+  app.get('/api/playlists', async function (req, res) {
     const pls = await database.playlists.list()
     res.json(pls)
   })
-  app.get('/api/playlist/auto/mostplayed', function (req, res) {
-    database.library.popular()
-      .then(pls => {
-        res.json(pls)
-      })
-  })
+  
   app.get('/api/playlist/:id', async function (req, res) {
     if (!req.params.id) {
       res.status(400).json({ error: "id missing" })
     } else {
-      const pl = await database.playlists.get(req.params.id)
+      let pl = {}
+      switch (req.params.id) {
+        case 'mostplayed':
+          pl = await database.playlists.popular()
+          break
+          case 'recentlyadded':
+            pl = await database.playlists.recentlyAdded()
+            break
+          case 'recentlyplayed':
+            pl = await database.playlists.recentlyPlayed()
+            break
+          case 'favorites':
+            pl = await database.playlists.favorites()
+            break
+          default:
+          pl = await database.playlists.get(req.params.id)
+        }
       if (pl) 
         res.json(pl)
       else
@@ -289,10 +306,6 @@ module.exports = app => {
     }
     return val
   }
-
-  app.get('/art/playlist/:id', function (req, res) {
-
-  })
 
   app.get('/art/:filename?', function (req, res) {
     const filename = req.params.filename || null

@@ -28,7 +28,7 @@ export default {
   name: 'PlaylistModal',
   props: [ 'show', 'selectedId' ],
   created () {
-    this.$database.getPlaylists()
+    this.$database.getUserPlaylists()
       .then(data => {
         this.playlists = data
       })

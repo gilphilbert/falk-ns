@@ -1,14 +1,11 @@
 ## General
-* Mobile Home controls working (play, pause, skip, repeat, shuffle)
-* Search (global / current view)
 * Save queue on shutdown
-* Home screen
-* Queue
 * Share mounting
+* How to stop dropdowns falling off page (dropdown-content, set top: auto, bottom: 0)
+* Drop dependency on Google Fonts
 
 ## Playback
 * Rearrange playing queue
-* Pause issue (restarting in UI)
 * Shuffle
 * Repeat
 
@@ -16,12 +13,8 @@
 * Rearrange playlist
 * Auto playlists
  * Most recent
-
-## Library
-* Play album button
+ * Played recently
+ * Most played
 
 ## Settings
-* Change default behavior (settings)
-
-## Database
-* Playlists need to move to sqlite, then we can remove plDB and musicDB
+* Ability to change default click behavior

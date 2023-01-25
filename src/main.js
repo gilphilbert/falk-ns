@@ -21,6 +21,7 @@ import Settings from './components/Settings.vue'
 
 import { DatabaseHandler } from './database.js'
 import * as player from './player.js'
+import * as settings from './settings'
 
 const scrollBehavior = (to, from, savedPosition) => {
   if (savedPosition) {
@@ -123,6 +124,7 @@ app.use(lazyPlugin, {
 })
 
 app.config.globalProperties.$player = player
+app.config.globalProperties.$settings = settings
 app.config.globalProperties.$innerWidth = window.innerWidth
 app.config.globalProperties.$database = new DatabaseHandler()
 app.mount('#app')

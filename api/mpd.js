@@ -27,7 +27,8 @@ function init (sendEvent) {
           const st = await client.api.status.get()
           if (st.elapsed && st.elapsed <= 1) {
             const q = await client.api.queue.info()
-            const ret = await database.tracks.incrementPlay(q[st.song].file)
+            console.log('incrementing play')
+            await database.tracks.incrementPlay(q[st.song].file)
           }
           break
         default:
@@ -67,7 +68,6 @@ async function sendQueue (save = false) {
   const st = await client.api.status.get()
   const cur = st.song
   for (const tr of q) {
-    console.log(tr) 
     const track = await database.tracks.trackByPath(tr.file)
     items.push({
       title: track.title,
@@ -177,7 +177,6 @@ player = {
 
     for (i = 0; i < tracks.length; i++) {
       const path = await database.tracks.getPath(tracks[i])
-      console.log(path)
       try {
         await client.api.queue.add(path)
       } catch (e) { console.log(`[ERROR] [Player] Can't add track (${ tracks[i] })`); console.log(e) }

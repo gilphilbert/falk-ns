@@ -37,7 +37,12 @@ export class DatabaseHandler {
   }
 
   async getPlaylists () {
-    return fetch(`/api/playlist`)
+    return fetch(`/api/playlists`)
+      .then(data => data.json())
+  }
+
+  async getUserPlaylists () {
+    return fetch(`/api/playlists/user`)
       .then(data => data.json())
   }
 

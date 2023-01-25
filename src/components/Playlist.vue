@@ -25,7 +25,7 @@
                     <p class="is-5" v-else>{{ track.title }}</p>
                     <p class="subtitle is-5">{{ track.artist + ' - ' + Math.floor(track.duration / 60) + ':' + ('0' + (track.duration % 60)).slice(-2, 3) }}</p>
                   </td>
-                  <td class="hidden--to-tablet"><span class="tag">{{ track.shortformat }}</span></td>
+                  <td class="hidden--to-tablet"><span class="tag" :class="{ 'is-gray': track.lossless === false }">{{ track.shortformat }}</span></td>
                   <td class="is-narrow">
                     <PlaylistDropDown :index="index" :trackID="track.id" @removeTrack="removeTrack" />
                   </td>
@@ -71,7 +71,6 @@ export default {
 
       this.$database.getPlaylist(id)
         .then(data => {
-        console.log(data)
           this.art = data.coverart || '/img/placeholder.png'
           this.title = data.name
           this.tracks = data.tracks.map(e => { e.dropdown = false; return e })

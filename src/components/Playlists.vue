@@ -1,7 +1,6 @@
 <template>
 <div class="container-fluid">
   <h1 class="is-capitalized">Playlists</h1>
-  <Tiles :tiles="autoplaylists" />
   <Tiles :tiles="playlists" />
 </div>
 </template>
@@ -28,19 +27,9 @@ export default {
         })
         this.playlists = data
       })
-    
-    this.autoplaylists = [{
-      id: -1,
-      title: 'Most Played',
-      urlParams: { name: 'Playlist', params: { id: '_mostplayed' } },
-      art: '/img/placeholder.png',
-      subtitle: '',
-      surlParams: false
-    }]
   },
   data () {
     return {
-      autoplaylists: [],
       playlists: []
     }
   },

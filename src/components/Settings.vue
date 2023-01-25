@@ -10,7 +10,7 @@
   <br/>
   <div>
     <p class="is-2">Music Libraries</p>
-    <table class="table">
+    <table class="is-half">
       <tbody>
         <tr v-for="location in locations" v-bind:key="location">
           <td><p class="is-6">{{ location }}</p></td>
@@ -28,7 +28,7 @@
     </div>
   </div>
 
-  <div id="dir-modal" class="modal is-small modal-fx-fadeInScale" :class="{ 'is-active': this.directories.show }">
+  <div id="dir-modal" class="modal is-sm modal-fx-fadeInScale" :class="{ 'is-active': this.directories.show }">
     <div class="modal-content">
       <div class="box">
         <h1>Add directory</h1>
@@ -59,6 +59,8 @@ export default {
         this.setLocations(data)
         this.getDirectories('')
     })
+
+    this.enqueueOnClick = this.$settings.get('enqueueOnClick', true)
   },
   data () {
     return {
@@ -67,7 +69,8 @@ export default {
         show: false,
         list: [],
         current: ''
-      }
+      },
+      enqueueOnClick: true
     }
   },
   props: [ 'stats' ],
@@ -141,7 +144,5 @@ export default {
 </script>
 
 <style lang="css">
-  .modal.is-md .modal-content, .modal.is-md .modal-card {
-    width: 600px;
-  }
+
 </style>
