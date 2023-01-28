@@ -4,8 +4,9 @@ const path = require('path')
 const mm = require('music-metadata')
 const crypto = require('crypto')
 
-const util = require('util');
-const exec = util.promisify(require('child_process').exec)
+const util = require('util')
+var countFiles = require('count-files')
+const cf = util.promisify(countFiles)
 
 const database = require('./database')
 
@@ -163,11 +164,12 @@ async function scan (dir) {
     }
   })
 
+  //count the total number of files
   const dirs = dir || await database.locations.paths()
   totalFiles = 0
   for (let i = 0; i < dirs.length; i++) {
-    const { stdout, stderr } = await exec(`find ${dirs[i]} f \\( -name "*.mp3"  -name "*.m4a" -o -name "*.flac" -o -name "*.wav" -o -name "*.ogg" \\)|wc -l`)
-    totalFiles += parseInt(stdout)
+    const stats = await cf(dirs[i])
+    totalFiles += stats.files
   }
 
   sendEvent({ toScan: totalFiles, scanned: 0 }, { event: 'scanner' })

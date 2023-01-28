@@ -2613,6 +2613,9 @@ p, a {
 p {
   margin: 0.2rem 0 0.3rem 0; }
 
+section {
+  margin-bottom: 30px; }
+
 table {
   width: 100%; }
   table.is-half {

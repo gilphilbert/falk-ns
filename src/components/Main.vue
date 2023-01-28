@@ -9,6 +9,12 @@
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
     <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
   </div>
+  <div class="toast" style="position: absolute; bottom: 120px; left: 20px; width: 280px; height: 120px; background: red; border-radius: 8px; padding: 12px 18px; z-index: 2; overflow: clip">
+    Stuff in the toast goes here.
+    <span class="progress" style="position: absolute; bottom: 0; left: 0; background: blue; height: 5px; width: 100%;">
+
+    </span>
+  </div>
 </div>
 </template>
 <script>

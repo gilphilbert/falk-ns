@@ -1,7 +1,7 @@
 <template>
 <div class="container-fluid">
   <h1>Settings</h1>
-  <div>
+  <section>
     <p class="is-2">Music Folders</p>
     <table class="is-half paths">
       <tbody>
@@ -17,25 +17,27 @@
     <div style="display: flex; align-items: center; margin-top: 15px">
       <button class="button no-v is-primary is-rounded" @click="directories.show = true">Add Folder</button>
     </div>
-  </div>
+  </section>
 
-  <br/>
+  <section>
+    <p class="is-1">Manage Library</p>
+    <div class="box darken row has-text-centered">
+      <div class="col-xs-4"><h1>{{ this.stats.songs }}</h1><p class="subtitle is-3">Songs</p></div>
+      <div class="col-xs-4"><h1>{{ this.stats.artists }}</h1><p class="subtitle is-3">Artists</p></div>
+      <div class="col-xs-4"><h1>{{ this.stats.albums }}</h1><p class="subtitle is-3">Albums</p></div>
+    </div>
+    <button class="button no-v is-primary is-rounded" @click="updateLibrary()">Update Library</button>
+    <button class="button no-v is-primary is-rounded" @click="rescanLibrary()">Rescan Library</button>
+  </section>
 
-  <p class="is-1">Library Stats</p>
-  <div class="box darken row has-text-centered">
-    <div class="col-xs-4"><h1>{{ this.stats.songs }}</h1><p class="subtitle is-3">Songs</p></div>
-    <div class="col-xs-4"><h1>{{ this.stats.artists }}</h1><p class="subtitle is-3">Artists</p></div>
-    <div class="col-xs-4"><h1>{{ this.stats.albums }}</h1><p class="subtitle is-3">Albums</p></div>
-  </div>
-  <button class="button no-v is-primary is-rounded" @click="updateLibrary()">Update Library</button>
-  <button class="button no-v is-primary is-rounded" @click="rescanLibrary()">Rescan Library</button>
-
-  <br/>
-  <label>
-  Play on click
-  <input type="checkbox" v-model="enqueueOnClick">
-  Enqueue On click
-  </label>
+  <section>
+    <p class="is-1">Playback Settings</p>
+    <label>
+      Play on click
+      <input type="checkbox" v-model="enqueueOnClick">
+      Enqueue On click
+    </label>
+  </section>
 
   <div id="dir-modal" class="modal is-sm modal-fx-fadeInScale" :class="{ 'is-active': this.directories.show }">
     <div class="modal-content">
