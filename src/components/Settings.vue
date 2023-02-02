@@ -32,11 +32,14 @@
 
   <section>
     <p class="is-1">Playback Settings</p>
-    <label>
-      Play on click
+    <div style="display:flex;">
+    <p>Play on click</p>
+    <label class="switch" style="margin: 2px 5px">
       <input type="checkbox" v-model="enqueueOnClick">
-      Enqueue On click
+      <span class="slider round"></span>
     </label>
+    <p>Enqueue On click</p>
+    </div>
   </section>
 
   <div id="dir-modal" class="modal is-sm modal-fx-fadeInScale" :class="{ 'is-active': this.directories.show }">
