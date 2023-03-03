@@ -32,13 +32,19 @@
 
   <section>
     <p class="is-1">Playback Settings</p>
-    <div style="display:flex;">
-    <p>Play on click</p>
-    <label class="switch" style="margin: 2px 5px">
-      <input type="checkbox" v-model="enqueueOnClick">
-      <span class="slider round"></span>
-    </label>
-    <p>Enqueue On click</p>
+    <div style="display: flex; margin-top: 10px">
+      <label class="switch" style="margin: 2px 5px">
+        <input type="checkbox" v-model="enqueueOnClick">
+        <span class="slider round"></span>
+      </label>
+      <p>Click to enqueue</p>
+    </div>
+    <div style="display: flex; margin-top: 8px">
+      <label class="switch" style="margin: 2px 5px">
+        <input type="checkbox" v-model="playEmptyQueue">
+        <span class="slider round"></span>
+      </label>
+      <p>Play when adding first track to queue</p>
     </div>
   </section>
 
@@ -75,7 +81,7 @@ export default {
     })
 
     this.enqueueOnClick = this.$settings.get('enqueueOnClick')
-    console.log(this.enqueueOnClick)
+    this.playEmptyQueue = this.$settings.get('playEmptyQueue')
   },
   props: [ 'stats' ],
   data () {
@@ -86,13 +92,16 @@ export default {
         list: [],
         current: ''
       },
-      enqueueOnClick: true
+      enqueueOnClick: true,
+      playEmptyQueue: true,
     }
   },
   watch: {
     enqueueOnClick: function (newValue) {
-      console.log(newValue)
       this.$settings.set('enqueueOnClick', newValue)
+    },
+    playEmptyQueue: function (newValue) {
+      this.$settings.set('playEmptyQueue', newValue)
     }
   },
   methods: {

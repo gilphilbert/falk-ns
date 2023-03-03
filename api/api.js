@@ -79,10 +79,16 @@ module.exports = app => {
   })
   app.post('/api/enqueue', async function( req, res ) {
     await mpd.player.enqueue(req.body.tracks)
+    if (req.body.autoplay && !await mpd.player.isPlaying()) {
+      await mpd.player.play()
+    }
     res.status(200).send()
   })
   app.post('/api/playNext', async function( req, res ) {
     await mpd.player.playNext(req.body.tracks)
+    if (req.body.autoplay && !await mpd.player.isPlaying()) {
+      await mpd.player.play()
+    }
     res.status(200).send()
   })
   app.post('/api/replaceAndPlay', async function( req, res ) {

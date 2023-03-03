@@ -11,9 +11,11 @@ const config = {
   })()
 }
 
+console.log(config)
+
 let client = false
 
-function init (sendEvent) {
+function init () {
   return mpdapi.connect(config)
   .then(con => {
     client = con
@@ -91,13 +93,13 @@ async function _sendState() {
 player = {
   //playback related items
   play: async function () {
-    return mpd.api.playback.play()
+    return client.api.playback.play()
   },
   stop: async function () {
-    return mpd.api.playback.stop()
+    return client.api.playback.stop()
   },
   pause: async function () {
-    return mpd.api.playback.pause()
+    return client.api.playback.pause()
   },
   toggle: async function () {
     const st = await client.api.status.get()
@@ -189,6 +191,11 @@ player = {
   sendState: async function () {
     _sendState()
     sendQueue()
+  },
+  isPlaying() {
+    return client.api.status.get()
+    .then(data => data.state === "play" )
+    .catch(e => false )
   },
 
   // settings related items

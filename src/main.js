@@ -20,8 +20,8 @@ import Search from './components/Search.vue'
 import Settings from './components/Settings.vue'
 
 import { DatabaseHandler } from './database.js'
-import * as player from './player.js'
 import * as settings from './settings'
+import * as player from './player.js'
 
 const scrollBehavior = (to, from, savedPosition) => {
   if (savedPosition) {

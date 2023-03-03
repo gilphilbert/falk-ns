@@ -1,3 +1,4 @@
+/*
 const STATE_STOP = 0
 const STATE_PLAY = 1
 const STATE_PAUSE = 2
@@ -10,12 +11,11 @@ let eventCallbacks = {}
 
 const progressTick = TICK
 
-/* == simple event emitter ==
+// == simple event emitter ==
 //
 //   attach like this:
 //   player.on('play', evt => console.log(evt))
 //
-*/
 function on (name, callback) {
   eventCallbacks = eventCallbacks || {}
   eventCallbacks[name] = eventCallbacks[name] || []
@@ -38,16 +38,12 @@ const progress = () => {
     }
   }
 }
-
-/*
-function play (index = -1) {
-  fetch('/api/play')
-}
-
-function pause () {
-  fetch('/api/pause')
-}
 */
+
+// import crashes Vue when enabled
+const settings = require('./settings');
+//import * as settings from './settings'
+
 
 function toggle () {
   fetch('/api/toggle')
@@ -70,7 +66,7 @@ function repeat () {
 }
 
 async function enqueue (tracks) {
-  let body = { tracks: tracks }
+  let body = { tracks: tracks, autoplay: settings.get('playEmptyQueue') }
   fetch('/api/enqueue', {
     method: 'post',
     body: JSON.stringify(body),
@@ -79,7 +75,7 @@ async function enqueue (tracks) {
 }
 
 async function playNext (tracks) {
-  let body = { tracks: tracks }
+  let body = { tracks: tracks, autoplay: settings.get('playEmptyQueue') }
   fetch('/api/playNext', {
     method: 'post',
     body: JSON.stringify(body),
@@ -109,7 +105,6 @@ function clearQueue () {
 }
 
 module.exports = {
-  on,
   toggle,
   skip,
   prev,

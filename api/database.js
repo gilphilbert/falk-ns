@@ -216,7 +216,7 @@ const library = {
         return {
           title: tracks[0].album,
           art: tracks[0].coverart,
-          artist: tracks[0].albumartist,
+          artist: tracks[0].artist,
           year: tracks[0].year,
           genre: tracks[0].genre,
           shortformat: tracks[0].shortformat,

@@ -6,8 +6,9 @@
       </svg>
     </span>
     <div class="dropdown-content">
-      <span class="dropdown-item" @click="enqueue">Enqueue</span> <!-- -->
+      <span v-if="!$settings.get('enqueueOnClick')" class="dropdown-item" @click="enqueue">Enqueue</span> <!-- -->
       <span class="dropdown-item" @click="playNext">Play next</span> <!-- -->
+      <span v-if="$settings.get('enqueueOnClick')" class="dropdown-item" @click="replaceAndPlay">Clear and play</span> <!-- -->
       <span class="dropdown-item" @click="playFromHere">Play from here</span>
       <span class="dropdown-item" @click="addToPlaylist">Add to playlist</span>
     </div>
@@ -33,6 +34,10 @@ export default {
     },
     enqueue() {
       this.$player.enqueue([this.trackID])
+      this.isActive = false
+    },
+    replaceAndPlay() {
+      this.$player.replaceAndPlay([this.trackID])
       this.isActive = false
     },
     playNext() {
