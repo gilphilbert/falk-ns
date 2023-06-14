@@ -28,11 +28,21 @@ export default {
           }
         })
         this.artists = data
+        this.doFilter(this.filter)
       })
   },
   data () {
     return {
       artists: []
+    }
+  },
+  methods: {
+    doFilter: function (filter) {
+      this.artists.forEach(el => {
+        if (filter === 0) el.filter = false
+        if (filter === 1) el.filter = !el.lossless
+        if (filter === 2) el.filter = el.maxbits <= 16
+      })
     }
   },
   watch: {
@@ -43,11 +53,7 @@ export default {
     },
 
     filter(filter) {
-      this.artists.forEach(el => {
-        if (filter === 0) el.filter = false
-        if (filter === 1) el.filter = !el.lossless
-        if (filter === 2) el.filter = el.maxbits <= 16
-      })
+      this.doFilter(filter)
     }
   }
 }

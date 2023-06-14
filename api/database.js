@@ -193,18 +193,20 @@ const library = {
       })
   },
   artist: function (artistName) {
-    return knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'year' }, { column: 'album' }])
+    return knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').max('bits').max('lossless').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'year' }, { column: 'album' }])
       .then((rows) => {
         let background = '',  
             artistart = '',
             albums = []
-        for (row of rows) {
+        for (let row of rows) {
           if (background === '' && row['backgroundart'] !== null) background = row['backgroundart']
           if (artistart === '' && row['artistart'] !== null) artistart = row['artistart']
           albums.push({
             name: row['name'],
             year: row['year'],
-            art: row['coverart']
+            art: row['coverart'],
+            maxbits: row["max(`bits`)"],
+            lossless: row["max(`lossless`)"]
           })
         }
         return {
@@ -217,7 +219,16 @@ const library = {
       .catch(err => console.log(err))
   },
   albums: function () {
-    return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').groupBy('album', 'albumartist').orderBy('name')
+    return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').max('bits').max('lossless').groupBy('album', 'albumartist').orderBy('name')
+      .then(rows => {
+        rows.forEach(row => {
+          row['maxbits'] = row["max(`bits`)"]
+          delete row["max(`bits`)"]
+          row['lossless'] = row["max(`lossless`)"]
+          delete row["max(`lossless`)"]
+        })
+        return rows
+      })
   },
   album: function (artist, album) {
     return knex.from('tracks').select(...trackFields).where('albumartist', artist).andWhere('album', album).orderBy('track', 'disc')
@@ -235,10 +246,28 @@ const library = {
       })
   },
   genres: function () {
-    return knex.from('tracks').select('genre as name', 'coverart as art').groupByRaw('LOWER(TRIM(genre))').orderBy('name')
+    return knex.from('tracks').select('genre as name', 'coverart as art').max('bits').max('lossless').groupByRaw('LOWER(TRIM(genre))').orderBy('name')
+      .then(rows => {
+        rows.forEach(row => {
+          row['maxbits'] = row["max(`bits`)"]
+          delete row["max(`bits`)"]
+          row['lossless'] = row["max(`lossless`)"]
+          delete row["max(`lossless`)"]
+        })
+        return rows
+      })
   },
   genre: function (genre) {
-    return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').where('genre', '=', genre).groupBy('album').orderBy('name')
+    return knex.from('tracks').select('album as name', 'albumartist as artist', 'coverart as art').max('bits').max('lossless').where('genre', '=', genre).groupBy('album').orderBy('name')
+    .then(rows => {
+      rows.forEach(row => {
+        row['maxbits'] = row["max(`bits`)"]
+        delete row["max(`bits`)"]
+        row['lossless'] = row["max(`lossless`)"]
+        delete row["max(`lossless`)"]
+      })
+      return rows
+    })
   },
   search: function (query) {
     return Promise.all([

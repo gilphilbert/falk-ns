@@ -4,7 +4,8 @@ const defaultSettings = {
     recentlyAdded: true,
     recentlyPlayed: true,
     mostPlayed: true,
-    favorites: true
+    favorites: true,
+    filter: 0
 }
 
 export function get(name) {

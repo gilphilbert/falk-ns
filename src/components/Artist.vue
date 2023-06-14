@@ -26,7 +26,7 @@ export default {
   components: {
     Tiles
   },
-  props: ['artist'],
+  props: [ 'artist', 'filter' ],
   created() {
     this.$database.getArtist(this.$route.params.artist)
       .then(data => {
@@ -39,10 +39,13 @@ export default {
             art: e.art,
             urlParams: { name: 'ArtistAlbum', params: { 'album': e.name, 'artist': this.artist } },
             surlParams: false,
+            lossless: e.lossless,
+            maxbits: e.maxbits,
             filter: false
           }
         })
         this.albums = data.albums
+        this.doFilter(this.filter)
       })
   },
   data () {
@@ -50,6 +53,20 @@ export default {
       albums: [],
       background: '',
       art: '',
+    }
+  },
+  methods: {
+    doFilter: function (filter) {
+      this.albums.forEach(el => {
+        if (filter === 0) el.filter = false
+        if (filter === 1) el.filter = !el.lossless
+        if (filter === 2) el.filter = el.maxbits <= 16
+      })
+    }
+  },
+  watch: {
+    filter(filter) {
+      this.doFilter(filter)
     }
   }
 }

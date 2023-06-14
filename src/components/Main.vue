@@ -32,6 +32,8 @@ export default {
     this.$database.getStats()
       .then(data => this.stats = data)
 
+    this.filter = this.$settings.get('filter')
+
     //set up the event listener
     const events = new EventSource('/events')
     events.onmessage = function(e) {
@@ -147,6 +149,7 @@ export default {
     },
     setFilter(_filter) {
       this.filter = _filter
+      this.$settings.set('filter', _filter)
     }
   },
   watch: {
