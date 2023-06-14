@@ -16,6 +16,15 @@ console.log(config)
 let client = false
 
 function init () {
+  var socket = socketLocations.filter(value => fs.existsSync(value))[0]
+  var config = {}
+  if (socket) {
+    config['path'] = socket
+  } else {
+    config['host'] = '127.0.0.1'
+    config['port'] = '6600'
+  }
+  console.log(config)
   return mpdapi.connect(config)
   .then(con => {
     client = con
@@ -37,52 +46,68 @@ function init () {
           console.log('[INFO] [MPD] Unregistered State Change:' + e)
       }
     })
+    console.info("Connected to MPD")
     return true
   })
   .catch(e => {
+    console.log(e)
     return false
   })
 }
 
 function getState() {
-  return client.api.status.get()
-    .then(data => {
-      return {
-        paused: data.state !== 'play',
-        position: data.song || 0,
-        elapsed: ((data.elapsed !== undefined) ? Math.round(data.elapsed) : 0),
-        random: data.random
-      }
-    })
-    .catch(e => {
-      return {
-        paused: false,
-        position: -1,
-        elapsed: 0,
-        random: false
-      }
-    })
+  if (client) {
+    return client.api.status.get()
+      .then(data => {
+        return {
+          paused: data.state !== 'play',
+          position: data.song || 0,
+          elapsed: ((data.elapsed !== undefined) ? Math.round(data.elapsed) : 0),
+          random: data.random
+        }
+      })
+      .catch(e => {
+        return {
+          paused: false,
+          position: -1,
+          elapsed: 0,
+          random: false
+        }
+      })
+  } else {
+    console.warn("Not connected to MPD")
+    return {
+      paused: false,
+      position: -1,
+      elapsed: 0,
+      random: false
+    }
+  }
 }
 
 async function sendQueue (save = false) {
-  let items = []
-  const q = await client.api.queue.info()
-  const st = await client.api.status.get()
-  const cur = st.song
-  for (const tr of q) {
-    const track = await database.tracks.trackByPath(tr.file)
-    items.push({
-      title: track.title,
-      artist: track.albumartist,
-      duration: track.duration,
-      album: track.album,
-      art: track.coverart,
-      discart: track.discart,
-      playing: ((tr.pos === cur) ? true : false),
-      shortformat: (track.samplerate / 1000) + 'kHz ' + ((track.bits) ? track.bits + 'bit' : ''),
-    })
+  if (client) {
+    let items = []
+    const q = await client.api.queue.info()
+    const st = await client.api.status.get()
+    const cur = st.song
+    for (const tr of q) {
+      const track = await database.tracks.trackByPath(tr.file)
+      items.push({
+        title: track.title,
+        artist: track.albumartist,
+        duration: track.duration,
+        album: track.album,
+        art: track.coverart,
+        discart: track.discart,
+        playing: ((tr.pos === cur) ? true : false),
+        shortformat: (track.samplerate / 1000) + 'kHz ' + ((track.bits) ? track.bits + 'bit' : ''),
+      })
+    }
+    sendEvent({ queue: items, state: await getState() }, { event: 'queue' })
+  } else {
+    console.warn("Not connected to MPD")
   }
-  sendEvent({ queue: items, state: await getState() }, { event: 'queue' })
 }
 
 async function _sendState() {

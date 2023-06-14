@@ -22,6 +22,21 @@
   <ul class="menu-list right">
     <li>
       <div style="position: relative">
+        <!--<p class="is-6 tag is-rounded">Everything</p>-->
+        <div class="dropdown is-right" :class="{ 'is-active': filterActive }" v-click-away="clickedAway">
+          <span @click="filterActive = !filterActive"> <!--  -->
+            <p class="is-6 tag is-rounded">{{ filterText }}</p>
+          </span>
+          <div class="dropdown-content">
+            <span class="dropdown-item" @click="changeFilter('all')">Everything</span>
+            <span class="dropdown-item" @click="changeFilter('lossless')">Lossless</span>
+            <span class="dropdown-item" @click="changeFilter('hires')">Hires</span>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li>
+      <div style="position: relative">
         <input class="input" type="text" v-model="searchQuery" @keyup.enter="fullSearch" />
         <svg class="feather" style="display: block; position: absolute; top: 6px; right: 6px; pointer-events: none"><use href="/img/feather-sprite.svg#search"></use></svg>
       </div>
@@ -46,10 +61,12 @@ import { emit } from 'process'
 
 export default {
   name: 'Menu',
-  props: [ 'isActive', 'scanPercent', 'scanning' ],
+  props: [ 'isActive', 'scanPercent', 'scanning', 'filter' ],
   data () {
     return {
-      searchQuery: ''
+      searchQuery: '',
+      filterActive: false,
+      //filter: 0
     }
   },
   methods: {
@@ -61,11 +78,32 @@ export default {
     },
     fullSearch () {
       this.$router.push({ name: 'Search', params: { query: this.searchQuery } })
+    },
+    clickedAway() {
+      this.filterActive = false
+    },
+    changeFilter(type) {
+      switch (type) {
+        case 'all':
+          this.$emit('setFilter', 0)
+          break
+        case 'lossless':
+          this.$emit('setFilter', 1)
+          break
+        case 'hires':
+          this.$emit('setFilter', 2)
+      }
+      this.filterActive = false
     }
   },
   computed: {
     degrees: function () {
       return 360 * this.scanPercent / 100
+    },
+    filterText: function () {
+      return this.filter == 0 ? 'Everything' :
+        this.filter == 1 ? 'Lossless':
+        'Hires'
     }
   },
   watch: {

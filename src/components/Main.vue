@@ -1,19 +1,19 @@
 <template>
 <div :class="{ 'no-controls': this.$route.path==='/' }">
   <div id="content-container" v-touch:swipe.left="doHideMenu" v-touch:swipe.right="doShowMenu">
-    <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" :query="query" ></router-view>
+    <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" :query="query" :filter="filter"></router-view>
   </div>
-  <Menu :isActive="showMenu" @hide="doHideMenu" :scanPercent="scanPercent" :scanning="scanning" @query="setQuery" />
+  <Menu :isActive="showMenu" @hide="doHideMenu" :scanPercent="scanPercent" :scanning="scanning" @query="setQuery" :filter="filter" @setFilter="setFilter" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" :online="online" v-touch:swipe.top="unhideQueue" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
     <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
   </div>
-  <!--
-  <div class="toast" style="position: absolute; bottom: 120px; left: 20px; width: 280px; height: 120px; background: red; border-radius: 8px; padding: 12px 18px; z-index: 2; overflow: clip">
+  
+  <div class="toast" style="position: absolute; bottom: 120px; left: 20px; width: 280px; height: 120px; background: rgba(255,255,255,0.2); border-radius: 8px; padding: 12px 18px; z-index: 2; overflow: clip">
+    <span class="progress" style="position: absolute; bottom: 0; left: 0; background: var(--yellow); height: 5px; width: 50%;"></span>
     Stuff in the toast goes here.
-    <span class="progress" style="position: absolute; bottom: 0; left: 0; background: blue; height: 5px; width: 100%;"></span>
-  </div>-->
+  </div>
 </div>
 </template>
 <script>
@@ -80,7 +80,6 @@ export default {
       const data = JSON.parse(evt.data)
       const keys = Object.keys(data)
       if (keys.includes('toScan')) {
-        //console.log(data)
         this.scanPercent = Math.round((data.scanned / data.toScan) * 100)
         if (this.scanned > this.stats.songs) {
           this.stats.songs = this.scanned
@@ -120,7 +119,8 @@ export default {
       scanning: false,
       timer: null,
       lastTimeUpdate: 0,
-      query: ''
+      query: '',
+      filter: 0
     }
   },
   props: [ 'isLoggedIn' ],
@@ -144,8 +144,11 @@ export default {
     },
     setQuery (query) {
       this.query = query
+    },
+    setFilter(_filter) {
+      this.filter = _filter
     }
-   },
+  },
   watch: {
     'playback.isPlaying': function () {
       if (this.playback.isPlaying) {

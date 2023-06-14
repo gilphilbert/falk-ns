@@ -181,7 +181,16 @@ const library = {
      })
   },
   artists: function () {
-    return knex('tracks').select('albumartist as name', 'artistart as art').groupByRaw('LOWER(TRIM(albumartist))').orderBy('name')
+    return knex('tracks').select('albumartist as name', 'artistart as art', 'lossless').max('bits').max('lossless').groupByRaw('LOWER(TRIM(albumartist))').orderBy('name')
+      .then(rows => {
+        rows.forEach(row => {
+          row['maxbits'] = row["max(`bits`)"]
+          delete row["max(`bits`)"]
+          row['lossless'] = row["max(`lossless`)"]
+          delete row["max(`lossless`)"]
+        })
+        return rows
+      })
   },
   artist: function (artistName) {
     return knex.from('tracks').select('album as name', 'year', 'artistart', 'backgroundart', 'coverart').where('albumartist', '=', artistName).groupBy('album').orderBy([{ column: 'year' }, { column: 'album' }])

@@ -72,7 +72,7 @@ const router = new createRouter({
       name: 'artists-home',
       component: { template: '<router-view></router-view>' },
       children: [
-        { path: '', name: 'Artists', component: Artists, meta: { scrollToTop: true } },
+        { path: '', name: 'Artists', component: Artists, props: true, meta: { scrollToTop: true } },
         { path: ':artist', name: 'Artist', component: Artist, props: true, meta: { scrollToTop: true } },
         { path: ':artist/:album', name: 'ArtistAlbum', component: Album, props: true, meta: { scrollToTop: true } }
       ]
@@ -82,8 +82,8 @@ const router = new createRouter({
       name: 'albums-home',
       component: { template: '<router-view></router-view>' },
       children: [
-        { path: '', name: 'Albums', component: Albums, meta: { scrollToTop: true } },
-        { path: ':artist/:album', name: 'Album', component: Album, meta: { scrollToTop: true } }
+        { path: '', name: 'Albums', component: Albums, props: true, meta: { scrollToTop: true } },
+        { path: ':artist/:album', name: 'Album', component: Album, props: true, meta: { scrollToTop: true } }
       ]
     },
     {
@@ -91,22 +91,17 @@ const router = new createRouter({
       name: 'genres-home',
       component: { template: '<router-view></router-view>' },
       children: [
-        { path: '', name: 'Genres', component: Genres, meta: { scrollToTop: true } },
-        { path: ':genre', name: 'Genre', component: Genre, meta: { scrollToTop: true } }
+        { path: '', name: 'Genres', component: Genres, props: true, meta: { scrollToTop: true } },
+        { path: ':genre', name: 'Genre', component: Genre, props: true, meta: { scrollToTop: true } }
       ]
     },
-    //{
-    //  path: '/search/:query/:type',
-    //  name: 'search',
-    //  component: Search,
-    //},
     {
       path: '/search',
       name: 'search-container',
       component: { template: '<router-view></router-view>' },
       children: [
-        { path: ':query', name: 'Search', component: Search, meta: { scrollToTop: true } },
-        { path: ':query/:type', name: 'SearchType', component: Search, meta: { scrollToTop: true } }
+        { path: ':query', name: 'Search', component: Search, props: true, meta: { scrollToTop: true } },
+        { path: ':query/:type', name: 'SearchType', component: Search, props: true, meta: { scrollToTop: true } }
       ]
     },
     { path: '/settings', name: 'Settings', component: Settings, meta: { scrollToTop: true } }

@@ -11,8 +11,8 @@ export default {
   components: {
     Tiles
   },
-  props: [ 'query' ],
-  created() {
+  props: [ 'query', 'filter' ],
+  mounted() {
     this.$database.getArtists()
       .then(data => {
         data = data.map(e => {
@@ -22,6 +22,8 @@ export default {
             subtitle: null,
             urlParams: { name: 'Artist', params: { 'artist': e.name } },
             surlParams: false,
+            lossless: e.lossless,
+            maxbits: e.maxbits,
             filter: false
           }
         })
@@ -37,6 +39,14 @@ export default {
     query(query) {
       this.artists.forEach(el => {
         el.filter = query === '' ? false : el.title.toLowerCase().includes(query.toLowerCase()) ? false : true 
+      })
+    },
+
+    filter(filter) {
+      this.artists.forEach(el => {
+        if (filter === 0) el.filter = false
+        if (filter === 1) el.filter = !el.lossless
+        if (filter === 2) el.filter = el.maxbits <= 16
       })
     }
   }
