@@ -3,16 +3,16 @@
   <div id="content-container" v-touch:swipe.left="doHideMenu" v-touch:swipe.right="doShowMenu">
     <router-view :playback="playback" @showQueue="toggleQueue" :stats="stats" :query="query" :filter="filter"></router-view>
   </div>
-  <Menu :isActive="showMenu" @hide="doHideMenu" :scanPercent="scanPercent" :scanning="scanning" @query="setQuery" :filter="filter" @setFilter="setFilter" />
+  <Menu :isActive="showMenu" @hide="doHideMenu" @query="setQuery" :filter="filter" @setFilter="setFilter" />
   <ControlBar :isActive="showControls" :playback="playback" @toggleQueue="toggleQueue" :online="online" v-touch:swipe.top="unhideQueue" />
   <Queue :isActive="showQueue" :playback="playback" @hideQueue="toggleQueue" />
   <div id="burger" class="hidden--for-desktop" @click="doShowMenu">
     <svg class="feather burger"><use href="/img/feather-sprite.svg#burger"></use></svg>
   </div>
   
-  <div class="toast" style="position: absolute; bottom: 120px; left: 20px; width: 280px; height: 120px; background: rgba(255,255,255,0.2); border-radius: 8px; padding: 12px 18px; z-index: 2; overflow: clip">
-    <span class="progress" style="position: absolute; bottom: 0; left: 0; background: var(--yellow); height: 5px; width: 50%;"></span>
-    Stuff in the toast goes here.
+  <div class="toast" :style="{ visibility: scanning ? 'visible' : 'hidden' }">
+    <p class="text">{{ this.scanToastText }}</p>
+    <span class="progress" :style="{ width: scanPercent + '%' }"></span>
   </div>
 </div>
 </template>
@@ -92,12 +92,17 @@ export default {
       if (keys.includes('status')) {
         if (data.status === 'started') {
           this.scanning = true
+          this.scanToastText = "Library updating"
         } else
         if (data.status === 'stopped') {
-          this.scanning = false
-          this.scanPercent = 0
+          setInterval(()=>{
+            this.scanPercent = 0
+            this.scanning = false
+          }, 3000)
+
           this.$database.getStats()
             .then(data => this.stats = data)
+          this.scanToastText = "Library update complete"
         }
       }
     })
@@ -122,7 +127,8 @@ export default {
       timer: null,
       lastTimeUpdate: 0,
       query: '',
-      filter: 0
+      filter: 0,
+      scanToastText: '',
     }
   },
   props: [ 'isLoggedIn' ],
@@ -166,3 +172,26 @@ export default {
   }
 }
 </script>
+
+<style type="css">
+.toast {
+  position: absolute;
+  bottom: 120px;
+  left: 20px;
+  width: 280px;
+  height: auto;
+  background: rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 12px 18px;
+  z-index: 2;
+  overflow: clip;
+  padding-bottom: 18px
+}
+.toast .progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: var(--yellow);
+  height: 5px;
+}
+</style>

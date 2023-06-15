@@ -41,17 +41,6 @@
         <svg class="feather" style="display: block; position: absolute; top: 6px; right: 6px; pointer-events: none"><use href="/img/feather-sprite.svg#search"></use></svg>
       </div>
     </li>
-    <li v-if="scanning">
-      <a>
-        <div class="progress-pie-chart" :class="{ 'gt-50': scanPercent > 50, 'fade': scanning && scanPercent === 0 }">
-          <div class="ppc-progress">
-            <div class="ppc-progress-fill" :style="{ 'transform': 'rotate('+ degrees + 'deg)' }"></div>
-          </div>
-          <div class="ppc-percents">
-          </div>
-        </div>
-      </a>
-    </li>
   </ul>
 
 </aside>
