@@ -2,6 +2,16 @@
 const fs = require('fs')
 const path = require('path')
 
+// make sure our paths exists
+//var fs = require('fs')
+var dirs = [ './../data', './../data/art' ]
+for (var dir of dirs) {
+  const _dn = path.resolve(__dirname, dir)
+  console.log(_dn)
+  if (!fs.existsSync(_dn))
+    fs.mkdirSync(_dn)
+}
+
 //image handling
 const gm = require('gm')
 

@@ -1,7 +1,6 @@
 let knex = null
 const trackFields = ['id', 'track', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration']
 
-
 async function buildTables () {
 
   await knex.schema.createTable('tracks', function (table) {

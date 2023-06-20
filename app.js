@@ -16,14 +16,6 @@ const staticConf = { maxAge: '1y', etag: false }
 
 app.use(express.static(publicPath, staticConf))
 
-var fs = require('fs')
-var dirs = [ './data', './data/art' ]
-for (var dir of dirs) {
-  _dn = resolve(__dirname, dir)
-  if (!fs.existsSync(_dn))
-    fs.mkdirSync(_dn)
-}
-
 // now include the api
 const app_api = require('./api/api')(app)
 

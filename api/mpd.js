@@ -16,14 +16,14 @@ console.log(config)
 let client = false
 
 function init () {
-  //var socket = socketLocations.filter(value => fs.existsSync(value))[0]
+  var socket = socketLocations.filter(value => fs.existsSync(value))[0]
   var config = {}
-  //if (socket) {
-  //  config['path'] = socket
-  //} else {
+  if (socket) {
+    config['path'] = socket
+  } else {
     config['host'] = '127.0.0.1'
     config['port'] = '6600'
-  //}
+  }
   //console.log(config)
   return mpdapi.connect(config)
   .then(con => {
