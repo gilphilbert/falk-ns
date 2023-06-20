@@ -1,8 +1,9 @@
-const sharp = require('sharp')
-
 // for serving files
 const fs = require('fs')
 const path = require('path')
+
+//image handling
+const gm = require('gm')
 
 // other modules (self explanatory)
 const scanner = require('./scanner')
@@ -317,28 +318,15 @@ module.exports = app => {
     const filename = req.params.filename || null
     const size = req.query.size || null
     if (filename !== null && filename.indexOf('/') === -1) {
-      const fn = path.resolve(__dirname, '../art/' + filename)
+      const fn = path.resolve(__dirname, '../data/art/' + filename)
       if (fs.existsSync(fn)) {
         res.set('Cache-Control', 'public, max-age=604800');
-        const image = sharp(fn)
-        image
-          .metadata()
-          .then(m => {
-            res.type(m.format)
-            switch(size) {
-              case 'full':
-                sharp(fn).resize(1920).pipe(res)
-                break
-              case '800':
-                sharp(fn).resize(800).pipe(res)
-                break
-              case '600':
-                sharp(fn).resize(600).pipe(res)
-                break
-              default:
-                sharp(fn).resize(300).pipe(res)
-            }
-          })
+        const _sz = size === 'full' ? 1920 : size === '800' ? 800 : size === '600' ? 600 : 300
+
+        gm(fn)
+          .resize(_sz)
+          .stream()
+          .pipe(res)
       } else {
         res.set('Cache-Control', 'public, max-age=31536000');
         res.sendFile(path.resolve(__dirname, '../public/img/placeholder.png'))

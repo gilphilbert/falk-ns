@@ -1,7 +1,8 @@
+#!/usr/bin/node
+
 // express framework
 const express = require('express')
 const app = express()
-
 
 // port we're listening on
 const port = 3000
@@ -15,8 +16,16 @@ const staticConf = { maxAge: '1y', etag: false }
 
 app.use(express.static(publicPath, staticConf))
 
-// now our secret stuff
-const private = require('./api/api')(app)
+var fs = require('fs')
+var dirs = [ './data', './data/art' ]
+for (var dir of dirs) {
+  _dn = resolve(__dirname, dir)
+  if (!fs.existsSync(_dn))
+    fs.mkdirSync(_dn)
+}
+
+// now include the api
+const app_api = require('./api/api')(app)
 
 const server = app.listen(port, () => {
   console.log(`[START] Listening on ${port}`)

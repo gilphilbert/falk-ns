@@ -73,7 +73,7 @@ async function processFile(ffname, { overwrite } = {}) {
               song.art.background = '/art/' + fn
               break
           }
-          fn = path.resolve(__dirname, '../art/' + fn)
+          fn = path.resolve(__dirname, '../data/art/' + fn)
           if (ext !== null && fn !== null && !fs.existsSync(fn)) {
             fs.writeFile(fn, pic.data, (err) => {
               if (err) return console.error(err)

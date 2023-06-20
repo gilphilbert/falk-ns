@@ -68,7 +68,7 @@ async function init () {
   knex = require('knex')({
     client: 'sqlite3',
     connection: {
-      filename: "./data/falk.sql"
+      filename: "./data/falk.db"
     },
     useNullAsDefault: true
   })
