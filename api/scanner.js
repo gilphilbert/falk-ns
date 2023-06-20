@@ -131,12 +131,16 @@ function getHome () {
 }
 
 async function getDirs (dir) {
-  dir = dir || getHome()
+  let _dir = dir || getHome()
+  console.log(dir)
+  console.log(_dir)
+  if (_dir === "") _dir = "/"
+  
   const promise = new Promise(function (resolve, reject) {
-    fs.readdir(dir, { withFileTypes: true }, (err, files) => {
+    fs.readdir(_dir, { withFileTypes: true }, (err, files) => {
       if (!err) {
         const out = []
-        if (dir !== '/') {
+        if (_dir !== '/') {
           out.push({ name: '..' })
         }
         files.forEach((file) => {
@@ -144,7 +148,7 @@ async function getDirs (dir) {
             out.push({ name: file.name })
           }
         })
-        resolve({ location: dir, directories: out })
+        resolve({ location: _dir, directories: out })
       }
     })
   })

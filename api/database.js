@@ -1,3 +1,5 @@
+const path = require('path')
+
 let knex = null
 const trackFields = ['id', 'track', 'title', 'albumartist as artist', 'type', 'title', 'album', 'genre', 'year', 'lossless', 'shortformat', 'shortestformat', 'coverart', 'playcount', 'duration']
 
@@ -64,10 +66,11 @@ async function buildTables () {
 }
 
 async function init () {
+  const _db = path.resolve(__dirname, "../data/falk.db")
   knex = require('knex')({
     client: 'sqlite3',
     connection: {
-      filename: "./data/falk.db"
+      filename: _db
     },
     useNullAsDefault: true
   })
