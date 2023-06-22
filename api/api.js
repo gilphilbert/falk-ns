@@ -324,6 +324,7 @@ module.exports = app => {
         const _sz = size === 'full' ? 1920 : size === '800' ? 800 : size === '600' ? 600 : 300
 
         gm(fn)
+          .quality(92)
           .resize(_sz)
           .stream()
           .pipe(res)

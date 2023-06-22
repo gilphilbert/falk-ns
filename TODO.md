@@ -6,7 +6,6 @@
 * Stats don't update on settings page - where else are they used?
 * Toasts
   * General for status changes (enqueue, perhaps)
-  * With progress for library updates
   * How to handle these on mobile?
 * Rescan a set of files (artist/album) instead of everything
 
@@ -21,3 +20,4 @@
 ## Settings
 * Ability to change default click behavior - need to work on switch!
 * Show/hide automatic playlists (selectively?)
+* Backup / restore
