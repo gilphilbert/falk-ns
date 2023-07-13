@@ -100,6 +100,8 @@ async function sendQueue (save = false) {
         album: track.album,
         art: track.coverart,
         discart: track.discart,
+        artistart: track.artistart,
+        backgroundart: track.backgroundart,
         playing: ((tr.pos === cur) ? true : false),
         shortformat: (track.samplerate / 1000) + 'kHz ' + ((track.bits) ? track.bits + 'bit' : ''),
       })
