@@ -105,7 +105,7 @@ dependency_install() {
       ;;
     npm-install)
       echo 'Installing dependenencies from NPM'
-      npm install --omit dev --unsafe-perm
+      npm install --omit dev --unsafe-perm > /dev/null
       ;;
     *)
       echo "WARN: Unexpected install strategy: $install_strategy"

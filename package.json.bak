@@ -1,6 +1,6 @@
 {
   "name": "falkdp",
-  "version": "0.0.16",
+  "version": "0.0.10",
   "description": "FALK Digital Player",
   "author": "gilphilbert",
   "scripts": {
@@ -38,7 +38,7 @@
   "license": "ISC",
   "node_deb": {
     "init": "systemd",
-    "version": "0.0.16",
+    "version": "0.0.10",
     "dependencies": "npm, mpd, graphicsmagick",
     "entrypoints": {
       "daemon": "app.js"

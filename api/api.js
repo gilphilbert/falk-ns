@@ -33,6 +33,10 @@ Told you it was complicated!
 database.init().then(() => scanner.watch.start(database))
 mpd.init(sendEvent)
 
+function isInt(value) {
+  return !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value))
+}
+
 module.exports = app => {
   app.get('/api/play', async function( req, res ) {
     await mpd.player.play()
@@ -289,6 +293,16 @@ module.exports = app => {
       })
   })
 
+  app.get('/api/version', function (req, res) {
+    let rawdata = fs.readFileSync('/usr/share/falkdp/app/package.json');
+    let config = JSON.parse(rawdata);
+    let returnData = {
+      name: config.name,
+      version: config.version
+    }
+    res.send(returnData)
+  })
+
   function ext2MIME (ext) {
     let val = false
     switch (ext) {
@@ -321,12 +335,15 @@ module.exports = app => {
       const fn = path.resolve(__dirname, '../data/art/' + filename)
       if (fs.existsSync(fn)) {
         res.set('Cache-Control', 'public, max-age=604800');
-        const _sz = size === 'full' ? 1920 : size === '800' ? 800 : size === '600' ? 600 : 300
+        //const _sz = size === 'full' ? 1920 : size === '800' ? 800 : size === '600' ? 600 : size === '150' ? 150 : 300
+        const _sz = size === 'full' ? 1920 : isInt(size) ? parseInt(size) : 300
 
         gm(fn)
           .quality(92)
           .resize(_sz)
-          .stream()
+          .colorspace('RGB')
+          .noProfile()
+          .stream('jpg')
           .pipe(res)
       } else {
         res.set('Cache-Control', 'public, max-age=31536000');
